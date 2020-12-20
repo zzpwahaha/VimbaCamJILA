@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vimbaMOTCamera", "vimbaMOTCamera\vimbaMOTCamera.vcxproj", "{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiThread-Mandelbrot", "MultiThread-Mandelbrot\MultiThread-Mandelbrot.vcxproj", "{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +17,10 @@ Global
 		{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}.Debug|x64.Build.0 = Debug|x64
 		{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}.Release|x64.ActiveCfg = Release|x64
 		{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}.Release|x64.Build.0 = Release|x64
+		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Debug|x64.ActiveCfg = Debug|x64
+		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Debug|x64.Build.0 = Debug|x64
+		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Release|x64.ActiveCfg = Release|x64
+		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
