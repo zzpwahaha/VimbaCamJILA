@@ -49,6 +49,10 @@ private:
 
     QMenu* fileMenu;
     QAction* exitAction;
+
+    QMenu* helpMenu;
+    QAction* helpAction;
+
 };
 
 //enum { NumGridRows = 3, NumButtons = 4 };

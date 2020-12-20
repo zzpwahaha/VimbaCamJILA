@@ -49,7 +49,12 @@ void Dialog::createMenu()
     exitAction = fileMenu->addAction(tr("E&xit"));
     menuBar->addMenu(fileMenu);
 
+    helpMenu = new QMenu("Help", this);
+    helpAction = helpMenu->addAction("Help");
+    menuBar->addMenu(helpMenu);
+
     connect(exitAction, &QAction::triggered, this, &QDialog::accept);
+
 }
 //! [6]
 
