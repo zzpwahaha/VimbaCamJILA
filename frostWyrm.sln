@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vimbaMOTCamera", "vimbaMOTC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiThread-Mandelbrot", "MultiThread-Mandelbrot\MultiThread-Mandelbrot.vcxproj", "{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "camera", "camera\camera.vcxproj", "{25D29373-3615-40B6-9D0C-668382C5EADB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Debug|x64.Build.0 = Debug|x64
 		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Release|x64.ActiveCfg = Release|x64
 		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Release|x64.Build.0 = Release|x64
+		{25D29373-3615-40B6-9D0C-668382C5EADB}.Debug|x64.ActiveCfg = Debug|x64
+		{25D29373-3615-40B6-9D0C-668382C5EADB}.Debug|x64.Build.0 = Debug|x64
+		{25D29373-3615-40B6-9D0C-668382C5EADB}.Release|x64.ActiveCfg = Release|x64
+		{25D29373-3615-40B6-9D0C-668382C5EADB}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
