@@ -6,7 +6,7 @@
 
 using namespace AVT;
 
-class AsynchronousGrab : public QMainWindow
+class AsynchronousGrab : public QWidget
 {
     Q_OBJECT
 
@@ -41,12 +41,12 @@ private:
     // Parameters:
     //  [in]    strMsg          A given message to be printed out
     //  [in]    eErr            The API status code
-    void Log( std::string strMsg, VmbErrorType eErr );
+    void Log( std::wstring strMsg, VmbErrorType eErr );
 
     // Prints out a given logging string
     // Parameters:
     //  [in]    strMsg          A given message to be printed out
-    void Log( std::string strMsg);
+    void Log( std::wstring strMsg);
     
 
     // Copies the content of a byte buffer to a Qt image with respect to the image's alignment

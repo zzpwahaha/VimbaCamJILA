@@ -32,7 +32,7 @@
 
 #include "VimbaCPP/Include/VimbaCPP.h"
 
-#ifdef UNICODE
+#if defined UNICODE || defined _MBCS
     typedef std::wstring    string_type;
     #define MAKE_STRING_LITERAL_(s) L ## s
 #else

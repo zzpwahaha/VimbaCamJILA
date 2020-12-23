@@ -123,7 +123,7 @@ class ApiController
     //  [in]    eErr        The error code to be converted to string
     // Returns:
     //  A descriptive string representation of the error code
-    std::string ErrorCodeToMessage( VmbErrorType eErr ) const;
+    std::wstring ErrorCodeToMessage( VmbErrorType eErr ) const;
 
     // Gets the version of the Vimba API
     // Returns:

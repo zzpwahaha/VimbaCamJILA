@@ -11,7 +11,7 @@
 using namespace AVT;
 
 AsynchronousGrab::AsynchronousGrab( QWidget *parent, Qt::WindowFlags flags )
-    : QMainWindow( parent, flags )
+    : QWidget( parent, flags )
     , m_bIsStreaming( false )
 {
     //Gui
@@ -22,8 +22,9 @@ AsynchronousGrab::AsynchronousGrab( QWidget *parent, Qt::WindowFlags flags )
 
     // Start Vimba
     VmbErrorType err = m_ApiController.StartUp();
-    setWindowTitle( QString( "AsynchronousGrab (Qt version) Vimba C++ API Version " )+ QString::fromStdString( m_ApiController.GetVersion() ) );
-    Log( "Starting Vimba", err );
+    //setWindowTitle( QString( "AsynchronousGrab (Qt version) Vimba C++ API Version " )+ QString::fromStdString( m_ApiController.GetVersion() ) );
+    setWindowTitle(QString("MOT Cam Mako") + QString::fromStdString(m_ApiController.GetVersion()));
+    Log( L"Starting Vimba", err );
 
     if( VmbErrorSuccess == err )
     {
@@ -32,9 +33,9 @@ AsynchronousGrab::AsynchronousGrab( QWidget *parent, Qt::WindowFlags flags )
 
         // Initially get all connected cameras
         UpdateCameraListBox();
-        std::stringstream strMsg;
+        std::wstringstream strMsg;
         strMsg << "Cameras found..." << m_cameras.size();
-        Log(strMsg.str() );
+        Log( strMsg.str() );
     }
 }
 
@@ -68,6 +69,7 @@ void AsynchronousGrab::setupGuiLayout()
     layout->addWidget(m_ListLog, 2, 0, 1, 2);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(1, 0);
+    layout->setRowStretch(0, 1);
     
 }
 
@@ -93,7 +95,7 @@ void AsynchronousGrab::OnBnClickedButtonStartstop()
 
                 QObject::connect( m_ApiController.GetFrameObserver(), SIGNAL( FrameReceivedSignal(int) ), this, SLOT( OnFrameReady(int) ) );
             }
-            Log( "Starting Acquisition", err );
+            Log( L"Starting Acquisition", err );
             m_bIsStreaming = VmbErrorSuccess == err;
         }
         else
@@ -104,7 +106,7 @@ void AsynchronousGrab::OnBnClickedButtonStartstop()
             // Clear all frames that we have not picked up so far
             m_ApiController.ClearFrameQueue();
             m_Image = QImage();
-            Log( "Stopping Acquisition", err );
+            Log( L"Stopping Acquisition", err );
         }
 
         if( false == m_bIsStreaming )
@@ -129,7 +131,7 @@ void AsynchronousGrab::OnFrameReady( int status )
         VmbAPI::FramePtr pFrame = m_ApiController.GetFrame();
         if( SP_ISNULL( pFrame ) )
         {
-            Log("frame pointer is NULL, late frame ready message");
+            Log(L"frame pointer is NULL, late frame ready message");
             return;
         }
         // See if it is not corrupt
@@ -173,7 +175,7 @@ void AsynchronousGrab::OnFrameReady( int status )
         else
         {
             // If we receive an incomplete image we do nothing but logging
-            Log( "Failure in receiving image", VmbErrorOther );
+            Log( L"Failure in receiving image", VmbErrorOther );
         }
 
         // And queue it to continue streaming
@@ -192,12 +194,12 @@ void AsynchronousGrab::OnCameraListChanged( int reason )
     // We only react on new cameras being found and known cameras being unplugged
     if (VmbAPI::UpdateTriggerPluggedIn == reason)
     {
-        Log("Camera list changed. A new camera was discovered by Vimba.");
+        Log(L"Camera list changed. A new camera was discovered by Vimba.");
         bUpdateList = true;
     }
     else if (VmbAPI::UpdateTriggerPluggedOut == reason)
     {
-        Log( "Camera list changed. A camera was disconnected from Vimba." );
+        Log( L"Camera list changed. A camera was disconnected from Vimba." );
         if( true == m_bIsStreaming )
         {
             OnBnClickedButtonStartstop();
@@ -232,7 +234,7 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
     Result = VmbSetImageInfoFromPixelFormat( ePixelFormat, nWidth, nHeight, & SourceImage );
     if( VmbErrorSuccess != Result )
     {
-        Log( "Could not set source image info", static_cast<VmbErrorType>( Result ) );
+        Log( L"Could not set source image info", static_cast<VmbErrorType>( Result ) );
         return static_cast<VmbErrorType>( Result );
     }
     QString             OutputFormat;
@@ -240,12 +242,12 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
     switch( pOutImage.format() )
     {
     default:
-        Log( "unknown output format",VmbErrorBadParameter );
+        Log( L"unknown output format",VmbErrorBadParameter );
         return VmbErrorBadParameter;
     case QImage::Format_RGB888:
         if( nWidth*3 != bytes_per_line )
         {
-            Log( "image transform does not support stride",VmbErrorWrongType );
+            Log( L"image transform does not support stride",VmbErrorWrongType );
             return VmbErrorWrongType;
         }
         OutputFormat = "RGB24";
@@ -254,7 +256,7 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
     Result = VmbSetImageInfoFromString( OutputFormat.toStdString().c_str(), OutputFormat.length(),nWidth,nHeight, &DestImage );
     if( VmbErrorSuccess != Result )
     {
-        Log( "could not set output image info",static_cast<VmbErrorType>( Result ) );
+        Log( L"could not set output image info",static_cast<VmbErrorType>( Result ) );
         return static_cast<VmbErrorType>( Result );
     }
     SourceImage.Data    = pInBuffer;
@@ -270,7 +272,7 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
         }
         else
         {
-            Log( "could not set matrix t o transform info ", static_cast<VmbErrorType>( Result ) );
+            Log( L"could not set matrix t o transform info ", static_cast<VmbErrorType>( Result ) );
             return static_cast<VmbErrorType>( Result );
         }
     }
@@ -280,7 +282,7 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
     }
     if( VmbErrorSuccess != Result )
     {
-        Log( "could not transform image", static_cast<VmbErrorType>( Result ) );
+        Log( L"could not transform image", static_cast<VmbErrorType>( Result ) );
         return static_cast<VmbErrorType>( Result );
     }
     return static_cast<VmbErrorType>( Result );
@@ -323,16 +325,23 @@ void AsynchronousGrab::UpdateCameraListBox()
 // Parameters:
 //  [in]    strMsg          A given message to be printed out
 //  [in]    eErr            The API status code
-void AsynchronousGrab::Log( std::string strMsg, VmbErrorType eErr )
+void AsynchronousGrab::Log( std::wstring strMsg, VmbErrorType eErr )
 {
-    strMsg += "..." + m_ApiController.ErrorCodeToMessage( eErr );
-    m_ListLog->insertItem( 0, QString::fromStdString( strMsg ) );
+    strMsg += L"..." + m_ApiController.ErrorCodeToMessage( eErr );
+    m_ListLog->insertItem( 0, QString::fromWCharArray( strMsg.c_str() ) );
+    //use QString::fromWCharArray( strMsg.c_str() ) instead of 
+    //using QString::fromStdWString( strMsg )
+    //just incase https://stackoverflow.com/questions/14726304/best-way-to-convert-stdwstring-to-qstring
 }
 
 // Prints out a given logging string
 // Parameters:
 //  [in]    strMsg          A given message to be printed out
-void AsynchronousGrab::Log( std::string strMsg)
+void AsynchronousGrab::Log( std::wstring strMsg)
 {
-    m_ListLog->insertItem( 0, QString::fromStdString( strMsg ) );
+    m_ListLog->insertItem( 0, QString::fromWCharArray(strMsg.c_str()));
+    //use QString::fromWCharArray( strMsg.c_str() ) instead of 
+    //using QString::fromStdWString( strMsg )
+    //just incase https://stackoverflow.com/questions/14726304/best-way-to-convert-stdwstring-to-qstring
+
 }

@@ -30,6 +30,10 @@
 #include <ApiController.h>
 #include <sstream>
 #include <iostream>
+
+#include <locale>
+#include <codecvt>  
+
 #include "StreamSystemInfo.h"
 #include "ErrorCodeToMessage.h"
 
@@ -57,9 +61,19 @@ ApiController::~ApiController()
 //  [in]    eErr        The error code to be converted to string
 // Returns:
 //  A descriptive string representation of the error code
-std::string ApiController::ErrorCodeToMessage( VmbErrorType eErr ) const
+std::wstring ApiController::ErrorCodeToMessage( VmbErrorType eErr ) const
 {
-    return ErrorCodeToMessage( eErr );
+    //from https://stackoverflow.com/questions/4804298/how-to-convert-wstring-into-string/4805413#4805413
+    //and http://www.cplusplus.com/reference/locale/wstring_convert/
+    //need care if transfer to linux based system
+    //-zzp
+    /*auto temp = VmbAPI::Examples::ErrorCodeToMessage(eErr);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;*/
+    //return converter.to_bytes(VmbAPI::Examples::ErrorCodeToMessage( eErr ));
+
+    //changed the return type from string to wstring, also in the AsynchronousGrab .-zzp
+    std::wstring tmp(VmbAPI::Examples::ErrorCodeToMessage(eErr));
+    return tmp;
 }
 
 // Starts the Vimba API and loads all transport layers
