@@ -38,7 +38,13 @@ enum    { NUM_FRAMES=3, };
 
 ApiController::ApiController()
 // Get a reference to the Vimba singleton
-    : m_system(VmbAPI::VimbaSystem::GetInstance())
+    : m_system(VmbAPI::VimbaSystem::GetInstance()),
+    m_pCamera(),
+    m_pFrameObserver(),
+    m_pCameraObserver(),
+    m_nPixelFormat(0),
+    m_nWidth(0),
+    m_nHeight(0)
 {
 }
 
