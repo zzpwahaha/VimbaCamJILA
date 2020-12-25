@@ -6,7 +6,7 @@
 
 using namespace AVT;
 
-class AsynchronousGrab : public QWidget
+class AsynchronousGrab : public QMainWindow
 {
     Q_OBJECT
 
@@ -16,11 +16,17 @@ public:
 
 private:
     // The Qt GUI
-    /*Ui::AsynchronousGrabClass ui;*/
-    QPushButton* m_ButtonStartStop;
+    //QPushButton* m_ButtonStartStop;
     QLabel* m_LabelStream;
-    QComboBox* m_ComboBoxCameras; //m_ListBoxCameras
+    //QComboBox* m_ComboBoxCameras; //m_ListBoxCameras
     QListWidget* m_ListLog;
+    QWidget* m_centralWidget;
+    QLabel* m_statusBar;
+    
+    QMenu* m_MenuCameras;
+    QAction* a_MenuLog;
+    QAction* a_MenuStart;
+    QDialog* d_Log;
 
     // Our controller that wraps API access
     ApiController m_ApiController;
@@ -33,10 +39,11 @@ private:
 
     //initialize 
     void setupGuiLayout();
+    void creatMenu();
 
     // Queries and lists all known camera
-    void UpdateCameraListBox();
-    
+ /*   void UpdateCameraListBox();*/
+    void UpdateCameraListMenu();
     // Prints out a given logging string, error code and the descriptive representation of that error code
     // Parameters:
     //  [in]    strMsg          A given message to be printed out

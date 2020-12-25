@@ -11,18 +11,18 @@
 using namespace AVT;
 
 AsynchronousGrab::AsynchronousGrab( QWidget *parent, Qt::WindowFlags flags )
-    : QWidget( parent, flags )
+    : QMainWindow( parent, flags )
     , m_bIsStreaming( false )
 {
     //Gui
     setupGuiLayout();
-
+    creatMenu();
+    
     // Connect GUI events with event handlers
-    QObject::connect( m_ButtonStartStop, SIGNAL( clicked() ), this, SLOT( OnBnClickedButtonStartstop() ) );
+    //QObject::connect( m_ButtonStartStop, SIGNAL( clicked() ), this, SLOT( OnBnClickedButtonStartstop() ) );
 
     // Start Vimba
     VmbErrorType err = m_ApiController.StartUp();
-    //setWindowTitle( QString( "AsynchronousGrab (Qt version) Vimba C++ API Version " )+ QString::fromStdString( m_ApiController.GetVersion() ) );
     setWindowTitle(QString("MOT Cam Mako") + QString::fromStdString(m_ApiController.GetVersion()));
     Log( L"Starting Vimba", err );
 
@@ -32,10 +32,11 @@ AsynchronousGrab::AsynchronousGrab( QWidget *parent, Qt::WindowFlags flags )
         QObject::connect( m_ApiController.GetCameraObserver(), SIGNAL( CameraListChangedSignal(int) ), this, SLOT( OnCameraListChanged(int) ) );
 
         // Initially get all connected cameras
-        UpdateCameraListBox();
+        UpdateCameraListMenu();
         std::wstringstream strMsg;
-        strMsg << "Cameras found..." << m_cameras.size();
+        strMsg << "Cameras found... " << m_cameras.size() << " in total";
         Log( strMsg.str() );
+        
     }
 }
 
@@ -54,34 +55,62 @@ AsynchronousGrab::~AsynchronousGrab()
 
 void AsynchronousGrab::setupGuiLayout()
 {
-    setGeometry(200, 300, 600, 400);
-    m_LabelStream = new QLabel;
+    m_centralWidget = new QWidget(this);
+           
+    setGeometry(200, 300, 800, 600);
+    m_LabelStream = new QLabel(m_centralWidget);
     m_LabelStream->setAlignment(Qt::AlignCenter);
-    m_ButtonStartStop = new QPushButton("Start Acquisition", this);
-    m_ComboBoxCameras = new QComboBox(this);
-    m_ListLog = new QListWidget(this);
+    //m_ButtonStartStop = new QPushButton("Start Acquisition", m_centralWidget);
+    //m_ComboBoxCameras = new QComboBox(m_centralWidget);
 
-    QGridLayout* layout = new QGridLayout(this);
-
+    QGridLayout* layout = new QGridLayout(m_centralWidget);
     layout->addWidget(m_LabelStream, 0, 0, 1, 2);
-    layout->addWidget(m_ComboBoxCameras, 1, 0);
-    layout->addWidget(m_ButtonStartStop, 1, 1);
-    layout->addWidget(m_ListLog, 2, 0, 1, 2);
+    //layout->addWidget(m_ComboBoxCameras, 1, 0);
+    //layout->addWidget(m_ButtonStartStop, 1, 1);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(1, 0);
     layout->setRowStretch(0, 1);
-    
+    m_statusBar = new QLabel("No camera selected now...");
+    statusBar()->addPermanentWidget(m_statusBar, 1);
+    m_statusBar->setAlignment(Qt::AlignLeft);
+    this->setCentralWidget(m_centralWidget);
+
+    /*Log Menu*/
+    d_Log = new QDialog(this);
+    d_Log->setWindowTitle("Log");
+    m_ListLog = new QListWidget(d_Log);
+    m_ListLog->setMinimumWidth(500);
+    QVBoxLayout* Dlayout = new QVBoxLayout(d_Log);
+    auto m_OkButton = new QDialogButtonBox(QDialogButtonBox::Ok, d_Log);
+    connect(m_OkButton, &QDialogButtonBox::accepted, d_Log, &QDialog::accept);
+    Dlayout->addWidget(m_ListLog, 1);
+    Dlayout->addWidget(m_OkButton);
+
 }
 
+void AsynchronousGrab::creatMenu()
+{
+    //QMenuBar* menu = new QMenuBar(this);
+    QMenu* camM = menuBar()->addMenu("&Camera");
+    m_MenuCameras = camM->addMenu("&Camera List");
+
+    a_MenuLog = camM->addAction("&Log");
+    connect(a_MenuLog, &QAction::triggered, this, [&]() {d_Log->exec();});
+    /*can also use [=](){this->d_Log->exec()} etc. see https://en.cppreference.com/w/cpp/language/lambda*/
+    a_MenuStart = camM->addAction("Start acquisition");
+    a_MenuStart->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
+    connect(a_MenuStart, &QAction::triggered, this, 
+        &AsynchronousGrab::OnBnClickedButtonStartstop);
+}
 
 void AsynchronousGrab::OnBnClickedButtonStartstop()
 {
     VmbErrorType err;
-    int nRow = m_ComboBoxCameras->currentIndex();
-    //int nRow = ui.m_ListBoxCameras->currentRow();
-
-    if( -1 < nRow )
+    QList<QActionGroup*> camlist = m_MenuCameras->findChildren<QActionGroup*>();
+    if ( (camlist.size() == 1) && camlist[0]->checkedAction() != nullptr)
     {
+        QString cam_text = camlist[0]->checkedAction()->text();
+        int nRow = camlist[0]->checkedAction()->data().toInt();
         if( false == m_bIsStreaming )
         {
             // Start acquisition
@@ -96,6 +125,7 @@ void AsynchronousGrab::OnBnClickedButtonStartstop()
                 QObject::connect( m_ApiController.GetFrameObserver(), SIGNAL( FrameReceivedSignal(int) ), this, SLOT( OnFrameReady(int) ) );
             }
             Log( L"Starting Acquisition", err );
+            setWindowTitle(cam_text + ", Capturing");
             m_bIsStreaming = VmbErrorSuccess == err;
         }
         else
@@ -107,15 +137,16 @@ void AsynchronousGrab::OnBnClickedButtonStartstop()
             m_ApiController.ClearFrameQueue();
             m_Image = QImage();
             Log( L"Stopping Acquisition", err );
+            setWindowTitle(QString("MOT Cam Mako") + QString::fromStdString(m_ApiController.GetVersion()));
         }
 
         if( false == m_bIsStreaming )
         {
-            m_ButtonStartStop->setText( QString( "Start Acquisition" ) );
+            a_MenuStart->setText( QString( "Start Acquisition" ) );
         }
         else
         {
-            m_ButtonStartStop->setText( QString( "Stop Acquisition" ) );
+            a_MenuStart->setText( QString( "Stop Acquisition" ) );
         }
     }
 }
@@ -209,10 +240,11 @@ void AsynchronousGrab::OnCameraListChanged( int reason )
 
     if( true == bUpdateList )
     {
-        UpdateCameraListBox();
+        /*UpdateCameraListBox();*/
+        UpdateCameraListMenu();
     }
 
-    m_ButtonStartStop->setEnabled( 0 < m_cameras.size() || m_bIsStreaming );
+    a_MenuStart->setEnabled( 0 < m_cameras.size() || m_bIsStreaming );
 }
 
 // Copies the content of a byte buffer to a Qt image with respect to the image's alignment
@@ -289,37 +321,46 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
 }
 
 
-// Queries and lists all known camera
-void AsynchronousGrab::UpdateCameraListBox()
+void AsynchronousGrab::UpdateCameraListMenu()
 {
     // Get all cameras currently connected to Vimba
     VmbAPI::CameraPtrVector cameras = m_ApiController.GetCameraList();
 
     // Simply forget about all cameras known so far
-    m_ComboBoxCameras->clear();
+    m_MenuCameras->clear();
+    QList<QActionGroup*> camlist = m_MenuCameras->findChildren<QActionGroup*>();
+    std::for_each(camlist.begin(), camlist.end(), [](auto ctmp) {ctmp->~QActionGroup(); });
+    //QList<QActionGroup*> camlist2 = m_MenuCameras->findChildren<QActionGroup*>();
     m_cameras.clear();
-
+    QActionGroup* camgroup = new QActionGroup(m_MenuCameras);
     // And query the camera details again
-    for(    VmbAPI::CameraPtrVector::const_iterator iter = cameras.begin();
-            cameras.end() != iter;
-            ++iter )
+    int iter_cnts = 0;
+    for (VmbAPI::CameraPtrVector::const_iterator iter = cameras.begin();
+        cameras.end() != iter;
+        ++iter)
     {
         std::string strCameraName;
         std::string strCameraID;
-        if( VmbErrorSuccess != (*iter)->GetName( strCameraName ) )
+        
+        if (VmbErrorSuccess != (*iter)->GetName(strCameraName))
         {
             strCameraName = "[NoName]";
         }
         // If for any reason we cannot get the ID of a camera we skip it
-        if( VmbErrorSuccess == (*iter)->GetID( strCameraID ) )
+        if (VmbErrorSuccess == (*iter)->GetID(strCameraID))
         {
-            m_ComboBoxCameras->addItem( QString::fromStdString( strCameraName + " " +strCameraID ) );
-            m_cameras.push_back( strCameraID );
+            QAction* tmp = m_MenuCameras->addAction(QString::fromStdString(strCameraName + " " + strCameraID));
+            tmp->setCheckable(true);
+            tmp->setData(iter_cnts);
+            camgroup->addAction(tmp);
+            m_cameras.push_back(strCameraID);
         }
+        iter_cnts += 1;
     }
 
-    m_ButtonStartStop->setEnabled( 0 < m_cameras.size() || m_bIsStreaming );
+    a_MenuStart->setEnabled(0 < m_cameras.size() || m_bIsStreaming);
 }
+
 
 // Prints out a given logging string, error code and the descriptive representation of that error code
 // Parameters:
@@ -329,6 +370,7 @@ void AsynchronousGrab::Log( std::wstring strMsg, VmbErrorType eErr )
 {
     strMsg += L"..." + m_ApiController.ErrorCodeToMessage( eErr );
     m_ListLog->insertItem( 0, QString::fromWCharArray( strMsg.c_str() ) );
+    m_statusBar->setText(QString::fromStdWString(strMsg.c_str()));
     //use QString::fromWCharArray( strMsg.c_str() ) instead of 
     //using QString::fromStdWString( strMsg )
     //just incase https://stackoverflow.com/questions/14726304/best-way-to-convert-stdwstring-to-qstring
@@ -340,6 +382,7 @@ void AsynchronousGrab::Log( std::wstring strMsg, VmbErrorType eErr )
 void AsynchronousGrab::Log( std::wstring strMsg)
 {
     m_ListLog->insertItem( 0, QString::fromWCharArray(strMsg.c_str()));
+    m_statusBar->setText(QString::fromStdWString(strMsg.c_str()));
     //use QString::fromWCharArray( strMsg.c_str() ) instead of 
     //using QString::fromStdWString( strMsg )
     //just incase https://stackoverflow.com/questions/14726304/best-way-to-convert-stdwstring-to-qstring
