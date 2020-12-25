@@ -78,7 +78,10 @@ void AsynchronousGrab::setupGuiLayout()
     /*Log Menu*/
     d_Log = new QDialog(this);
     d_Log->setWindowTitle("Log");
-    m_ListLog = new QListWidget(d_Log);
+    //m_ListLog = new QListWidget(d_Log);
+    m_ListLog = new QTextEdit(d_Log);
+    m_ListLog->setReadOnly(TRUE);
+    //m_ListLog->setFontPointSize(9);
     m_ListLog->setMinimumWidth(500);
     QVBoxLayout* Dlayout = new QVBoxLayout(d_Log);
     auto m_OkButton = new QDialogButtonBox(QDialogButtonBox::Ok, d_Log);
@@ -369,7 +372,7 @@ void AsynchronousGrab::UpdateCameraListMenu()
 void AsynchronousGrab::Log( std::wstring strMsg, VmbErrorType eErr )
 {
     strMsg += L"..." + m_ApiController.ErrorCodeToMessage( eErr );
-    m_ListLog->insertItem( 0, QString::fromWCharArray( strMsg.c_str() ) );
+    m_ListLog->append( QString::fromWCharArray( strMsg.c_str() ) );
     m_statusBar->setText(QString::fromStdWString(strMsg.c_str()));
     //use QString::fromWCharArray( strMsg.c_str() ) instead of 
     //using QString::fromStdWString( strMsg )
@@ -381,7 +384,7 @@ void AsynchronousGrab::Log( std::wstring strMsg, VmbErrorType eErr )
 //  [in]    strMsg          A given message to be printed out
 void AsynchronousGrab::Log( std::wstring strMsg)
 {
-    m_ListLog->insertItem( 0, QString::fromWCharArray(strMsg.c_str()));
+    m_ListLog->append(  QString::fromWCharArray(strMsg.c_str()));
     m_statusBar->setText(QString::fromStdWString(strMsg.c_str()));
     //use QString::fromWCharArray( strMsg.c_str() ) instead of 
     //using QString::fromStdWString( strMsg )

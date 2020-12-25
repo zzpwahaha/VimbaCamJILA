@@ -19,7 +19,8 @@ private:
     //QPushButton* m_ButtonStartStop;
     QLabel* m_LabelStream;
     //QComboBox* m_ComboBoxCameras; //m_ListBoxCameras
-    QListWidget* m_ListLog;
+    //QListWidget* m_ListLog;
+    QTextEdit* m_ListLog;
     QWidget* m_centralWidget;
     QLabel* m_statusBar;
     
