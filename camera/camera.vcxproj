@@ -46,11 +46,11 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(ProjectDir)3rdParty\qcustomplot;$(IncludePath)</IncludePath>
     <LibraryPath>D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(ProjectDir)3rdParty\qcustomplot;$(IncludePath)</IncludePath>
     <LibraryPath>D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -65,12 +65,12 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>core;gui;uitools;widgets;charts</QtModules>
+    <QtModules>charts;core;gui;printsupport;uitools;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>core;gui;uitools;widgets;charts</QtModules>
+    <QtModules>charts;core;gui;printsupport;uitools;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -103,6 +103,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3rdParty\qcustomplot\qcustomplot.cpp" />
     <ClCompile Include="ApiController.cpp" />
     <ClCompile Include="AsynchronousGrab.cpp" />
     <ClCompile Include="CameraObserver.cpp" />
@@ -110,6 +111,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="3rdParty\qcustomplot\qcustomplot.h" />
     <ClInclude Include="ApiController.h" />
     <QtMoc Include="AsynchronousGrab.h" />
     <QtMoc Include="FrameObserver.h" />

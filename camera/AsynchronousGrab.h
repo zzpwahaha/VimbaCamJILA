@@ -2,8 +2,9 @@
 
 #include <QtWidgets>
 #include <QMainWindow>
-#include <ApiController.h>
+#include "ApiController.h"
 
+#include "qcustomplot.h"
 using namespace AVT;
 
 class AsynchronousGrab : public QMainWindow
@@ -28,6 +29,13 @@ private:
     QAction* a_MenuLog;
     QAction* a_MenuStart;
     QDialog* d_Log;
+
+    QCustomPlot* customPlot;
+    QCPColorMap* colormapPlot;
+    QCPColorMap* colorMap;
+    void setColorMap();
+
+    VmbErrorType CopyToQCPImage(VmbUchar_t* pInBuffer, VmbPixelFormat_t ePixelFormat);
 
     // Our controller that wraps API access
     ApiController m_ApiController;

@@ -1,10 +1,12 @@
 
 #include <sstream>
+#include <iomanip>
 
 #include "AsynchronousGrab.h"
 #include "VimbaImageTransform\Include\VmbTransform.h"
-#define NUM_COLORS 3
-#define BIT_DEPTH 8
+#include "qcustomplot.h"
+//#define NUM_COLORS 3
+//#define BIT_DEPTH 8
 
 
 
@@ -17,7 +19,7 @@ AsynchronousGrab::AsynchronousGrab( QWidget *parent, Qt::WindowFlags flags )
     //Gui
     setupGuiLayout();
     creatMenu();
-    
+    setColorMap();
     // Connect GUI events with event handlers
     //QObject::connect( m_ButtonStartStop, SIGNAL( clicked() ), this, SLOT( OnBnClickedButtonStartstop() ) );
 
@@ -60,11 +62,14 @@ void AsynchronousGrab::setupGuiLayout()
     setGeometry(200, 300, 800, 600);
     m_LabelStream = new QLabel(m_centralWidget);
     m_LabelStream->setAlignment(Qt::AlignCenter);
+    customPlot = new QCustomPlot(m_centralWidget);
+    //m_LabelStream->setFrameStyle(QFrame::NoFrame | QFrame::Raised);
     //m_ButtonStartStop = new QPushButton("Start Acquisition", m_centralWidget);
     //m_ComboBoxCameras = new QComboBox(m_centralWidget);
 
     QGridLayout* layout = new QGridLayout(m_centralWidget);
-    layout->addWidget(m_LabelStream, 0, 0, 1, 2);
+    layout->addWidget(customPlot, 0, 0, 1, 2);
+    //layout->addWidget(m_LabelStream, 0, 0, 1, 2);
     //layout->addWidget(m_ComboBoxCameras, 1, 0);
     //layout->addWidget(m_ButtonStartStop, 1, 1);
     layout->setColumnStretch(0, 1);
@@ -81,7 +86,7 @@ void AsynchronousGrab::setupGuiLayout()
     //m_ListLog = new QListWidget(d_Log);
     m_ListLog = new QTextEdit(d_Log);
     m_ListLog->setReadOnly(TRUE);
-    //m_ListLog->setFontPointSize(9);
+    m_ListLog->setFontPointSize(9);
     m_ListLog->setMinimumWidth(500);
     QVBoxLayout* Dlayout = new QVBoxLayout(d_Log);
     auto m_OkButton = new QDialogButtonBox(QDialogButtonBox::Ok, d_Log);
@@ -105,6 +110,56 @@ void AsynchronousGrab::creatMenu()
     connect(a_MenuStart, &QAction::triggered, this, 
         &AsynchronousGrab::OnBnClickedButtonStartstop);
 }
+
+
+void AsynchronousGrab::setColorMap()
+{
+    // configure axis rect:
+    customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
+    customPlot->axisRect()->setupFullAxesBox(true);
+
+    colormapPlot = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
+    int nx = 200;
+    int ny = 200;
+    colormapPlot->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
+    colormapPlot->data()->setRange(QCPRange(-4, 4), QCPRange(-4, 4)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    // now we assign some data, by accessing the QCPColorMapData instance of the color map:
+    double x, y, z;
+    for (int xIndex = 0; xIndex < nx; ++xIndex)
+    {
+        for (int yIndex = 0; yIndex < ny; ++yIndex)
+        {
+            colormapPlot->data()->cellToCoord(xIndex, yIndex, &x, &y);
+            double r = 3 * qSqrt(x * x + y * y) + 1e-2;
+            z = 2 * x * (qCos(r + 2) / r - qSin(r + 2) / r); // the B field strength of dipole radiation (modulo physical constants)
+            colormapPlot->data()->setCell(xIndex, yIndex, z);
+        }
+    }
+
+
+    colormapPlot->setTightBoundary(FALSE);
+    QCPColorScale* colorScale = new QCPColorScale(customPlot);
+    customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colormapPlot->setColorScale(colorScale); // associate the color map with the color scale
+    colorScale->axis()->setLabel("Intensity, 8-bit");
+    colorScale->setGradient(QCPColorGradient::gpGrayscale);
+    colormapPlot->rescaleDataRange();
+
+    // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
+    QCPMarginGroup* marginGroup = new QCPMarginGroup(customPlot);
+    customPlot->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+
+    
+    // rescale the key (x) and value (y) axes so the whole color map is visible:
+    customPlot->rescaleAxes();
+    
+    
+}
+
+
+
 
 void AsynchronousGrab::OnBnClickedButtonStartstop()
 {
@@ -184,24 +239,14 @@ void AsynchronousGrab::OnFrameReady( int status )
                     {
                         // Copy it
                         // We need that because Qt might repaint the view after we have released the frame already
-                        /*if( ui.m_ColorProcessingCheckBox->checkState()==  Qt::Checked )
-                        {
-                            static const VmbFloat_t Matrix[] = {    8.0f, 0.1f, 0.1f, // this matrix just makes a quick color to mono conversion
-                                                                    0.1f, 0.8f, 0.1f,
-                                                                    0.0f, 0.0f, 1.0f };
-                            if( VmbErrorSuccess != CopyToImage( pBuffer,ePixelFormat, m_Image, Matrix ) )
-                            {
-                                ui.m_ColorProcessingCheckBox->setChecked( false );
-                            }
-                        }
-                        else
-                        {
-                            CopyToImage( pBuffer,ePixelFormat, m_Image );
-                        }*/
-                        CopyToImage(pBuffer, ePixelFormat, m_Image);
+                        //CopyToImage(pBuffer, ePixelFormat, m_Image);
+                        CopyToQCPImage(pBuffer, ePixelFormat);
                         // Display it
-                        const QSize s = m_LabelStream->size() ;
-                        m_LabelStream->setPixmap( QPixmap::fromImage( m_Image ).scaled(s,Qt::KeepAspectRatio ) );
+                        //const QSize s = m_LabelStream->size() ;
+                        //m_LabelStream->setPixmap( QPixmap::fromImage( m_Image ).scaled(s,Qt::KeepAspectRatio ) );
+                        colormapPlot->rescaleDataRange();
+                        customPlot->rescaleAxes();
+                        customPlot->replot();
                     }
                 }
             }
@@ -261,6 +306,7 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
     const int           nHeight = m_ApiController.GetHeight();
     const int           nWidth  = m_ApiController.GetWidth();
 
+    
     VmbImage            SourceImage,DestImage;
     VmbError_t          Result;
     SourceImage.Size    = sizeof( SourceImage );
@@ -274,6 +320,7 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
     }
     QString             OutputFormat;
     const int           bytes_per_line = pOutImage.bytesPerLine();
+    
     switch( pOutImage.format() )
     {
     default:
@@ -322,6 +369,57 @@ VmbErrorType AsynchronousGrab::CopyToImage( VmbUchar_t *pInBuffer, VmbPixelForma
     }
     return static_cast<VmbErrorType>( Result );
 }
+
+//copy the buffer directly to the QCP colormap since the colormap has to be initialized pixel by pixel
+//so it is better to do it here
+VmbErrorType AsynchronousGrab::CopyToQCPImage(VmbUchar_t* pInBuffer, VmbPixelFormat_t ePixelFormat)
+{
+    const int           nHeight = m_ApiController.GetHeight();
+    const int           nWidth = m_ApiController.GetWidth();
+    VmbError_t Result = 1;
+    if (ePixelFormat != VmbPixelFormatMono8)
+    {
+        std::wstringstream stream;
+        stream << std::hex << ePixelFormat;
+        Log(L"Only support Mono8 format, not " + stream.str() + L"see VmbCommonTypes.h for enumrate type");
+        return static_cast<VmbErrorType>(Result);
+    }
+
+    colormapPlot->data()->setSize(nWidth, nHeight);
+
+    /*std::vector<std::vector<double>> matrix;
+    matrix.resize(nHeight, std::vector<double>(nWidth, 0));*/
+    for (int yIndex = 0; yIndex < nHeight; ++yIndex)
+    {
+        for (int xIndex = 0; xIndex < nWidth; ++xIndex)
+        {
+            colormapPlot->data()->setCell(xIndex, yIndex, 
+                static_cast<double>(pInBuffer[xIndex + yIndex * nWidth]));
+            /*matrix[yIndex][xIndex] = static_cast<double>(pInBuffer[xIndex + yIndex * nHeight]);
+            auto tmp = colormapPlot->data()->data(xIndex, yIndex);
+            auto tt = 1;*/
+        }
+    }
+    /*std::ofstream out("test.csv");
+
+    for (auto& row : matrix) {
+        for (auto col : row)
+            out << col << ',';
+        out << '\n';
+    }*/
+    colormapPlot->data()->setRange(QCPRange(0, nWidth), QCPRange(0, nHeight));
+    Result = 0;
+
+    if (VmbErrorSuccess != Result)
+    {
+        Log(L"something wrong in transfering data to QCPColorMap", 
+            static_cast<VmbErrorType>(Result));
+        return static_cast<VmbErrorType>(Result);
+    }
+    return static_cast<VmbErrorType>(Result);
+}
+
+
 
 
 void AsynchronousGrab::UpdateCameraListMenu()

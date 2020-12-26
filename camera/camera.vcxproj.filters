@@ -39,6 +39,9 @@
     <ClCompile Include="AsynchronousGrab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="3rdParty\qcustomplot\qcustomplot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="CameraObserver.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="AsynchronousGrab.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="3rdParty\qcustomplot\qcustomplot.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
