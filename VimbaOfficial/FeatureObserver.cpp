@@ -160,7 +160,8 @@ bool FeatureObserver::isEventFeature( const FeaturePtr pFeature )
     std::string sCategory;
     if (    !SP_ISNULL( pFeature )                                                  // Test for being beneath EventID category
          && VmbErrorSuccess == SP_ACCESS( pFeature )->GetCategory( sCategory )
-         && std::strstr( sCategory.c_str(), "/EventID" ))
+         && std::strstr( sCategory.c_str(), "/EventID" ))                           //std::strstr(char* haystack, const char* needle );return pointer to first needle in haystack
+
     {
         sendEventMessage( pFeature );                                               // Send Qt Signal to display event data
         return true;
@@ -184,7 +185,7 @@ void FeatureObserver::sendEventMessage ( const FeaturePtr pFeature )
     VmbInt64_t nValueTimeStamp = 0;
     VmbInt64_t nValueFrameID = 0;
     
-    static int i = 0;
+    static int i = 0; //static means it gets allocated for the lifetime of the program
 
     if ( VmbErrorSuccess == SP_ACCESS( pFeature )->GetName( name ))
     {

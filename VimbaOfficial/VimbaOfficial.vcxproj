@@ -21,10 +21,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -112,7 +114,6 @@
     <ClInclude Include="memcpy_threaded.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SplashScreen.h" />
-    <ClInclude Include="UI\HexEditor\ui_OptionDialog.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="VmbImageTransformHelper.hpp" />
     <QtMoc Include="ViewerWindow.h" />
@@ -364,7 +365,6 @@
     <ClCompile Include="UI\HexEditor\HexOptionDialog.cpp" />
     <ClCompile Include="UI\HexEditor\QHexEdit.cpp" />
     <ClCompile Include="UI\HexEditor\QHexEdit_p.cpp" />
-    <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp" />
     <ClCompile Include="UI\HexEditor\XByteArray.cpp" />
     <ClCompile Include="UI\Histogram\Histogram.cpp" />
     <ClCompile Include="UI\Histogram\HistogramThread.cpp" />
@@ -388,6 +388,7 @@
     <QtUic Include="SaveImageOption.ui" />
     <QtUic Include="SavingProgress.ui" />
     <QtUic Include="StartOption.ui" />
+    <QtUic Include="UI\HexEditor\OptionDialog.ui" />
     <QtUic Include="ViewerOption.ui" />
     <QtUic Include="ViewerWindow.ui" />
   </ItemGroup>

@@ -18,7 +18,7 @@ public:
 private:
     // The Qt GUI
     //QPushButton* m_ButtonStartStop;
-    QLabel* m_LabelStream;
+    //QLabel* m_LabelStream;
     //QComboBox* m_ComboBoxCameras; //m_ListBoxCameras
     //QListWidget* m_ListLog;
     QTextEdit* m_ListLog;

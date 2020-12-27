@@ -335,7 +335,7 @@ ViewerWindow::ViewerWindow ( QWidget *parent, Qt::WindowFlags flag, QString sID,
 
     connect(m_Controller,      SIGNAL(setDescription(const QString &)),  this, SLOT(onSetDescription(const QString &)));
     connect(m_Controller,      SIGNAL(setEventMessage(const QStringList &)), this, SLOT(onSetEventMessage(const QStringList &)), Qt::QueuedConnection);
-    connect(m_Controller,      SIGNAL(acquisitionStartStop(const QString &)), this, SLOT(onAcquisitionStartStop(const QString &)));
+    connect(m_Controller,      SIGNAL(acquisitionStartStop(const QString &)), this, SLOT(onAcquisitionStartStop(const QString &))); // this eventually calls RegisterObserver in Frame.h which make sure  As new frames arrive, the observer's FrameReceived method will be called.  Only one observer can be registered.
     connect(m_Controller,      SIGNAL(updateBufferSize()), this, SLOT(onPrepareCapture()));
     connect(m_Controller,      SIGNAL(resetFPS()), this, SLOT(onResetFPS()));
     connect(m_Controller,      SIGNAL(logging(const QString &)), this, SLOT(onFeedLogger( const QString &)));

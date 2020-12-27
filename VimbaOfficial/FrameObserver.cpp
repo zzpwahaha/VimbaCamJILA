@@ -100,7 +100,7 @@ void FrameObserver::FrameReceived ( const AVT::VmbAPI::FramePtr frame  )
         VmbUint64_t camera_frame_id;
         frame->GetFrameID( camera_frame_id );
         m_FPSCamera.count( camera_frame_id ); 
-        static const char token[] = {'-','\\','|','/'};
+        static const char token[] = {'-','\\','|','/'}; //quite interesting :) -zzp
         QString fps(token[ m_nFramesCounter%4] );
         if( m_FPSReceived.isValid() )
         {

@@ -60,8 +60,8 @@ void AsynchronousGrab::setupGuiLayout()
     m_centralWidget = new QWidget(this);
            
     setGeometry(200, 300, 800, 600);
-    m_LabelStream = new QLabel(m_centralWidget);
-    m_LabelStream->setAlignment(Qt::AlignCenter);
+    //m_LabelStream = new QLabel(m_centralWidget);
+    //m_LabelStream->setAlignment(Qt::AlignCenter);
     customPlot = new QCustomPlot(m_centralWidget);
     //m_LabelStream->setFrameStyle(QFrame::NoFrame | QFrame::Raised);
     //m_ButtonStartStop = new QPushButton("Start Acquisition", m_centralWidget);

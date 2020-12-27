@@ -281,9 +281,6 @@
     <ClInclude Include="VmbImageTransformHelper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UI\HexEditor\ui_OptionDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExternLib\qwt\qwt_abstract_legend.cpp">
@@ -673,9 +670,6 @@
     <ClCompile Include="ViewerWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ExternLib\qwt\qwt_abstract_legend.h">
@@ -873,6 +867,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ViewerWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="UI\HexEditor\OptionDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
