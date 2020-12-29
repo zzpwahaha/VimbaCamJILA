@@ -1,0 +1,408 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{18D3C715-6701-4607-A639-E19AA83DB4BA}</ProjectGuid>
+    <Keyword>QtVS_v303</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+    <ProjectName>VimbaOfficialExtract</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <LibraryPath>D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <LibraryPath>D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <AdditionalDependencies>VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <AdditionalDependencies>VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtInstall>msvc2019_64</QtInstall>
+    <QtModules>concurrent;core;gui;multimedia;network;opengl;printsupport;sql;svg;xml;xmlpatterns</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtInstall>msvc2019_64</QtInstall>
+    <QtModules>concurrent;core;gui;multimedia;network;opengl;printsupport;sql;svg;xml;xmlpatterns</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Helper.h" />
+    <ClInclude Include="ILogTarget.h" />
+    <ClInclude Include="ImageWriter.h" />
+    <ClInclude Include="memcpy_threaded.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SplashScreen.h" />
+    <ClInclude Include="Version.h" />
+    <ClInclude Include="VmbImageTransformHelper.hpp" />
+    <QtMoc Include="ViewerWindow.h" />
+    <QtMoc Include="MainWindow.h" />
+    <QtMoc Include="ImageSaver.h" />
+    <QtMoc Include="FrameObserver.h" />
+    <QtMoc Include="ForceIP.h" />
+    <QtMoc Include="FeatureObserver.h" />
+    <QtMoc Include="ControllerViewer.h" />
+    <QtMoc Include="CameraObserver.h" />
+    <QtMoc Include="ActionCommand.h" />
+    <ClInclude Include="ExternLib\qwt\qwt.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_abstract_scale_draw.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_arrow_button.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_clipper.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_color_map.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_column_symbol.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_compass_rose.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_compat.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_curve_fitter.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_date.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_date_scale_draw.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_date_scale_engine.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_dial_needle.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_event_pattern.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_global.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_graphic.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_interval.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_interval_symbol.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_legend_data.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_math.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_matrix_raster_data.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_null_paintdevice.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_painter.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_painter_command.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_picker_machine.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_pixel_matrix.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_abstract_barchart.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_barchart.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_curve.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_dict.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_directpainter.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_grid.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_histogram.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_intervalcurve.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_item.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_layout.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_legenditem.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_marker.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_multi_barchart.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_rasteritem.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_rescaler.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_scaleitem.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_seriesitem.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_shapeitem.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_spectrocurve.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_spectrogram.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_svgitem.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_textlabel.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_tradingcurve.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_plot_zoneitem.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_point_3d.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_point_data.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_point_mapper.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_point_polar.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_raster_data.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_round_scale_draw.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_samples.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_scale_div.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_scale_draw.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_scale_engine.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_scale_map.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_series_data.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_series_store.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_spline.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_symbol.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_system_clock.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_text.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_text_engine.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_transform.h" />
+    <ClInclude Include="ExternLib\qwt\qwt_widget_overlay.h" />
+    <ClInclude Include="UI\SortFilterProxyModel.h" />
+    <ClInclude Include="UI\tabextensioninterface.h" />
+    <ClInclude Include="UI\TabExtensionResult.h" />
+    <QtMoc Include="UI\Viewer.h" />
+    <QtMoc Include="UI\MultiCompleter.h" />
+    <QtMoc Include="UI\MdiChild.h" />
+    <QtMoc Include="UI\MainInformationWindow.h" />
+    <QtMoc Include="UI\LoggerWindow.h" />
+    <QtMoc Include="UI\LineEditCompleter.h" />
+    <QtMoc Include="UI\IntSpinBox.h" />
+    <QtMoc Include="UI\FloatSpinBox.h" />
+    <QtMoc Include="UI\ExComboBox.h" />
+    <QtMoc Include="UI\DockWidgetWindow.h" />
+    <QtMoc Include="UI\ControllerTreeWindow.h" />
+    <QtMoc Include="UI\CameraTreeWindow.h" />
+    <ClInclude Include="UI\HexEditor\Commands.h" />
+    <ClInclude Include="UI\HexEditor\XByteArray.h" />
+    <ClInclude Include="UI\Histogram\Histogram.h" />
+    <QtMoc Include="UI\Histogram\HistogramWindow.h" />
+    <QtMoc Include="UI\Histogram\HistogramThread.h" />
+    <QtMoc Include="UI\HexEditor\QHexEdit_p.h" />
+    <QtMoc Include="UI\HexEditor\QHexEdit.h" />
+    <QtMoc Include="UI\HexEditor\HexOptionDialog.h" />
+    <QtMoc Include="UI\HexEditor\HexMainWindow.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_wheel.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_thermo.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_text_label.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_slider.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_scale_widget.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_sampling_thread.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot_zoomer.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot_renderer.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot_picker.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot_panner.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot_magnifier.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot_glcanvas.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot_canvas.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_plot.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_picker.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_panner.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_magnifier.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_legend_label.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_legend.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_knob.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_dyngrid_layout.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_dial.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_counter.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_compass.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_analog_clock.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_abstract_slider.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_abstract_scale.h" />
+    <QtMoc Include="ExternLib\qwt\qwt_abstract_legend.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ActionCommand.cpp" />
+    <ClCompile Include="CameraObserver.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_abstract_legend.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_abstract_scale.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_abstract_scale_draw.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_abstract_slider.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_analog_clock.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_arrow_button.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_clipper.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_color_map.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_column_symbol.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_compass.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_compass_rose.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_counter.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_curve_fitter.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_date.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_date_scale_draw.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_date_scale_engine.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_dial.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_dial_needle.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_dyngrid_layout.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_event_pattern.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_graphic.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_interval.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_interval_symbol.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_knob.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_legend.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_legend_data.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_legend_label.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_magnifier.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_math.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_matrix_raster_data.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_null_paintdevice.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_painter.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_painter_command.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_panner.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_picker.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_picker_machine.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_pixel_matrix.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_abstract_barchart.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_axis.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_barchart.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_canvas.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_curve.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_dict.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_directpainter.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_glcanvas.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_grid.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_histogram.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_intervalcurve.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_item.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_layout.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_legenditem.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_magnifier.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_marker.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_multi_barchart.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_panner.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_picker.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_rasteritem.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_renderer.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_rescaler.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_scaleitem.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_seriesitem.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_shapeitem.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_spectrocurve.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_spectrogram.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_svgitem.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_textlabel.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_tradingcurve.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_xml.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_zoneitem.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_plot_zoomer.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_point_3d.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_point_data.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_point_mapper.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_point_polar.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_raster_data.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_round_scale_draw.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_sampling_thread.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_scale_div.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_scale_draw.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_scale_engine.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_scale_map.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_scale_widget.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_series_data.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_slider.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_spline.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_symbol.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_system_clock.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_text.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_text_engine.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_text_label.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_thermo.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_transform.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_wheel.cpp" />
+    <ClCompile Include="ExternLib\qwt\qwt_widget_overlay.cpp" />
+    <ClCompile Include="FeatureObserver.cpp" />
+    <ClCompile Include="ForceIP.cpp" />
+    <ClCompile Include="FrameObserver.cpp" />
+    <ClCompile Include="Helper.cpp" />
+    <ClCompile Include="ImageSaver.cpp" />
+    <ClCompile Include="ImageWriter.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="SplashScreen.cpp" />
+    <ClCompile Include="UI\CameraTreeWindow.cpp" />
+    <ClCompile Include="UI\ControllerTreeWindow.cpp" />
+    <ClCompile Include="UI\DockWidgetWindow.cpp" />
+    <ClCompile Include="UI\ExComboBox.cpp" />
+    <ClCompile Include="UI\FloatSpinBox.cpp" />
+    <ClCompile Include="UI\HexEditor\Commands.cpp" />
+    <ClCompile Include="UI\HexEditor\HexMainWindow.cpp" />
+    <ClCompile Include="UI\HexEditor\HexOptionDialog.cpp" />
+    <ClCompile Include="UI\HexEditor\QHexEdit.cpp" />
+    <ClCompile Include="UI\HexEditor\QHexEdit_p.cpp" />
+    <ClCompile Include="UI\HexEditor\XByteArray.cpp" />
+    <ClCompile Include="UI\Histogram\Histogram.cpp" />
+    <ClCompile Include="UI\Histogram\HistogramThread.cpp" />
+    <ClCompile Include="UI\Histogram\HistogramWindow.cpp" />
+    <ClCompile Include="UI\IntSpinBox.cpp" />
+    <ClCompile Include="UI\LineEditCompleter.cpp" />
+    <ClCompile Include="UI\LoggerWindow.cpp" />
+    <ClCompile Include="UI\MainInformationWindow.cpp" />
+    <ClCompile Include="UI\MdiChild.cpp" />
+    <ClCompile Include="UI\MultiCompleter.cpp" />
+    <ClCompile Include="UI\SortFilterProxyModel.cpp" />
+    <ClCompile Include="UI\Viewer.cpp" />
+    <ClCompile Include="ViewerWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ActionCommand.ui" />
+    <QtUic Include="DirectAccess.ui" />
+    <QtUic Include="ForceIP.ui" />
+    <QtUic Include="MainWindow.ui" />
+    <QtUic Include="OpenByID.ui" />
+    <QtUic Include="SaveImageOption.ui" />
+    <QtUic Include="SavingProgress.ui" />
+    <QtUic Include="StartOption.ui" />
+    <QtUic Include="UI\HexEditor\OptionDialog.ui" />
+    <QtUic Include="ViewerOption.ui" />
+    <QtUic Include="ViewerWindow.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VimbaViewer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="VimbaViewer.rc2" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
