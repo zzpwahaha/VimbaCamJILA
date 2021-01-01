@@ -236,7 +236,7 @@ class ViewerWindow : public QMainWindow, private Ui::ViewerWindow
                 virtual void closeEvent                 ( QCloseEvent *event );
 
     private:
-                void        showSplashScreen            ( const QString &,QWidget*parent);
+                
                 VmbError_t  releaseBuffer               ();
                 void        checkDisplayInterval        ();
                 void        changeEvent                 ( QEvent * event );

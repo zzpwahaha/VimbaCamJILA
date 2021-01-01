@@ -13,6 +13,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaOfficial", "VimbaOffic
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaOfficialExtract", "VimbaOfficalExtract\VimbaOfficialExtract.vcxproj", "{18D3C715-6701-4607-A639-E19AA83DB4BA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cameraCombine", "cameraCombine\cameraCombine.vcxproj", "{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cameraCombineTest", "cameraCombineTest\cameraCombineTest.vcxproj", "{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +43,14 @@ Global
 		{18D3C715-6701-4607-A639-E19AA83DB4BA}.Debug|x64.Build.0 = Debug|x64
 		{18D3C715-6701-4607-A639-E19AA83DB4BA}.Release|x64.ActiveCfg = Release|x64
 		{18D3C715-6701-4607-A639-E19AA83DB4BA}.Release|x64.Build.0 = Release|x64
+		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Debug|x64.ActiveCfg = Debug|x64
+		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Debug|x64.Build.0 = Debug|x64
+		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Release|x64.ActiveCfg = Release|x64
+		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Release|x64.Build.0 = Release|x64
+		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Debug|x64.ActiveCfg = Debug|x64
+		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Debug|x64.Build.0 = Debug|x64
+		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Release|x64.ActiveCfg = Release|x64
+		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

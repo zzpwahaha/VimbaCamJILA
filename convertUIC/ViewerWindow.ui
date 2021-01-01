@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ViewerWindow</class>
+ <widget class="QMainWindow" name="ViewerWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>823</width>
+    <height>569</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout"/>
+  </widget>
+  <widget class="QMenuBar" name="menuBarMainWindow">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>823</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Verdana&quot;;</string>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="ActionSaveAs"/>
+    <addaction name="ActionSaveImages"/>
+    <addaction name="ActionSaveOptions"/>
+    <addaction name="ActionAllow16BitTiffSaving"/>
+   </widget>
+   <widget class="QMenu" name="viewMenu">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="ActionFitToWindow"/>
+    <addaction name="ActionLeftRotation"/>
+    <addaction name="ActionRightRotation"/>
+    <addaction name="separator"/>
+    <addaction name="ActionHistogram"/>
+    <addaction name="separator"/>
+    <addaction name="ActionZoomIn"/>
+    <addaction name="ActionZoomOut"/>
+    <addaction name="ActionOriginalSize"/>
+    <addaction name="ActionResetPosition"/>
+    <addaction name="separator"/>
+    <addaction name="ActionDisplayOptions"/>
+   </widget>
+   <widget class="QMenu" name="menuCamera">
+    <property name="title">
+     <string>Camera</string>
+    </property>
+    <widget class="QMenu" name="menuDirect_Access">
+     <property name="title">
+      <string>Direct Access</string>
+     </property>
+     <addaction name="ActionRegister"/>
+    </widget>
+    <addaction name="ActionFreerun"/>
+    <addaction name="separator"/>
+    <addaction name="menuDirect_Access"/>
+    <addaction name="separator"/>
+    <addaction name="ActionLoadCameraSettingsMenu"/>
+    <addaction name="ActionSaveCameraSettingsMenu"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="viewMenu"/>
+   <addaction name="menuCamera"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(195, 195, 195);
+font: 10pt &quot;Verdana&quot;;</string>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="palette">
+    <palette>
+     <active/>
+     <inactive/>
+     <disabled/>
+    </palette>
+   </property>
+   <property name="windowTitle">
+    <string>Viewer ToolBar </string>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="ActionFreerun"/>
+   <addaction name="separator"/>
+   <addaction name="ActionSaveImages"/>
+   <addaction name="ActionLoadCameraSettings"/>
+   <addaction name="ActionSaveCameraSettings"/>
+   <addaction name="separator"/>
+   <addaction name="ActionHistogram"/>
+   <addaction name="separator"/>
+   <addaction name="ActionFitToWindow"/>
+   <addaction name="ActionLeftRotation"/>
+   <addaction name="ActionRightRotation"/>
+   <addaction name="ActionZoomIn"/>
+   <addaction name="ActionOriginalSize"/>
+   <addaction name="ActionZoomOut"/>
+   <addaction name="separator"/>
+   <addaction name="ActionResetPosition"/>
+  </widget>
+  <action name="ActionFreerun">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/play.png</normaloff>:/VimbaViewer/Images/play.png</iconset>
+   </property>
+   <property name="text">
+    <string>Freerun</string>
+   </property>
+   <property name="iconText">
+    <string>Freerun</string>
+   </property>
+   <property name="toolTip">
+    <string>Freerun</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="ActionResetPosition">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/resetposition.png</normaloff>:/VimbaViewer/Images/resetposition.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reset Docking Position</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset docking windows position</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="ActionSaveAs">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/save.png</normaloff>:/VimbaViewer/Images/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Image As...</string>
+   </property>
+  </action>
+  <action name="ActionOriginalSize">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/zoom_default.png</normaloff>:/VimbaViewer/Images/zoom_default.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set Zoom To Default</string>
+   </property>
+   <property name="iconText">
+    <string>Original Size</string>
+   </property>
+   <property name="toolTip">
+    <string>Set zoom to default (original size)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="ActionSaveOptions">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/ImageSeriesSaveSettings.png</normaloff>:/VimbaViewer/Images/ImageSeriesSaveSettings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Image Series Options...</string>
+   </property>
+  </action>
+  <action name="ActionRegister">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/directaccess.png</normaloff>:/VimbaViewer/Images/directaccess.png</iconset>
+   </property>
+   <property name="text">
+    <string>Register</string>
+   </property>
+   <property name="toolTip">
+    <string>Direct Access Register</string>
+   </property>
+  </action>
+  <action name="ActionSaveImages">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/ImageSeriesStart.png</normaloff>:/VimbaViewer/Images/ImageSeriesStart.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Image Series</string>
+   </property>
+   <property name="toolTip">
+    <string>Save images</string>
+   </property>
+  </action>
+  <action name="ActionDisplayOptions">
+   <property name="text">
+    <string>Options...</string>
+   </property>
+   <property name="toolTip">
+    <string>Display options</string>
+   </property>
+  </action>
+  <action name="ActionHistogram">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/histogram.png</normaloff>:/VimbaViewer/Images/histogram.png</iconset>
+   </property>
+   <property name="text">
+    <string>Histogram</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the histogram window</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="ActionFitToWindow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/fittowin.png</normaloff>:/VimbaViewer/Images/fittowin.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fit to window</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="ActionLeftRotation">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/leftrotate.png</normaloff>:/VimbaViewer/Images/leftrotate.png</iconset>
+   </property>
+   <property name="text">
+    <string>Left Rotation 90°</string>
+   </property>
+  </action>
+  <action name="ActionRightRotation">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/rightrotate.png</normaloff>:/VimbaViewer/Images/rightrotate.png</iconset>
+   </property>
+   <property name="text">
+    <string>Right Rotation 90°</string>
+   </property>
+  </action>
+  <action name="ActionZoomIn">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/zoom_in.png</normaloff>:/VimbaViewer/Images/zoom_in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="ActionZoomOut">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/zoom_out.png</normaloff>:/VimbaViewer/Images/zoom_out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="ActionSaveCameraSettings">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/saveSettings_32.png</normaloff>:/VimbaViewer/Images/saveSettings_32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save camera settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Camera Settings to File.</string>
+   </property>
+  </action>
+  <action name="ActionLoadCameraSettings">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/loadSettings_32.png</normaloff>:/VimbaViewer/Images/loadSettings_32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load camera settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Load Camera Settings from File.</string>
+   </property>
+  </action>
+  <action name="ActionLoadCameraSettingsMenu">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/loadSettings_32.png</normaloff>:/VimbaViewer/Images/loadSettings_32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Camera Settings</string>
+   </property>
+  </action>
+  <action name="ActionSaveCameraSettingsMenu">
+   <property name="icon">
+    <iconset resource="VimbaViewer.qrc">
+     <normaloff>:/VimbaViewer/Images/saveSettings_32.png</normaloff>:/VimbaViewer/Images/saveSettings_32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Camera Settings</string>
+   </property>
+  </action>
+  <action name="ActionAllow16BitTiffSaving">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Allow 16-Bit Tiff Saving</string>
+   </property>
+   <property name="toolTip">
+    <string>Allow saving of 16 Bit Tiff images</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="VimbaViewer.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -28,7 +28,7 @@
 
 #include "MainWindow.h"
 #include "CameraObserver.h"
-#include "SplashScreen.h"
+//#include "SplashScreen.h"
 #include <QSplitter>
 #include "Version.h"
 #include <algorithm>
@@ -94,14 +94,7 @@ MainWindow::MainWindow ( QWidget *parent, Qt::WindowFlags flags )
     m_OpenByIDDialog = new QDialog( this, windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint); 
     m_OpenByID.setupUi( m_OpenByIDDialog );
 
-    /*Start Option (auto adjust packet size) */
-    m_StartOptionDialog = new QDialog(this, windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
-    m_StartOption.setupUi(m_StartOptionDialog);
-    m_MainWindow.ActionStartOptions->setEnabled(false);
-    /* read the last saved value */
-    QVariant result = settings.value("autoenable", true);
-    m_bIsAutoAdjustPacketSize = result.toBool();
-    m_StartOption.AutoAdjustPacketSize_CheckBox->setChecked(m_bIsAutoAdjustPacketSize); 
+    
 }
 
 MainWindow::~MainWindow ( void )
@@ -241,17 +234,10 @@ void CheckOpen(QVector<QTreeWidgetItem*> &items, const QString &CameraID)
     }
 }
 
+
 void MainWindow::onUpdateDeviceList ( void )
 {
-    /*
-    QPixmap pixmap( ":/VimbaViewer/Images/refresh.png" );
-    SplashScreen splashScreen(pixmap, this, Qt::SplashScreen);
-    int nW = ((this->width()/2) - splashScreen.width()/2);
-    int nH = ((this->height()/2) - splashScreen.height()/2);
-    splashScreen.setGeometry(nW,nH, splashScreen.width(),splashScreen.height());
-    splashScreen.show();
-    splashScreen.showMessage("Please wait..." , Qt::AlignHCenter | Qt::AlignVCenter, Qt::red);
-    */
+    
     CameraPtrVector     currentListedCameras;
     
     QMutexLocker        local_lock( &m_Lock );

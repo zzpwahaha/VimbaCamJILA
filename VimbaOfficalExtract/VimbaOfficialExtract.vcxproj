@@ -58,7 +58,7 @@
       <AdditionalDependencies>VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -66,7 +66,7 @@
       <AdditionalDependencies>VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
@@ -115,6 +115,31 @@
     <ClInclude Include="memcpy_threaded.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SplashScreen.h" />
+    <QtMoc Include="UI\CameraTreeWindow.h" />
+    <QtMoc Include="UI\ControllerTreeWindow.h" />
+    <QtMoc Include="UI\DockWidgetWindow.h" />
+    <QtMoc Include="UI\ExComboBox.h" />
+    <QtMoc Include="UI\FloatSpinBox.h" />
+    <ClInclude Include="UI\HexEditor\Commands.h" />
+    <QtMoc Include="UI\HexEditor\HexMainWindow.h" />
+    <QtMoc Include="UI\HexEditor\HexOptionDialog.h" />
+    <QtMoc Include="UI\HexEditor\QHexEdit.h" />
+    <QtMoc Include="UI\HexEditor\QHexEdit_p.h" />
+    <ClInclude Include="UI\HexEditor\ui_OptionDialog.h" />
+    <ClInclude Include="UI\HexEditor\XByteArray.h" />
+    <ClInclude Include="UI\Histogram\Histogram.h" />
+    <QtMoc Include="UI\Histogram\HistogramThread.h" />
+    <QtMoc Include="UI\Histogram\HistogramWindow.h" />
+    <QtMoc Include="UI\IntSpinBox.h" />
+    <QtMoc Include="UI\LineEditCompleter.h" />
+    <QtMoc Include="UI\LoggerWindow.h" />
+    <QtMoc Include="UI\MainInformationWindow.h" />
+    <QtMoc Include="UI\MdiChild.h" />
+    <QtMoc Include="UI\MultiCompleter.h" />
+    <ClInclude Include="UI\SortFilterProxyModel.h" />
+    <ClInclude Include="UI\tabextensioninterface.h" />
+    <ClInclude Include="UI\TabExtensionResult.h" />
+    <QtMoc Include="UI\Viewer.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="VmbImageTransformHelper.hpp" />
     <QtMoc Include="ViewerWindow.h" />
@@ -123,9 +148,9 @@
     <QtMoc Include="FrameObserver.h" />
     <QtMoc Include="ForceIP.h" />
     <QtMoc Include="FeatureObserver.h" />
-    <QtMoc Include="ControllerViewer.h" />
-    <QtMoc Include="CameraObserver.h" />
     <QtMoc Include="ActionCommand.h" />
+    <QtMoc Include="CameraObserver.h" />
+    <QtMoc Include="ControllerViewer.h" />
     <ClInclude Include="ExternLib\qwt\qwt.h" />
     <ClInclude Include="ExternLib\qwt\qwt_abstract_scale_draw.h" />
     <ClInclude Include="ExternLib\qwt\qwt_arrow_button.h" />
@@ -196,30 +221,6 @@
     <ClInclude Include="ExternLib\qwt\qwt_text_engine.h" />
     <ClInclude Include="ExternLib\qwt\qwt_transform.h" />
     <ClInclude Include="ExternLib\qwt\qwt_widget_overlay.h" />
-    <ClInclude Include="UI\SortFilterProxyModel.h" />
-    <ClInclude Include="UI\tabextensioninterface.h" />
-    <ClInclude Include="UI\TabExtensionResult.h" />
-    <QtMoc Include="UI\Viewer.h" />
-    <QtMoc Include="UI\MultiCompleter.h" />
-    <QtMoc Include="UI\MdiChild.h" />
-    <QtMoc Include="UI\MainInformationWindow.h" />
-    <QtMoc Include="UI\LoggerWindow.h" />
-    <QtMoc Include="UI\LineEditCompleter.h" />
-    <QtMoc Include="UI\IntSpinBox.h" />
-    <QtMoc Include="UI\FloatSpinBox.h" />
-    <QtMoc Include="UI\ExComboBox.h" />
-    <QtMoc Include="UI\DockWidgetWindow.h" />
-    <QtMoc Include="UI\ControllerTreeWindow.h" />
-    <QtMoc Include="UI\CameraTreeWindow.h" />
-    <ClInclude Include="UI\HexEditor\Commands.h" />
-    <ClInclude Include="UI\HexEditor\XByteArray.h" />
-    <ClInclude Include="UI\Histogram\Histogram.h" />
-    <QtMoc Include="UI\Histogram\HistogramWindow.h" />
-    <QtMoc Include="UI\Histogram\HistogramThread.h" />
-    <QtMoc Include="UI\HexEditor\QHexEdit_p.h" />
-    <QtMoc Include="UI\HexEditor\QHexEdit.h" />
-    <QtMoc Include="UI\HexEditor\HexOptionDialog.h" />
-    <QtMoc Include="UI\HexEditor\HexMainWindow.h" />
     <QtMoc Include="ExternLib\qwt\qwt_wheel.h" />
     <QtMoc Include="ExternLib\qwt\qwt_thermo.h" />
     <QtMoc Include="ExternLib\qwt\qwt_text_label.h" />
@@ -366,6 +367,7 @@
     <ClCompile Include="UI\HexEditor\HexOptionDialog.cpp" />
     <ClCompile Include="UI\HexEditor\QHexEdit.cpp" />
     <ClCompile Include="UI\HexEditor\QHexEdit_p.cpp" />
+    <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp" />
     <ClCompile Include="UI\HexEditor\XByteArray.cpp" />
     <ClCompile Include="UI\Histogram\Histogram.cpp" />
     <ClCompile Include="UI\Histogram\HistogramThread.cpp" />
@@ -389,15 +391,14 @@
     <QtUic Include="SaveImageOption.ui" />
     <QtUic Include="SavingProgress.ui" />
     <QtUic Include="StartOption.ui" />
-    <QtUic Include="UI\HexEditor\OptionDialog.ui" />
     <QtUic Include="ViewerOption.ui" />
     <QtUic Include="ViewerWindow.ui" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="VimbaViewer.rc" />
+    <None Include="VimbaViewer.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="VimbaViewer.rc2" />
+    <ResourceCompile Include="VimbaViewer.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

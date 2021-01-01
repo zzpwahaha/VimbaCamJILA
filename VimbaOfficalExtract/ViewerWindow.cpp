@@ -32,7 +32,7 @@
 #include <QTimer>
 #include "UI/LineEditCompleter.h"
 #include "UI/SortFilterProxyModel.h"
-#include "SplashScreen.h"
+//#include "SplashScreen.h"
 #include "UI/tabextensioninterface.h"
 #include "UI/ControllerTreeWindow.h"
 #include "UI/DockWidgetWindow.h"
@@ -50,79 +50,6 @@ using AVT::VmbAPI::FramePtr;
 #endif
 
 
-void ViewerWindow::showSplashScreen(const QString& sID,QWidget* parent)
-{
-    bool bIsModelFound = true;
-    QPixmap pixmap;
-    // We expect ID to be of format: Modelname (DevicePartNumber)-DeviceID(DEV_MAC@) while MAC@ has 12 digits
-    if ( sID.startsWith( "1800" ) )
-        pixmap.load( ":/VimbaViewer/Images/1800U.png" );
-    else if ( sID.contains( "Mako" ))
-        pixmap.load( ":/VimbaViewer/Images/mako.png" );
-    else if(sID.contains("Manta"))
-        pixmap.load( ":/VimbaViewer/Images/manta.png" );
-    else if(sID.contains("GT"))
-    {
-        if (   sID.contains( "4100 " )
-            || sID.contains( "4905" )
-            || sID.contains( "4907" )
-            || sID.contains( "6600" ))
-            pixmap.load( ":/VimbaViewer/Images/prosilicagt-large.png" );
-        else
-            pixmap.load( ":/VimbaViewer/Images/prosilicagt.png" );
-    }
-    else if(sID.contains("GC"))
-        pixmap.load( ":/VimbaViewer/Images/prosilicagc.png" );
-    else if(sID.contains("GX"))
-        pixmap.load( ":/VimbaViewer/Images/prosilicagx.png" );
-    else if(sID.contains("GE"))
-        pixmap.load( ":/VimbaViewer/Images/prosilicage.png" );
-    else if(sID.contains("Marlin"))
-        pixmap.load( ":/VimbaViewer/Images/marlin.png" );
-    else if(sID.contains("Guppy"))
-    {
-        if ( sID.contains( "PRO" ))
-            pixmap.load( ":/VimbaViewer/Images/guppy-pro.png" );
-        else
-            pixmap.load( ":/VimbaViewer/Images/guppy.png" );
-    }
-    else if(sID.contains("Oscar"))
-        pixmap.load( ":/VimbaViewer/Images/oscar.png" );
-    else if(sID.contains("Pike"))
-        pixmap.load( ":/VimbaViewer/Images/pike.png" );
-    else if(sID.contains("Stingray"))
-        pixmap.load( ":/VimbaViewer/Images/stingray.png" );
-    else if(sID.contains("Bigeye"))
-        pixmap.load( ":/VimbaViewer/Images/bigeye.png" );
-    else if(sID.contains("Goldeye P"))
-        pixmap.load( ":/VimbaViewer/Images/goldeye-p.png" );
-    else if(sID.contains("Goldeye G") || sID.contains("Goldeye CL"))
-    {
-        if ( sID.contains( "Cool" ))
-            pixmap.load( ":/VimbaViewer/Images/goldeye-g-cool.png" );
-        else
-            pixmap.load( ":/VimbaViewer/Images/goldeye-g.png" );
-    }
-    else
-    {
-        pixmap.load( ":/VimbaViewer/Images/stripes_256.png" );
-        bIsModelFound = false;
-    }
-
-    SplashScreen splashScreen(pixmap, parent, Qt::SplashScreen);
-    const int posX = (parent->width()  - splashScreen.width()) / 2;
-    const int posY = (parent->height() - splashScreen.height()) / 2;
-    splashScreen.setGeometry( posX, posY, splashScreen.width(), splashScreen.height() );
-    splashScreen.show();
-    if(bIsModelFound)
-    {
-        splashScreen.showMessage("" , Qt::AlignHCenter | Qt::AlignVCenter, Qt::white);
-    }
-    else
-    {
-        splashScreen.showMessage("" , Qt::AlignHCenter | Qt::AlignVCenter, Qt::black);
-    }
-}
 ViewerWindow::ViewerWindow ( QWidget *parent, Qt::WindowFlags flag, QString sID, QString sAccess, bool bAutoAdjustPacketSize, CameraPtr pCam )
     : QMainWindow( NULL, flag )
     , m_DockController( NULL )
@@ -145,7 +72,7 @@ ViewerWindow::ViewerWindow ( QWidget *parent, Qt::WindowFlags flag, QString sID,
     , m_FrameBufferCount (BUFFER_COUNT)
     , m_pCam( pCam )
 {
-    showSplashScreen(sID,parent);
+    
 
     VmbError_t errorType;
     QTime openTimer;
@@ -545,14 +472,7 @@ ViewerWindow::~ViewerWindow()
 
 void ViewerWindow::textFilterChanged()
 {
-    QPixmap pixmap( ":/VimbaViewer/Images/refresh.png" );
-    SplashScreen splashScreen(pixmap, m_Controller, Qt::SplashScreen);
-    int nW = ((m_Controller->width()/2) - splashScreen.width()/2);
-    int nH = ((m_Controller->height()/2) - splashScreen.height()/2);
-    splashScreen.setGeometry(nW,nH, splashScreen.width(),splashScreen.height());
-    splashScreen.show();
-    splashScreen.showMessage("Please wait..." , Qt::AlignHCenter | Qt::AlignVCenter, Qt::red);
-
+    
     QRegExp::PatternSyntax syntax = QRegExp::PatternSyntax(0);
     Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
 
