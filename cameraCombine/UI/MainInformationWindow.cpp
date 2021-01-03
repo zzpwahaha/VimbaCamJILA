@@ -1,39 +1,23 @@
-﻿/*=============================================================================
-  Copyright (C) 2012 Allied Vision Technologies.  All Rights Reserved.
-
-  Redistribution of this file, in original or modified form, without
-  prior written consent of Allied Vision Technologies is prohibited.
-
--------------------------------------------------------------------------------
-
-  File:        MainInformationWindow.cpp
-
-  Description: Main MDI Window for logging and event viewer
-
--------------------------------------------------------------------------------
-
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF TITLE,
-  NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR  PURPOSE ARE
-  DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
-  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-  AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-=============================================================================*/
+﻿//Description: Main MDI Window for loggingand event viewer
 
 
 #include "MainInformationWindow.h"
 #include <QToolBar>
+//#include <QtWidgets>
 
-
-MainInformationWindow::MainInformationWindow ( QWidget *parent , Qt::WindowFlags flags, CameraPtr pCam ) : QMainWindow( parent, flags ),
-m_WindowMenu( NULL ), m_OpenLoggerAct( NULL ), m_OpenEventViewerAct( NULL ), m_CloseAllAct( NULL ), m_TileAct( NULL ),
-m_CascadeAct( NULL ), m_MDIArea( NULL )      , m_nEventViewerPosition (-1) , m_bIsLogging ( false ), m_bIsEventViewerOpen ( false ),
-m_NumberOfLogging ( 0 )    
+MainInformationWindow::MainInformationWindow ( QWidget *parent , Qt::WindowFlags flags, CameraPtr pCam ) 
+    : QMainWindow( parent, flags )
+    , m_WindowMenu( NULL )
+    , m_OpenLoggerAct( NULL )
+    , m_OpenEventViewerAct( NULL )
+    , m_CloseAllAct( NULL )
+    , m_TileAct( NULL )
+    , m_CascadeAct( NULL )
+    , m_MDIArea( NULL )
+    , m_nEventViewerPosition (-1) 
+    , m_bIsLogging ( false )
+    , m_bIsEventViewerOpen ( false )
+    , m_NumberOfLogging ( 0 )    
 {
     m_pCam = pCam;
     /* make sure to treat this as a widget :) */
@@ -70,11 +54,11 @@ MainInformationWindow::~MainInformationWindow ( )
 
 void MainInformationWindow::createAction ( void )
 {
-    m_OpenLoggerAct      = new QAction(QIcon(":/VimbaViewer/Images/logger.png"), tr("&Open logging window"), this );
-    m_OpenEventViewerAct = new QAction(QIcon(":/VimbaViewer/Images/open_eventviewer.png"), tr("&Open event viewer"), this );
-    m_CascadeAct         = new QAction(QIcon(":/VimbaViewer/Images/cascade.png"),tr("&Cascade"), this);
-    m_TileAct            = new QAction(QIcon(":/VimbaViewer/Images/tile.png"),tr("&Tile "), this);
-    m_CloseAllAct        = new QAction(QIcon(":/VimbaViewer/Images/close.png"),tr("&Close all"), this);
+    m_OpenLoggerAct      = new QAction(tr("&Open logging window"), this );
+    m_OpenEventViewerAct = new QAction(tr("&Open event viewer"), this );
+    m_CascadeAct         = new QAction(tr("&Cascade"), this);
+    m_TileAct            = new QAction(tr("&Tile "), this);
+    m_CloseAllAct        = new QAction(tr("&Close all"), this);
     
     m_OpenLoggerAct->setPriority(QAction::LowPriority);
     m_OpenEventViewerAct->setPriority(QAction::LowPriority);

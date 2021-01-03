@@ -1,29 +1,4 @@
-﻿/*=============================================================================
-  Copyright (C) 2012-2019 Allied Vision Technologies.  All Rights Reserved.
-
-  Redistribution of this file, in original or modified form, without
-  prior written consent of Allied Vision Technologies is prohibited.
-
--------------------------------------------------------------------------------
-
-  File:        ControllerTreeWindow.cpp
-
-  Description: All about features control tree
-
--------------------------------------------------------------------------------
-
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF TITLE,
-  NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR  PURPOSE ARE
-  DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
-  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-  AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-=============================================================================*/
+﻿//Description: All about features control tree
 
 /* define this to use std::numeric_limits */
 #define NOMINMAX
@@ -82,7 +57,8 @@ protected:
     unsigned char row_height;
 };
 
-ControllerTreeWindow::ControllerTreeWindow ( QString sID, QWidget *parent, bool bAutoAdjustPacketSize, CameraPtr pCam ): QTreeView ( parent ), m_TreeDelegate ( NULL ),
+ControllerTreeWindow::ControllerTreeWindow ( QString sID, QWidget *parent, bool bAutoAdjustPacketSize, CameraPtr pCam )
+    : QTreeView ( parent ), m_TreeDelegate ( NULL ),
     m_HBooleanLayout          ( NULL ), m_HBooleanLayout2          ( NULL ), m_BooleanWidget         ( NULL ), m_CheckBox_Bool   ( NULL ),
     m_HEditLayout             ( NULL ), m_HEditLayout2             ( NULL ), m_EditWidget            ( NULL ), m_TextEdit_String ( NULL ),
     m_HButtonLayout           ( NULL ), m_HButtonLayout2           ( NULL ), m_ButtonWidget          ( NULL ), m_CmdButton       ( NULL ),

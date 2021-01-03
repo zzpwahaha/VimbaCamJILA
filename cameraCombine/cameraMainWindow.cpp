@@ -34,7 +34,14 @@ cameraMainWindow::cameraMainWindow(QWidget* parent , Qt::WindowFlags flags)
     connect(m_CameraTree, SIGNAL(cameraClicked(const QString&, const bool&)), this, SLOT(onCameraClicked(const QString&, const bool&)));
     /*Initializing Vimba is set in the showEvent, which overide the virtual function in QMainWindow*/
     //onInitializeVimba();
-
+    QWidget* window = new QWidget(this);
+    m_ViewerGrid = new QGridLayout();
+    window->setLayout(m_ViewerGrid);
+    this->setCentralWidget(window);
+    
+    //m_ViewerGrid->setRowMinimumHeight(0,750);
+    //m_ViewerGrid->setAlignment(Qt::AlignCenter);
+    //m_ViewerGrid
 }
 
 cameraMainWindow::~cameraMainWindow()
@@ -1071,6 +1078,23 @@ void cameraMainWindow::openViewer(CameraInfo& info)
         m_Logger->logging("MainWindow <openViewer> Exception: " + QString::fromStdString(e.what()), VimbaViewerLogCategory_ERROR);
     }
 
+    for (size_t i = 0; i < m_Viewer.size(); i++)
+    {
+        /*i < 3 ? m_ViewerGrid->addWidget(m_Viewer[i], 0, i) :
+            m_ViewerGrid->addWidget(m_Viewer[i], 1, i - 3);*/
+        //m_Viewer[i]->show();
+        m_ViewerGrid->addWidget(m_Viewer[i], 0, i);
+        m_ViewerGrid->setRowStretch(0, 1);
+       
+    }
+    //this->setLayout(m_ViewerGrid);
+    m_ViewerGrid->setAlignment(Qt::AlignCenter);
+    
+    this->centralWidget()->setLayout(m_ViewerGrid);
+
+
+        /* */
+    //std::for_each(m_Viewer.begin(), m_Viewer.end(), (m_ViewerGrid->addWidget));
     //if (m_bIsOpenByRightMouseClick)
     //    m_bIsOpenByRightMouseClick = false;
 }

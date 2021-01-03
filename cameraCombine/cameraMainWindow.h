@@ -63,6 +63,7 @@ private:
     QAction* m_aMenuStart;
     QDialog* m_dCamList;
     QDialog* m_dLog;
+    QGridLayout* m_ViewerGrid;
     void m_createMenu();
 
     void searchCameras          (const CameraPtrVector& Cameras);
