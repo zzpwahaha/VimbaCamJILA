@@ -62,6 +62,8 @@ private:
     QAction*                            m_aStartStopCap;
     QAction*                            m_aDiagCtrler;
     QAction*                            m_aDiagInfo;
+    QAction*                            m_aCamlist;
+    QAction*                            m_aDisconnect;
 
     SP_DECL(FrameObserver)              m_pFrameObs;
 
@@ -123,6 +125,7 @@ public:
     VmbError_t  getOpenError() const;
     QString     getCameraID() const;
     bool        getAdjustPacketSizeMessage(QString& sMessage);
+    QMenu*      getmContextMenu() const { return m_ContextMenu; }
 
     //virtual void ViewerWidget::contextMenuEvent(QContextMenuEvent* event)
     //{
@@ -152,7 +155,7 @@ private:
 
 
 public:
-    QAction* ActionFreerun;
+    //QAction* ActionFreerun;
 
 
 

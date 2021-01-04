@@ -17,6 +17,34 @@ using AVT::VmbAPI::CameraPtrVector;
 class CameraInfo;
 typedef QVector<CameraInfo>     CameraInfoVector;
 
+enum ViewerGridGeometry
+{
+    ncols = 3,
+    nrows = 2,
+    total = nrows * ncols
+};
+
+class Selector
+{
+private:
+    bool bActive;
+    int activeIndex;
+    int validRange;
+public:
+    Selector()                  { bActive = false; activeIndex = -1; validRange = -1; }
+    Selector(bool bActive, int activeIndex, int validRange)
+        : bActive(bActive)
+        , activeIndex(activeIndex)
+        , validRange(validRange) {};
+    bool isActive()             { return bActive; }
+    bool isValid() { return ((activeIndex < validRange) && (activeIndex >= 0)); }
+    int getActiveIndex()        { return activeIndex; }
+    void setActiveIndex(int a)  { activeIndex = a; }
+    void Activate()             { bActive = true; }
+    void deActivate()           { bActive = false; }
+};
+
+
 class cameraMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -57,18 +85,20 @@ private:
 
 
     /*layout initialization*/
-    QAction* m_aMenuCameras;
-    QAction* m_aMenuLog;
-    QAction* m_aRefreshCamList;
-    QAction* m_aMenuStart;
-    QDialog* m_dCamList;
-    QDialog* m_dLog;
-    QGridLayout* m_ViewerGrid;
+    QAction*                        m_aMenuCameras;
+    QAction*                        m_aMenuLog;
+    QAction*                        m_aRefreshCamList;
+    QAction*                        m_aMenuStart;
+    QDialog*                        m_dCamList;
+    QDialog*                        m_dLog;
+    QVector<QWidget*>               m_ViewerGridPlaceHolder;
+    QGridLayout*                    m_ViewerGridLayout;
+    Selector*                       m_activeViewerGrid; // control of active viewer widget
     void m_createMenu();
 
     void searchCameras          (const CameraPtrVector& Cameras);
     void openViewer             (CameraInfo& info);
-    void closeViewer            (CameraPtr cam);
+    void closeViewer            (CameraPtr cam, int closefromDisconnect = -1);
     QString getBestAccess       (const CameraInfo& info);
 //    unsigned int getAccessListPosition  (const QString& sAccessName);
     VmbErrorType getCameraDisplayName   (const CameraPtr& camera, std::string& sDisplayName);

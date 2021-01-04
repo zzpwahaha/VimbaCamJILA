@@ -171,6 +171,14 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_ContextMenu->addAction(m_aDiagInfo);
     connect(m_aDiagInfo, &QAction::triggered, this, [&]() {m_DiagInfomation->show(); });
 
+    m_ContextMenu->addSeparator();
+
+    //connecting the following action to a slot happens at cameraMainWindow, be careful of the order
+    m_aCamlist = new QAction("&Camera");
+    m_ContextMenu->addAction(m_aCamlist);
+    m_aDisconnect = new QAction("&Disconnect");
+    m_ContextMenu->addAction(m_aDisconnect);
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(OnShowContextMenu(const QPoint&)));
     

@@ -8,15 +8,14 @@
 #include "CameraObserver.h"
 
 
-cameraMainWindow::cameraMainWindow(QWidget* parent , Qt::WindowFlags flags)
-	: QMainWindow(parent,flags)
-	, m_bIsCurrentModelChecked(false)
-	, m_Logger(nullptr)
-	, m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
-	, m_bIsInitialized(false)
-	, m_Lock(QMutex::Recursive)
+cameraMainWindow::cameraMainWindow(QWidget* parent, Qt::WindowFlags flags)
+    : QMainWindow(parent, flags)
+    , m_bIsCurrentModelChecked(false)
+    , m_Logger(nullptr)
+    , m_VimbaSystem(AVT::VmbAPI::VimbaSystem::GetInstance())
+    , m_bIsInitialized(false)
+    , m_Lock(QMutex::Recursive)
     , m_bIsAutoAdjustPacketSize(false)
-    
 {
 	qRegisterMetaType<CameraPtr>("CameraPtr");
 	setGeometry(0, 0, qApp->screens()[0]->geometry().width(), 
@@ -27,21 +26,54 @@ cameraMainWindow::cameraMainWindow(QWidget* parent , Qt::WindowFlags flags)
 	this->restoreGeometry(settings.value("geometrymainwindow").toByteArray());
 	this->restoreState(settings.value("state").toByteArray(), 0);*/
 
+
     m_CameraTree = new CameraTreeWindow(this);
     m_Logger = new LoggerWindow(this);
 
+    /*create menu*/
 	m_createMenu();
     connect(m_CameraTree, SIGNAL(cameraClicked(const QString&, const bool&)), this, SLOT(onCameraClicked(const QString&, const bool&)));
     /*Initializing Vimba is set in the showEvent, which overide the virtual function in QMainWindow*/
     //onInitializeVimba();
+
+    /*initialize selector for active view widget*/
+    m_activeViewerGrid = new Selector(false, -1, ViewerGridGeometry::total);
+
+    /*initialize layout*/
     QWidget* window = new QWidget(this);
-    m_ViewerGrid = new QGridLayout();
-    window->setLayout(m_ViewerGrid);
+    m_ViewerGridLayout = new QGridLayout();
+    for (size_t indx = 0; indx < ViewerGridGeometry::total; indx++)
+    {
+        m_ViewerGridPlaceHolder.append(new QWidget);
+        m_ViewerGridPlaceHolder.at(indx)->setStyleSheet("border: 1px solid red");
+        QPushButton* connectCamB = new QPushButton("&Connect To", m_ViewerGridPlaceHolder.at(indx));
+        connectCamB->setStyleSheet("font-size: 16px; background-color: rgb(51, 255, 153);");
+        connectCamB->setMinimumWidth(200);
+            
+        QVBoxLayout* layoutPH = new QVBoxLayout(m_ViewerGridPlaceHolder.at(indx));
+        layoutPH->addWidget(connectCamB);
+        layoutPH->setAlignment(Qt::AlignHCenter);
+        
+        m_ViewerGridLayout->addWidget(m_ViewerGridPlaceHolder.at(indx),
+            indx / ViewerGridGeometry::ncols, indx % ViewerGridGeometry::ncols);
+            
+        connect(connectCamB, &QPushButton::clicked, this, [&,indx]() {
+            m_dCamList->setWindowTitle("Camera List : " +
+                QString::fromStdString(std::to_string(indx)));
+            m_activeViewerGrid->setActiveIndex(indx);
+            m_activeViewerGrid->Activate();
+            m_dCamList->show(); 
+            });
+    }
+    window->setLayout(m_ViewerGridLayout);
     this->setCentralWidget(window);
     
-    //m_ViewerGrid->setRowMinimumHeight(0,750);
-    //m_ViewerGrid->setAlignment(Qt::AlignCenter);
-    //m_ViewerGrid
+    connect(m_dCamList, &QDialog::finished, this, [&]() {m_activeViewerGrid->deActivate(); });
+
+
+    //m_ViewerGridLayout->setRowMinimumHeight(0,750);
+    //m_ViewerGridLayout->setAlignment(Qt::AlignCenter);
+    //m_ViewerGridLayout
 }
 
 cameraMainWindow::~cameraMainWindow()
@@ -71,7 +103,9 @@ void cameraMainWindow::m_createMenu()
     QVBoxLayout* camlistlayout = new QVBoxLayout(m_dCamList);
     //camlistlayout->addWidget(new QLabel("Camera list"));
     camlistlayout->addWidget(m_CameraTree);
-    connect(m_aMenuCameras, &QAction::triggered, this, [&]() {m_dCamList->exec(); });
+    connect(m_aMenuCameras, &QAction::triggered, this, [&]() {
+        m_dCamList->setWindowTitle("Camera List");
+        m_dCamList->exec(); });
 	
     /*refresh camera list*/
     m_aRefreshCamList = camM->addAction("&Refresh");
@@ -80,8 +114,8 @@ void cameraMainWindow::m_createMenu()
     
     
     /*camera start button*/
-    m_aMenuStart = camM->addAction("Start acquisition");
-    m_aMenuStart->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
+    //m_aMenuStart = camM->addAction("Start acquisition");
+    //m_aMenuStart->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
     
     /*connect(m_aMenuStart, &QAction::triggered, this,
 		&AsynchronousGrab::OnBnClickedButtonStartstop);*/
@@ -703,7 +737,7 @@ void cameraMainWindow::onCloseFromViewer(CameraPtr cam)
 }
 
 
-void cameraMainWindow::closeViewer(CameraPtr cam)
+void cameraMainWindow::closeViewer(CameraPtr cam, int closefromDisconnect)
 {
     /* copy ID for logging because sCamID will be deleted (ref) when m_Viewer destroyed */
 
@@ -716,6 +750,22 @@ void cameraMainWindow::closeViewer(CameraPtr cam)
     QVector<ViewerWidget*>::iterator findWindowPos = std::find_if(m_Viewer.begin(), m_Viewer.end(), FindWindowByCameraPtr(cam));
     if (m_Viewer.end() != findWindowPos)
     {
+        
+        if ((m_activeViewerGrid->isActive() && m_activeViewerGrid->isValid()) || (closefromDisconnect > 0))
+        {
+            int indx;
+            closefromDisconnect >= 0 ? indx = closefromDisconnect : m_activeViewerGrid->getActiveIndex();
+            m_ViewerGridLayout->replaceWidget(
+                m_ViewerGridPlaceHolder.at(indx), *findWindowPos);
+            m_ViewerGridPlaceHolder.at(indx)->show();
+            //(*findWindowPos)->menu
+            closefromDisconnect >= 0 ? m_Logger->logging("closed from disconnect action, not from camera tree window, window index : " + QString::fromStdString(std::to_string(indx)), VimbaViewerLogCategory_INFO) : 0;
+
+        }
+        else
+        {
+            m_Logger->logging("Add placeholder widget to the layout failed: the selector is not activated or the index range is invalid ", VimbaViewerLogCategory_ERROR);
+        }
         delete* findWindowPos;
         *findWindowPos = NULL;
         m_Viewer.erase(findWindowPos);
@@ -1078,19 +1128,50 @@ void cameraMainWindow::openViewer(CameraInfo& info)
         m_Logger->logging("MainWindow <openViewer> Exception: " + QString::fromStdString(e.what()), VimbaViewerLogCategory_ERROR);
     }
 
-    for (size_t i = 0; i < m_Viewer.size(); i++)
+
+    if (m_activeViewerGrid->isActive() && m_activeViewerGrid->isValid())
     {
-        /*i < 3 ? m_ViewerGrid->addWidget(m_Viewer[i], 0, i) :
-            m_ViewerGrid->addWidget(m_Viewer[i], 1, i - 3);*/
-        //m_Viewer[i]->show();
-        m_ViewerGrid->addWidget(m_Viewer[i], 0, i);
-        m_ViewerGrid->setRowStretch(0, 1);
-       
+        m_ViewerGridPlaceHolder.at(m_activeViewerGrid->getActiveIndex())->hide();
+        //m_ViewerGridLayout->removeWidget(m_ViewerGridPlaceHolder.at(m_activeViewerGrid->getActiveIndex()));
+        m_ViewerGridLayout->replaceWidget(
+            m_ViewerGridPlaceHolder.at(m_activeViewerGrid->getActiveIndex()),
+            m_Viewer.back());
+        //m_ViewerGridLayout->addWidget()
+        m_Viewer.back()->setStyleSheet("border: 1px solid red");
+        m_Viewer.back()->getmContextMenu()->addSeparator();
+        
+        //auto actions = m_Viewer.back()->getmContextMenu()->actions();
+        auto indx = m_activeViewerGrid->getActiveIndex();
+        auto actions = m_Viewer.back()->getmContextMenu()->actions();
+        connect(actions.at(actions.size() - 1 - 2), &QAction::triggered,
+            this, [&, indx]() {
+                m_dCamList->setWindowTitle("Camera List : " +
+                    QString::fromStdString(std::to_string(indx)));
+                m_activeViewerGrid->setActiveIndex(indx);
+                m_activeViewerGrid->Activate();
+                m_dCamList->show();
+            });
+
+        connect(actions.at(actions.size() - 1 - 1), &QAction::triggered,
+            this, [&, indx, info]() {closeViewer(info.Cam(), indx); });
     }
-    //this->setLayout(m_ViewerGrid);
-    m_ViewerGrid->setAlignment(Qt::AlignCenter);
-    
-    this->centralWidget()->setLayout(m_ViewerGrid);
+    else
+    {
+        m_Logger->logging("Add viewer widget to the layout failed: the selector is not activated or the index range is invalid ", VimbaViewerLogCategory_ERROR);
+    }
+    //for (size_t i = 0; i < m_Viewer.size(); i++)
+    //{
+    //    /*i < 3 ? m_ViewerGridLayout->addWidget(m_Viewer[i], 0, i) :
+    //        m_ViewerGridLayout->addWidget(m_Viewer[i], 1, i - 3);*/
+    //    //m_Viewer[i]->show();
+    //    //m_ViewerGridLayout->removeWidget();
+    //    m_ViewerGridLayout->addWidget(m_Viewer[i], 0, i);
+    //    m_ViewerGridLayout->setRowStretch(0, 1);
+    //   
+    //}
+    //this->setLayout(m_ViewerGridLayout);
+    //m_ViewerGridLayout->setAlignment(Qt::AlignCenter);
+    //this->centralWidget()->setLayout(m_ViewerGridLayout);
 
 
         /* */
