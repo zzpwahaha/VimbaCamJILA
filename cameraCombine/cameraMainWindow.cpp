@@ -94,7 +94,7 @@ void cameraMainWindow::m_createMenu()
     QVBoxLayout* loggerlayout = new QVBoxLayout(m_dLog);
     //loggerlayout->addWidget(new QLabel("Log"));
     loggerlayout->addWidget(m_Logger);
-    connect(m_aMenuLog, &QAction::triggered, this, [&]() {m_dLog->exec(); });
+    connect(m_aMenuLog, &QAction::triggered, this, [&]() {m_dLog->show(); });
 
     /*cameralist dialog*/
     m_aMenuCameras = camM->addAction("&Camera List");
@@ -985,7 +985,18 @@ void cameraMainWindow::on_ActionDiscover_triggered(void)
     }
     for (int i = 0; i < tmpCameras.size(); ++i)
     {
-        closeViewer(tmpCameras[i]);
+        //closeViewer(tmpCameras[i]);
+        std::string camName;
+        VmbErrorType error = getCameraDisplayName(tmpCameras[i], (camName));
+        if (VmbErrorSuccess == error)
+        {
+            m_Logger->logging("Refreshing camera list, not closing opened camera " + QString::fromStdString(camName), VimbaViewerLogCategory_INFO);
+        }
+        else
+        {
+            m_Logger->logging("Refreshing camera list, can not read the opened camera display name " + QString::fromStdString(camName), VimbaViewerLogCategory_WARNING);
+        }
+        
     }
     onUpdateDeviceList();
     m_CameraTree->setEnabled(true);
@@ -1027,7 +1038,7 @@ void cameraMainWindow::closeViewer(CameraPtr cam, int closefromDisconnect)
             m_ViewerGridLayout->replaceWidget(*findWindowPos, m_ViewerGridPlaceHolder.at(indx) );
             m_ViewerGridPlaceHolder.at(indx)->show();
             //(*findWindowPos)->menu
-            closefromDisconnect >= 0 ? m_Logger->logging("closed from disconnect action, not from camera tree window, window index : " + QString::fromStdString(std::to_string(indx)), VimbaViewerLogCategory_INFO) : 0;
+            closefromDisconnect >= 0 ? m_Logger->logging("Closed from disconnect action, not from camera tree window, window index : " + QString::fromStdString(std::to_string(indx)), VimbaViewerLogCategory_INFO) : 0;
 
         }
         else
