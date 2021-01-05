@@ -62,6 +62,7 @@ cameraMainWindow::cameraMainWindow(QWidget* parent, Qt::WindowFlags flags)
                 QString::fromStdString(std::to_string(indx)));
             m_activeViewerGrid->setActiveIndex(indx);
             m_activeViewerGrid->Activate();
+            onUpdateDeviceList();//force to update camlist
             m_dCamList->show(); 
             });
     }
@@ -105,6 +106,7 @@ void cameraMainWindow::m_createMenu()
     camlistlayout->addWidget(m_CameraTree);
     connect(m_aMenuCameras, &QAction::triggered, this, [&]() {
         m_dCamList->setWindowTitle("Camera List");
+        onUpdateDeviceList();//force update camlist
         m_dCamList->exec(); });
 	
     /*refresh camera list*/
@@ -737,47 +739,6 @@ void cameraMainWindow::onCloseFromViewer(CameraPtr cam)
 }
 
 
-void cameraMainWindow::closeViewer(CameraPtr cam, int closefromDisconnect)
-{
-    /* copy ID for logging because sCamID will be deleted (ref) when m_Viewer destroyed */
-
-    CameraInfoVector::iterator findPos = std::find(m_CameraInfos.begin(), m_CameraInfos.end(), cam);
-    if (m_CameraInfos.end() != findPos)
-    {
-        findPos->SetOpen(false);
-    }
-
-    QVector<ViewerWidget*>::iterator findWindowPos = std::find_if(m_Viewer.begin(), m_Viewer.end(), FindWindowByCameraPtr(cam));
-    if (m_Viewer.end() != findWindowPos)
-    {
-        
-        if ((m_activeViewerGrid->isActive() && m_activeViewerGrid->isValid()) || (closefromDisconnect > 0))
-        {
-            int indx;
-            closefromDisconnect >= 0 ? indx = closefromDisconnect : m_activeViewerGrid->getActiveIndex();
-            m_ViewerGridLayout->replaceWidget(
-                m_ViewerGridPlaceHolder.at(indx), *findWindowPos);
-            m_ViewerGridPlaceHolder.at(indx)->show();
-            //(*findWindowPos)->menu
-            closefromDisconnect >= 0 ? m_Logger->logging("closed from disconnect action, not from camera tree window, window index : " + QString::fromStdString(std::to_string(indx)), VimbaViewerLogCategory_INFO) : 0;
-
-        }
-        else
-        {
-            m_Logger->logging("Add placeholder widget to the layout failed: the selector is not activated or the index range is invalid ", VimbaViewerLogCategory_ERROR);
-        }
-        delete* findWindowPos;
-        *findWindowPos = NULL;
-        m_Viewer.erase(findWindowPos);
-        m_Logger->logging(tr("Closing The Viewer:") + "\t" + findPos->DisplayName(), VimbaViewerLogCategory_INFO);
-        findPos->ResetPermittedAccessState(); /* reset all */
-    }
-    if (!m_CameraTree->isEnabled())
-    {
-        m_CameraTree->setDisabled(false);
-    }
-}
-
 void CheckOpen(QVector<QTreeWidgetItem*>& items, const QString& CameraID)
 {
     for (int pos = 0; pos < items.size(); pos++)
@@ -994,6 +955,7 @@ void cameraMainWindow::onCameraClicked(const QString& sModel, const bool& bIsChe
             else
             {
                 closeViewer(selectedCamera.Cam());
+                onUpdateDeviceList();
             }
         }
         catch (const std::exception& e)
@@ -1044,6 +1006,45 @@ public:
     }
 };
 
+void cameraMainWindow::closeViewer(CameraPtr cam, int closefromDisconnect)
+{
+    /* copy ID for logging because sCamID will be deleted (ref) when m_Viewer destroyed */
+
+    CameraInfoVector::iterator findPos = std::find(m_CameraInfos.begin(), m_CameraInfos.end(), cam);
+    if (m_CameraInfos.end() != findPos)
+    {
+        findPos->SetOpen(false);
+    }
+
+    QVector<ViewerWidget*>::iterator findWindowPos = std::find_if(m_Viewer.begin(), m_Viewer.end(), FindWindowByCameraPtr(cam));
+    if (m_Viewer.end() != findWindowPos)
+    {
+
+        if ((m_activeViewerGrid->isActive() && m_activeViewerGrid->isValid()) || (closefromDisconnect > 0))
+        {
+            int indx;
+            closefromDisconnect >= 0 ? indx = closefromDisconnect : indx = m_activeViewerGrid->getActiveIndex();
+            m_ViewerGridLayout->replaceWidget(*findWindowPos, m_ViewerGridPlaceHolder.at(indx) );
+            m_ViewerGridPlaceHolder.at(indx)->show();
+            //(*findWindowPos)->menu
+            closefromDisconnect >= 0 ? m_Logger->logging("closed from disconnect action, not from camera tree window, window index : " + QString::fromStdString(std::to_string(indx)), VimbaViewerLogCategory_INFO) : 0;
+
+        }
+        else
+        {
+            m_Logger->logging("Add placeholder widget to the layout failed: the selector is not activated or the index range is invalid ", VimbaViewerLogCategory_ERROR);
+        }
+        delete* findWindowPos;
+        *findWindowPos = NULL;
+        m_Viewer.erase(findWindowPos);
+        m_Logger->logging(tr("Closing The Viewer:") + "\t" + findPos->DisplayName(), VimbaViewerLogCategory_INFO);
+        findPos->ResetPermittedAccessState(); /* reset all */
+    }
+    if (!m_CameraTree->isEnabled())
+    {
+        m_CameraTree->setDisabled(false);
+    }
+}
 
 /*locked by on camera clicked*/
 void cameraMainWindow::openViewer(CameraInfo& info)
@@ -1132,15 +1133,14 @@ void cameraMainWindow::openViewer(CameraInfo& info)
     if (m_activeViewerGrid->isActive() && m_activeViewerGrid->isValid())
     {
         m_ViewerGridPlaceHolder.at(m_activeViewerGrid->getActiveIndex())->hide();
-        //m_ViewerGridLayout->removeWidget(m_ViewerGridPlaceHolder.at(m_activeViewerGrid->getActiveIndex()));
         m_ViewerGridLayout->replaceWidget(
             m_ViewerGridPlaceHolder.at(m_activeViewerGrid->getActiveIndex()),
             m_Viewer.back());
         //m_ViewerGridLayout->addWidget()
-        m_Viewer.back()->setStyleSheet("border: 1px solid red");
+        m_Viewer.back()->show();
+        //m_Viewer.back()->setStyleSheet("border: 1px solid red");
         m_Viewer.back()->getmContextMenu()->addSeparator();
         
-        //auto actions = m_Viewer.back()->getmContextMenu()->actions();
         auto indx = m_activeViewerGrid->getActiveIndex();
         auto actions = m_Viewer.back()->getmContextMenu()->actions();
         connect(actions.at(actions.size() - 1 - 2), &QAction::triggered,
@@ -1149,11 +1149,15 @@ void cameraMainWindow::openViewer(CameraInfo& info)
                     QString::fromStdString(std::to_string(indx)));
                 m_activeViewerGrid->setActiveIndex(indx);
                 m_activeViewerGrid->Activate();
+                onUpdateDeviceList();//force update camlist
                 m_dCamList->show();
             });
 
         connect(actions.at(actions.size() - 1 - 1), &QAction::triggered,
-            this, [&, indx, info]() {closeViewer(info.Cam(), indx); });
+            this, [&, indx, info]() {
+                m_activeViewerGrid->setActiveIndex(indx);
+                m_activeViewerGrid->Activate();
+                onCloseFromViewer(info.Cam()); });
     }
     else
     {
@@ -1174,6 +1178,8 @@ void cameraMainWindow::openViewer(CameraInfo& info)
     //this->centralWidget()->setLayout(m_ViewerGridLayout);
 
 
+
+    onUpdateDeviceList();//force update camlist
         /* */
     //std::for_each(m_Viewer.begin(), m_Viewer.end(), (m_ViewerGrid->addWidget));
     //if (m_bIsOpenByRightMouseClick)
