@@ -4,12 +4,9 @@
 
 
 
-#include "UI/Viewer.h"
-#include "UI/GraphViewer.h"
 #include <VimbaCPP/Include/VimbaSystem.h>
 #include "FrameObserver.h"
 #include "ILogTarget.h"
-//#include "UI/DockWidgetWindow.h"
 #include "UI/ControllerTreeWindow.h"
 #include "UI/MainInformationWindow.h"
 #include "UI/LineEditCompleter.h"
@@ -37,19 +34,13 @@ private:
     bool                                m_bIsViewerWindowClosing;
 
     QString                             m_sAccessMode;
-    //QAction*                            m_ResetPosition;
-    //QCheckBox*                          m_ToolTipCheckBox;
 
     QDialog*                            m_DiagController;
     QDialog*                            m_DiagInfomation;
-    //DockWidgetWindow* m_DockInformation;
-    //DockWidgetWindow* m_DockHistogram;
 
-    //Viewer*                             m_ScreenViewer;
-    GraphViewer*                        m_ScreenViewer;
     MainInformationWindow*              m_InformationWindow;
     ControllerTreeWindow*               m_Controller;
-    //HistogramWindow* m_HistogramWindow;
+
 
     CameraPtr                           m_pCam;
     QTextEdit*                          m_Description;
@@ -63,10 +54,13 @@ private:
 
 
     QSharedPointer<QCustomPlot>         m_QCP;
+    QCPAxisRect*                        m_QCPcenterAxisRect;
+    QCPAxisRect*                        m_QCPbottomAxisRect;
+    QCPAxisRect*                        m_QCPleftAxisRect;
     QSharedPointer<QCPColorMap>         m_colorMap;
     QCPColorScale*                      m_colorScale;
-    QSharedPointer<QGraphicsScene>      m_pScene;
-    QGraphicsPixmapItem*                m_PixmapItem;
+
+
     QGraphicsTextItem*                  m_TextItem;
     QMenu*                              m_ContextMenu;
     QAction*                            m_aStartStopCap;
@@ -80,22 +74,16 @@ private:
     SP_DECL(FrameObserver)              m_pFrameObs;
     ImageCalculatingThread*             m_pImgCThread;
 
+
+    /* Save Image Option */
     //QString                             m_SaveFileDir;
     //QString                             m_SelectedExtension;
     //QString                             m_SaveImageName;
-    ///* Save Image Option */
     //Ui::SavingOptionsDialog             m_SaveImageOption;
     //QDialog* m_ImageOptionDialog;
     //QFileDialog* m_getDirDialog; // multiple images
     //QFileDialog* m_saveFileDialog; // save an image
 
-    /* Direct Access */
-    //Ui::DirectAccessDialog              m_DirectAccess;
-    //QDialog* m_AccessDialog;
-
-    /*Viewer Option */
-    //Ui::DisplayOptionsDialog            m_ViewerOption;
-    //QDialog* m_ViewerOptionDialog;
     bool                                m_bIsDisplayEveryFrame;
 
     /* Filter Pattern */
@@ -121,6 +109,7 @@ private:
 
     unsigned int                        m_FrameBufferCount;
 
+    /*tab extension*/
     //QVector<TabExtensionInterface*>     m_tabExtensionInterface; // Closed source injected
     //int                                 m_TabPluginCount;
 
@@ -140,14 +129,6 @@ public:
     bool        getAdjustPacketSizeMessage(QString& sMessage);
     QMenu*      getmContextMenu() const { return m_ContextMenu; }
 
-    //virtual void ViewerWidget::contextMenuEvent(QContextMenuEvent* event)
-    //{
-    //    QMenu contextMenu("Context menu", this);
-    //    QAction action1("Remove Data Point", &contextMenu);
-    //    //contextMenu.exec(QCursor::pos());
-    //    contextMenu.exec(event->globalPos());
-    //    //menu.exec(event->globalPos());
-    //}
 
 protected:
     //virtual void closeEvent(QCloseEvent* event);
@@ -156,6 +137,7 @@ private:
 
     VmbError_t  releaseBuffer();
     void        checkDisplayInterval();
+    bool        isStreamingAvailable();
     //void        changeEvent(QEvent* event);
     //bool        isDestPathWritable();
     //bool        checkUsedName(const QStringList& files);
@@ -163,7 +145,6 @@ private:
     //void        endianessConvert(T& v);
     //bool        CanReduceBpp();
     //QImage      ReduceBpp(QImage image);
-    bool        isStreamingAvailable();
     //bool        isSupportedPixelFormat();
 
 
@@ -174,7 +155,7 @@ public:
 
 
 private slots:
-    void OnShowContextMenu(const QPoint& pt);
+    
     /* when you use this std convention, you don't need any "connect..." */
     void on_ActionFreerun_triggered();
     //void on_ActionResetPosition_triggered();
@@ -197,31 +178,34 @@ private slots:
     //void on_ActionAllow16BitTiffSaving_triggered();
 
     /* custom */
-    /*this is for the command from tree controller*/
-    void onAcquisitionStartStop(const QString& sThisFeature); 
+    void OnShowContextMenu(const QPoint& pt);
+    void onAcquisitionStartStop(const QString& sThisFeature); //this is for the command from tree controller
     void onImageCalcStartStop(bool);
-    //void onfloatingDockChanged(bool bIsFloating);
-    //void onVisibilityChanged(bool bIsVisible);
-    //void displayEveryFrameClick(bool bValue);
+
     void onSetDescription(const QString& sDesc);
-    void onimageReady(QImage image, const QString& sFormat, const QString& sHeight, const QString& sWidth);
-    void onimageReady(QVector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
-    void onimageReady(std::vector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
     void onimageReadyFromCalc();
     void onFullBitDepthImageReady(tFrameInfo mFullImageInfo);
-    //void onSaving(unsigned int nPos);
+    
     void onSetEventMessage(const QStringList& sMsg);
     void onSetCurrentFPS(const QString& sFPS);
     void onSetFrameCounter(const unsigned int& nNumberOfFrames);
     void onFeedLogger(const QString& sMessage);
     void onResetFPS();
+    VmbError_t onPrepareCapture();
+    void textFilterChanged();
+    void onSetMousePosInCMap(QMouseEvent* event);
+    void SetCurrentScreenROI();
+    void ResetFullROI(bool notStartReStart = false);
+    //void onfloatingDockChanged(bool bIsFloating);
+    //void onVisibilityChanged(bool bIsVisible);
+    //void displayEveryFrameClick(bool bValue);
+    //void onSaving(unsigned int nPos);
     //void getSaveDestinationPath();
     //void acceptSaveImagesDlg();
     //void rejectSaveImagesDlg();
     //void writeRegisterData();
     //void readRegisterData();
     //void endianessChanged(int);
-    VmbError_t onPrepareCapture();
     //void onSetColorInterpolation(const bool& bState);
     //void onSetHistogramData(const QVector<QVector <quint32> >& histData, const QString& sHistogramTitle,
     //    const double& nMaxHeight_YAxis, const double& nMaxWidth_XAxis, const QVector <QStringList>& statistics);
@@ -232,12 +216,9 @@ private slots:
     //void directAccessDecTextChanged(const QString& sText);
     //void optionsFrameCountChanged(const QString& sText);
     //void optionsAccepted();
-    void textFilterChanged();
     //bool loadPlugin();  // Closed source injected
-    void onSetMousePosInScene(const QPointF& pPoint);
-    void onSetMousePosInCMap(QMouseEvent* event);
-    void SetCurrentScreenROI();
-    void ResetFullROI(bool notStartReStart = false);
+    //void onSetMousePosInScene(const QPointF& pPoint);
+
 
 signals:
     void closeViewer(CameraPtr cam);

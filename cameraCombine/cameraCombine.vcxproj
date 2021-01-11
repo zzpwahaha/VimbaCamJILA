@@ -11,13 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="UI\GraphViewer.h" />
     <QtMoc Include="ExternLib\qcustomplot\qcustomplot.h" />
+    <QtMoc Include="FrameObserver.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="ILogTarget.h" />
     <QtMoc Include="UI\ImageCalculatingThread.h" />
+    <QtMoc Include="ImageProcessingThread.h" />
     <ClInclude Include="memcpy_threaded.h" />
-    <QtMoc Include="UI\Viewer.h" />
     <QtMoc Include="ViewerWidget.h" />
     <QtMoc Include="UI\LoggerWindow.h" />
     <QtMoc Include="UI\CameraTreeWindow.h" />
@@ -40,7 +40,6 @@
     <ClInclude Include="UI\SortFilterProxyModel.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="VmbImageTransformHelper.hpp" />
-    <QtMoc Include="FrameObserver.h" />
     <QtMoc Include="FeatureObserver.h" />
     <QtMoc Include="CameraObserver.h" />
     <QtMoc Include="cameraMainWindow.h" />
@@ -244,8 +243,8 @@
     <ClCompile Include="ExternLib\qwt\qwt_widget_overlay.cpp" />
     <ClCompile Include="FeatureObserver.cpp" />
     <ClCompile Include="FrameObserver.cpp" />
+    <ClCompile Include="ImageProcessingThread.cpp" />
     <ClCompile Include="UI\ImageCalculatingThread.cpp" />
-    <ClCompile Include="UI\GraphViewer.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="UI\CameraTreeWindow.cpp" />
@@ -267,7 +266,6 @@
     <ClCompile Include="UI\MdiChild.cpp" />
     <ClCompile Include="UI\MultiCompleter.cpp" />
     <ClCompile Include="UI\SortFilterProxyModel.cpp" />
-    <ClCompile Include="UI\Viewer.cpp" />
     <ClCompile Include="ViewerWidget.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

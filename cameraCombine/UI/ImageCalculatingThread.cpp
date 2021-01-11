@@ -139,7 +139,8 @@ void ImageCalculatingThread::run()
             assignValue(m_uint16QVector, m_format, m_height, m_width, m_offsetX, m_offsetY);
             if (m_firstStart)
             {
-                m_pQCP->yAxis->setScaleRatio(m_pQCP->xAxis, 1.0);
+                m_pQCP->axisRect(0)->axis(QCPAxis::atLeft)->setScaleRatio(
+                    m_pQCP->axisRect(0)->axis(QCPAxis::atBottom), 1.0);
                 m_pQCP->rescaleAxes();
                 m_firstStart = false;
             }

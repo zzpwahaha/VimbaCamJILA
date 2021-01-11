@@ -557,9 +557,6 @@
     <ClCompile Include="FeatureObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FrameObserver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -582,9 +579,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ViewerWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UI\Viewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UI\ControllerTreeWindow.cpp">
@@ -629,13 +623,16 @@
     <ClCompile Include="UI\LineEditCompleter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UI\GraphViewer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ExternLib\qcustomplot\qcustomplot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UI\ImageCalculatingThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProcessingThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -733,9 +730,6 @@
     <QtMoc Include="FeatureObserver.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="FrameObserver.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="UI\Histogram\HistogramThread.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -746,9 +740,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="UI\LoggerWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="UI\Viewer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ViewerWidget.h">
@@ -787,13 +778,16 @@
     <QtMoc Include="UI\LineEditCompleter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="UI\GraphViewer.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="ExternLib\qcustomplot\qcustomplot.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="UI\ImageCalculatingThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="FrameObserver.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ImageProcessingThread.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
