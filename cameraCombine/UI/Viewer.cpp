@@ -1,5 +1,5 @@
 ﻿//Description: - Displaying data from the camera in RGB32 format.
-//             - Scrolling, Rotating, Saving single image
+//             - Scrolling, Rotating, Saving single image(saving not yet implemented)
 
 
 #include <UI/Viewer.h>
@@ -120,7 +120,7 @@ void Viewer::mousePressEvent ( QMouseEvent* event )
     if( Qt::RightButton == mouseBtn )
     {
         QMenu menu;
-        menu.addAction(QIcon(":/VimbaViewer/Images/save.png"), tr("Save Image..."), this, SLOT(saveImage()));
+        menu.addAction( tr("Save Image..."), this, SLOT(saveImage()));
         
         if(NULL != m_ColorInterpolationAct)
         {
@@ -174,7 +174,7 @@ void Viewer::mouseMoveEvent ( QMouseEvent* event )
         /* Get how much we panned */
         QPointF delta = mapToScene(m_LastPanPoint) - mapToScene(event->pos());
         m_LastPanPoint = event->pos();
- 
+
         /* Update the center e.g do the pan */
         QPointF F = GetCenter();
         SetCenter(GetCenter() + delta);
@@ -184,7 +184,18 @@ void Viewer::mouseMoveEvent ( QMouseEvent* event )
 /*  Zoom the view in and out. */
 void Viewer::wheelEvent ( QWheelEvent* event ) 
 {   
-    0 < event->delta() ? zoomIn() : zoomOut();
+    //0 < event->delta() ? zoomIn(event) : zoomOut(event);
+    double scaleFactor = 1.0;
+    scaleFactor *= 0 < event->delta() ? 1.15 : 1 / 1.15;
+    QPointF pointBeforeScale(mapToScene(event->pos()));    
+    setTransformationAnchor(QGraphicsView::NoAnchor);
+    scale(scaleFactor, scaleFactor);
+    m_ZoomFactor++;
+    QPointF pointAfterScale(mapToScene(event->pos()));
+    auto delta = pointAfterScale - pointBeforeScale;
+    translate(delta.x(), delta.y());
+    //m_CurrentCenterPoint = this->
+    
 }
  
 /**
@@ -207,34 +218,47 @@ QPointF Viewer::GetCenter ( void )
     return m_CurrentCenterPoint;
 }
 
-void Viewer::zoomIn ( void ) 
+void Viewer::zoomIn (QWheelEvent* event)
 {   
     /* Get the position of the mouse before scaling, in scene coords */
-    QPointF pointBeforeScale(mapToScene(pos()));
+    QPointF pointBeforeScale(mapToScene(event->pos()));
     /* Get the original screen center point */
     QPointF screenCenter = GetCenter();
     /* How fast we zoom */
-    double scaleFactor = 1.15; 
+    double scaleFactor = 1.15;
+    setTransformationAnchor(QGraphicsView::NoAnchor);
     scale(scaleFactor, scaleFactor);
     m_ZoomFactor++;
-    updateCenter(pointBeforeScale, screenCenter);
+    QPointF pointAfterScale(mapToScene(event->pos()));
+    auto delta = pointAfterScale - pointBeforeScale;
+    translate(delta.x(), delta.y());
+
+    //updateCenter(pointBeforeScale, screenCenter);
 }
 
-void Viewer::zoomOut ( void ) 
+void Viewer::zoomOut (QWheelEvent* event)
 {
+    auto tmp = pos();
+    auto ttmp = event->pos();
     /* Get the position of the mouse before scaling, in scene coords */
-    QPointF pointBeforeScale(mapToScene(pos()));
+    QPointF pointBeforeScale(mapToScene(event->pos()));
     /* Get the original screen center point */
     QPointF screenCenter = GetCenter();
     /* How fast we zoom */
     double scaleFactor = 1.15; 
+    setTransformationAnchor(QGraphicsView::NoAnchor);
     scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+    QPointF pointAfterScale(mapToScene(event->pos()));
+    auto delta = pointAfterScale - pointBeforeScale;
+    translate(delta.x(), delta.y());
     m_ZoomFactor--;
-    updateCenter(pointBeforeScale, screenCenter);
+    
+    //updateCenter(pointBeforeScale, screenCenter);
 }
 
 void Viewer::updateCenter ( QPointF pointBeforeScale, QPointF screenCenter ) 
 {
+
     /* Get the position after scaling, in scene coords */
     QPointF pointAfterScale(mapToScene(pos()));
 
@@ -244,4 +268,5 @@ void Viewer::updateCenter ( QPointF pointBeforeScale, QPointF screenCenter )
     /* Adjust to the new center for correct zooming */
     QPointF newCenter = screenCenter + offset;
     SetCenter(newCenter);
+
 }

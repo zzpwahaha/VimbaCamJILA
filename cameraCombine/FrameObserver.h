@@ -1,31 +1,4 @@
-﻿/*=============================================================================
-  Copyright (C) 2012 Allied Vision Technologies.  All Rights Reserved.
-
-  Redistribution of this file, in original or modified form, without
-  prior written consent of Allied Vision Technologies is prohibited.
-
--------------------------------------------------------------------------------
-
-  File:        FrameObserver.h
-
-  Description: Frame callback.
-               
-
--------------------------------------------------------------------------------
-
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF TITLE,
-  NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR  PURPOSE ARE
-  DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
-  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-  AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-=============================================================================*/
-
+﻿
 
 #ifndef FRAMEOBSERVER_H
 #define FRAMEOBSERVER_H
@@ -214,13 +187,38 @@ class ImageProcessingThread : public QThread
         timer_type                  m_Timer;
         bool                        m_LimitFrameRate;
         ValueWithState<double>      m_LastTime;
-    public:
+
+        QVector<ushort>             m_uint16QVector;
+        int                         m_width; //this width and height are used in data transfer to imgCThread
+        int                         m_height;
+        QString                     m_format;
+        bool                        m_imageDataReady;
+
+        QMutex                      m_imageLock;
+        QWaitCondition              m_imageCalcWait;
+        QWaitCondition              m_imageProcWait;
+    
+public:
+        QMutex& mutex() { return m_imageLock; }
+        QWaitCondition& calcWait() { return m_imageCalcWait; }
+        QWaitCondition& procWait() { return m_imageProcWait; }
+        QVector<ushort>& uint16Vec() { return m_uint16QVector; }
+        const int& width() const { return m_width; }
+        const int& height() const { return m_height; }
+        const QString& format() const { return m_format; }
+        const int& frameCount() const { return m_FrameCount; }
+        const bool& dataReady() const { return m_imageDataReady; }
+
         ImageProcessingThread( size_t MaxFrames = 3)
             : m_FrameQueue( MaxFrames )
             , m_Stopping( false )
             , m_DroppedFrames( 0 )
             , m_FrameCount ( 0 )
             , m_LimitFrameRate( false )
+            , m_width(0)
+            , m_height(0)
+            , m_format("")
+            , m_imageDataReady(false)
         {
             m_Timer.start();
         }
@@ -235,6 +233,7 @@ class ImageProcessingThread : public QThread
             {
                 m_LastTime.Invalidate();
                 m_Stopping = true;
+                m_FrameCount = 0;
                 m_FrameQueue.StopProcessing();
                 wait();
             }
@@ -242,6 +241,7 @@ class ImageProcessingThread : public QThread
         void StartProcessing()
         {
             m_Stopping = false;
+            m_FrameCount = 0;
             m_FrameQueue.StartProcessing();
             start();
         }
@@ -260,9 +260,12 @@ private:
 
     private:
 
-    signals:
+signals:
+            void frameReadyFromThread             ( std::vector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
             void frameReadyFromThread             ( QImage image, const QString &sFormat, const QString &sHeight, const QString &sWidth );
+            void frameReadyFromThread             ( QVector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
             void frameReadyFromThreadFullBitDepth ( tFrameInfo mFullImageInfo );
+            void logging                          (const QString& sMessage);
 };
 
 
@@ -331,23 +334,33 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
             void enableFullBitDepthTransfer     ( bool bIsFullBitDepthEnabled );
             void setEmitFrame                   ( bool bEmitFrame );
             
-    protected:
+            const QSharedPointer<ImageProcessingThread>& ImageProcessThreadPtr() const { return m_pImageProcessingThread; }
+            
+protected:
            
     private:
             bool setFrame                       ( const FramePtr &frame );
             
     private slots:
             void getFrameFromThread             ( QImage image, const QString &sFormat, const QString &sHeight, const QString &sWidth );
+            void getFrameFromThread             ( QVector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
+            void getFrameFromThread             ( std::vector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
+
             void getFullBitDepthFrameFromThread ( tFrameInfo mFullImageInfo );
             void getHistogramDataFromThread     ( const QVector<QVector <quint32> > &histData, const QString &sHistogramTitle, 
                                                   const double &nMaxHeight_YAxis, const double &nMaxWidth_XAxis, const QVector <QStringList> &statistics );
     signals:
             void frameReadyFromObserver              ( QImage image, const QString &sFormat, const QString &sHeight, const QString &sWidth );
+            void frameReadyFromObserver              ( QVector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
+            void frameReadyFromObserver              ( std::vector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
+
             void frameReadyFromObserverFullBitDepth  ( tFrameInfo mFullImageInfo );
             void setCurrentFPS                       ( const QString &sFPS );
             void setFrameCounter                     ( const unsigned int &nFrame );
             void histogramDataFromObserver           ( const QVector<QVector <quint32> > &histData, const QString &sHistogramTitle, 
                                                        const double &nMaxHeight_YAxis, const double &nMaxWidth_XAxis, const QVector <QStringList> &statistics );
+
+            
 };
 
 

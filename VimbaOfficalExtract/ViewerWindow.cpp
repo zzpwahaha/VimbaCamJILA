@@ -1580,6 +1580,7 @@ void ViewerWindow::onimageReady ( QImage image, const QString &sFormat, const QS
     m_PixmapItem->setPixmap(QPixmap::fromImage(image));
     m_ScreenViewer->show();
 
+    Sleep(1000);
     /* save series of images */
     if( (0 < m_nNumberOfFramesToSave) && m_bIsTriggeredByMultiSaveBtn )
     {
@@ -1836,6 +1837,113 @@ void ViewerWindow::checkDisplayInterval()
         }
     }
 }
+
+
+//VmbError_t ViewerWindow::onPrepareCapture()
+//{
+//    FeaturePtr pFeature;
+//    VmbInt64_t nPayload = 0;
+//    QVector <FramePtr> frames;
+//    VmbError_t error = m_pCam->GetFeatureByName("PayloadSize", pFeature);
+//    VmbUint32_t nCounter = 0;
+//    if (VmbErrorSuccess == error)
+//    {
+//        error = pFeature->GetValue(nPayload);
+//        if (VmbErrorSuccess == error)
+//        {
+//            frames.resize(m_FrameBufferCount);
+//
+//            bool bIsStreamingAvailable = isStreamingAvailable();
+//
+//            if (bIsStreamingAvailable)
+//            {
+//                for (int i = 0; i < frames.size(); i++)
+//                {
+//                    try
+//                    {
+//                        frames[i] = FramePtr(new Frame(nPayload));
+//                        nCounter++;
+//                    }
+//                    catch (std::bad_alloc&)
+//                    {
+//                        frames.resize((VmbInt64_t)(nCounter * 0.7));
+//                        break;
+//                    }
+//                    m_pFrameObs->Starting();
+//                    error = frames[i]->RegisterObserver(m_pFrameObs);
+//                    if (VmbErrorSuccess != error)
+//                    {
+//                        m_InformationWindow->feedLogger("Logging",
+//                            QString(QTime::currentTime().toString("hh:mm:ss:zzz") + "\t" + " RegisterObserver frame[" + QString::number(i) + "] Failed! Error: " + QString::number(error) + " " + Helper::mapReturnCodeToString(error)),
+//                            VimbaViewerLogCategory_ERROR);
+//                        return error;
+//                    }
+//                }
+//
+//                for (int i = 0; i < frames.size(); i++)
+//                {
+//                    error = m_pCam->AnnounceFrame(frames[i]);
+//                    if (VmbErrorSuccess != error)
+//                    {
+//                        m_InformationWindow->feedLogger("Logging",
+//                            QString(QTime::currentTime().toString("hh:mm:ss:zzz") + "\t" + " AnnounceFrame [" + QString::number(i) + "] Failed! Error: " + QString::number(error) + " " + Helper::mapReturnCodeToString(error)),
+//                            VimbaViewerLogCategory_ERROR);
+//                        return error;
+//                    }
+//                }
+//            }
+//
+//            if (VmbErrorSuccess == error)
+//            {
+//                error = m_pCam->StartCapture();
+//                if (VmbErrorSuccess != error)
+//                {
+//                    QString sMessage = " StartCapture Failed! Error: ";
+//
+//                    if (0 != m_sAccessMode.compare(tr("(READ ONLY)")))
+//                        m_InformationWindow->feedLogger("Logging",
+//                            QString(QTime::currentTime().toString("hh:mm:ss:zzz") + "\t" + sMessage + QString::number(error) + " " + Helper::mapReturnCodeToString(error)),
+//                            VimbaViewerLogCategory_ERROR);
+//                    return error;
+//                }
+//            }
+//
+//            if (bIsStreamingAvailable)
+//            {
+//                for (int i = 0; i < frames.size(); i++)
+//                {
+//                    error = m_pCam->QueueFrame(frames[i]);
+//                    if (VmbErrorSuccess != error)
+//                    {
+//                        m_InformationWindow->feedLogger("Logging",
+//                            QString(QTime::currentTime().toString("hh:mm:ss:zzz") + "\t" + " QueueFrame [" + QString::number(i) + "] Failed! Error: " + QString::number(error) + " " + Helper::mapReturnCodeToString(error)),
+//                            VimbaViewerLogCategory_ERROR);
+//                        return error;
+//                    }
+//                }
+//            }
+//        }
+//        else
+//        {
+//            m_InformationWindow->feedLogger("Logging",
+//                QString(QTime::currentTime().toString("hh:mm:ss:zzz") + "\t" + " GetValue [PayloadSize] Failed! Error: " + QString::number(error) + " " + Helper::mapReturnCodeToString(error)),
+//                VimbaViewerLogCategory_ERROR);
+//            return error;
+//        }
+//    }
+//    else
+//    {
+//        m_InformationWindow->feedLogger("Logging",
+//            QString(QTime::currentTime().toString("hh:mm:ss:zzz") + "\t" + " GetFeatureByName [PayloadSize] Failed! Error: " + QString::number(error) + " " + Helper::mapReturnCodeToString(error)),
+//            VimbaViewerLogCategory_ERROR);
+//        return error;
+//    }
+//
+//    return error;
+//}
+
+
+
 
 void ViewerWindow::on_ActionFreerun_triggered()
 {

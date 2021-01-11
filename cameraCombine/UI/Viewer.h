@@ -1,5 +1,5 @@
 ﻿//Description: - Displaying data from the camera in RGB32 format.
-//             - Scrolling, Rotating, Saving single image
+//             - Scrolling, Rotating, Saving single image (saving not yet implemented)
 
 
 
@@ -38,8 +38,8 @@ class Viewer : public QGraphicsView
             void enableFitToWindow ( const bool &bIsEnable );
             void setDefaultSize ( void );
             void updateInterpolationState ( const bool &bState );
-            void zoomIn  ( void ) ;
-            void zoomOut ( void ) ;
+            void zoomIn     (QWheelEvent* event);
+            void zoomOut    (QWheelEvent* event);
 
     protected:
             QPointF             m_CurrentCenterPoint;

@@ -2,6 +2,9 @@
 #include <QTimer>
 
 #include "VmbImageTransformHelper.hpp"
+#include "ExternLib/qcustomplot/qcustomplot.h"
+
+#include <QDebug>
 
 using AVT::VmbAPI::Frame;
 using AVT::VmbAPI::FramePtr;
@@ -67,10 +70,41 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     }
     this->setWindowTitle(sID);
 
+
+
+    /*QCP viewer widget: colormap + side/bottom plot*/
+    m_QCP = QSharedPointer<QCustomPlot>(new QCustomPlot());
+    //m_QCP->xAxis->setTickLabels(false);
+    //m_QCP->yAxis->setTickLabels(false);
+    
+    m_QCP->xAxis->grid()->setVisible(false);
+    m_QCP->yAxis->grid()->setVisible(false);
+    
+    /*m_QCP->setNotAntialiasedElements(QCP::aeAll);*/
+    m_QCP->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
+    m_QCP->axisRect()->setupFullAxesBox(true);
+    m_colorMap = QSharedPointer<QCPColorMap>(new QCPColorMap(m_QCP->xAxis, m_QCP->yAxis));
+    m_colorMap->setInterpolate(false);
+    m_colorScale = new QCPColorScale(m_QCP.data());
+    m_QCP->plotLayout()->addElement(0, 1, m_colorScale);
+    m_colorScale->setType(QCPAxis::atRight);
+    m_colorScale->setRangeZoom(false);
+    m_colorScale->setRangeDrag(false);
+    m_colorMap->setColorScale(m_colorScale);
+    m_colorMap->setGradient(QCPColorGradient::gpGrayscale);
+    
+    QCPMarginGroup* marginGroup = new QCPMarginGroup(m_QCP.data());
+    m_QCP->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+    m_colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+
+    connect(m_QCP.data(), &QCustomPlot::mouseMove, this, &ViewerWidget::onSetMousePosInCMap);
+    //another connect for image coming in update is made afater m_pImgCThread
+
+
     /* add Viewer Widget to ViewerWindow*/
     m_pScene = QSharedPointer<QGraphicsScene>(new QGraphicsScene());
     m_PixmapItem = new QGraphicsPixmapItem();
-    m_ScreenViewer = new Viewer(this);
+    m_ScreenViewer = new GraphViewer(this);
     m_ScreenViewer->setAlignment(Qt::AlignCenter);
     m_ScreenViewer->setScene(m_pScene.data());
     m_pScene->addItem(m_PixmapItem);
@@ -83,7 +117,8 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     QLabel* namelabel = new QLabel(sID);
     namelabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     m_VertLayout->addWidget(namelabel, 0);
-    m_VertLayout->addWidget(m_ScreenViewer, 1);
+    //m_VertLayout->addWidget(m_ScreenViewer, 1);
+    m_VertLayout->addWidget(m_QCP.data(), 1);
     //this->setStyleSheet("background-color: rgb(85, 100, 100)");
     //this->setWindowFlags(Qt::Widget);
 
@@ -173,6 +208,16 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
 
     m_ContextMenu->addSeparator();
 
+    m_aSetCurrScrROI = new QAction("SetCurrentRO&I");
+    m_ContextMenu->addAction(m_aSetCurrScrROI);
+    connect(m_aSetCurrScrROI, &QAction::triggered, this, &ViewerWidget::SetCurrentScreenROI);
+
+    m_aResetFullROI = new QAction("ResetFullROI");
+    m_ContextMenu->addAction(m_aResetFullROI);
+    connect(m_aResetFullROI, &QAction::triggered, this, &ViewerWidget::ResetFullROI);
+
+    m_ContextMenu->addSeparator();
+
     //connecting the following action to a slot happens at cameraMainWindow, be careful of the order
     m_aCamlist = new QAction("&Camera");
     m_ContextMenu->addAction(m_aCamlist);
@@ -182,16 +227,33 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(OnShowContextMenu(const QPoint&)));
     
-    /* create FrameObserver to get frames from camera */
+    /* create FrameObserver to get frames from camera, add for QCPColorMap */
     SP_SET(m_pFrameObs, new FrameObserver(m_pCam));
     connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(QImage, const QString&, const QString&, const QString&)),
         this, SLOT(onimageReady(QImage, const QString&, const QString&, const QString&)));
+    /*connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(QVector<ushort>, const QString&, const QString&, const QString&)),
+        this, SLOT(onimageReady(QVector<ushort>, const QString&, const QString&, const QString&)));*/
+    connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(std::vector<ushort>, const QString&, const QString&, const QString&)),
+        this, SLOT(onimageReady(std::vector<ushort>, const QString&, const QString&, const QString&)));
+    
     connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserverFullBitDepth(tFrameInfo)),
         this, SLOT(onFullBitDepthImageReady(tFrameInfo)));
     connect(SP_ACCESS(m_pFrameObs), SIGNAL(setCurrentFPS(const QString&)),
         this, SLOT(onSetCurrentFPS(const QString&)));
     connect(SP_ACCESS(m_pFrameObs), SIGNAL(setFrameCounter(const unsigned int&)),
         this, SLOT(onSetFrameCounter(const unsigned int&)));
+
+    connect(SP_ACCESS(m_pFrameObs)->ImageProcessThreadPtr().data(),
+        &ImageProcessingThread::logging, this, &ViewerWidget::onFeedLogger);
+
+
+    /*create image calculating thread*/
+    m_pImgCThread = new ImageCalculatingThread(m_pFrameObs, m_pCam, m_QCP, m_colorMap);
+    connect(m_pImgCThread, &ImageCalculatingThread::imageReadyForPlot,
+        this, &ViewerWidget::onimageReadyFromCalc);
+    connect(this, &ViewerWidget::acquisitionRunning, this, &ViewerWidget::onImageCalcStartStop);
+    connect(m_QCP.data(), &QCustomPlot::mouseMove, m_pImgCThread, &ImageCalculatingThread::updateMousePos);
+    connect(m_pImgCThread, &ImageCalculatingThread::logging, this, &ViewerWidget::onFeedLogger);
 
 
     m_Timer = new QTimer(this);
@@ -205,12 +267,15 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_ImageSizeLabel = new QLabel;
     m_FramesLabel = new QLabel;
     m_FramerateLabel = new QLabel;
+    m_CursorScenePosLabel = new QLabel;
 
     statusbar->addWidget(m_OperatingStatusLabel);
     statusbar->addWidget(m_ImageSizeLabel);
     statusbar->addWidget(m_FormatLabel);
     statusbar->addWidget(m_FramesLabel);
     statusbar->addWidget(m_FramerateLabel);
+    statusbar->addWidget(m_CursorScenePosLabel);
+    connect(m_ScreenViewer, &GraphViewer::mousePositionInScene, this, &ViewerWidget::onSetMousePosInScene);
     //statusbar->setContentsMargins(0, 0, 0, 0);
     m_OperatingStatusLabel->setStyleSheet("background-color: rgb(0,0, 0); color: rgb(255,255,255)");
     m_VertLayout->addWidget(statusbar, 0);
@@ -220,8 +285,51 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_TextItem->setFont(serifFont);
     m_TextItem->setDefaultTextColor(Qt::red);
 
-    
+    //setMaximumSize(600, 600);
 }
+
+void ViewerWidget::onSetMousePosInScene(const QPointF& pPoint)
+{
+    if (!m_PixmapItem->pixmap().isNull())
+    {        
+        int pixValue=m_PixmapItem->pixmap().toImage().pixel(
+            static_cast<int>(pPoint.x()),
+            static_cast<int>(pPoint.y()));
+        if (m_FormatLabel->text().contains("Mono8"))
+        {
+            //pixValue = pixValue & 0xFF;
+        }
+        else if (m_FormatLabel->text().contains("Mono12"))
+        {
+            //pixValue = pixValue & 0x0FFF;
+        }
+        else
+        {
+            m_CursorScenePosLabel->setText("MONO");
+            return;
+        }
+        m_CursorScenePosLabel->setText("(" + QString::number(static_cast<int>(pPoint.x())) + " , " +
+            QString::number(static_cast<int>(pPoint.y())) + " , " +
+            QString::number(pixValue,16) + ")");
+    }
+    else
+    {
+        m_CursorScenePosLabel->setText("N/A");
+    }
+}
+
+void ViewerWidget::onSetMousePosInCMap(QMouseEvent* event)
+{
+    double x = m_QCP->xAxis->pixelToCoord(event->pos().x());
+    double y = m_QCP->yAxis->pixelToCoord(event->pos().y());
+    //double z = m_colorMap->data()->data(x, y);
+    //qDebug() << x << "," << std::floor(x + 0.5) << "," << y << "," << std::floor(y + 0.5) << "," << z;
+    m_CursorScenePosLabel->setText("(" + QString::number(std::floor(x + 0.5)) + " , " +
+        QString::number(std::floor(y + 0.5)) + " , " +
+        QString::number(m_colorMap->data()->data(x, y)) + ")");
+}
+
+
 
 void ViewerWidget::OnShowContextMenu(const QPoint& pos)
 {
@@ -277,20 +385,20 @@ bool ViewerWidget::isControlledCamera(const CameraPtr& cam) const
 
 bool  ViewerWidget::getAdjustPacketSizeMessage(QString& sMessage)
 {
-    //if (m_Controller->isGigE())
-    //{
-    //    if (VmbErrorSuccess == m_Controller->getTreeStatus())
-    //    {
-    //        sMessage = "Packet Size Adjusted:\t";
-    //    }
-    //    else
-    //    {
-    //        sMessage = "Failed To Adjust Packet Size!";
-    //        sMessage.append(" Reason: " + Helper::mapReturnCodeToString(m_Controller->getTreeStatus()));
-    //    }
+    if (m_Controller->isGigE())
+    {
+        if (VmbErrorSuccess == m_Controller->getTreeStatus())
+        {
+            sMessage = "Packet Size Adjusted:\t";
+        }
+        else
+        {
+            sMessage = "Failed To Adjust Packet Size!";
+            sMessage.append(" Reason: " + Helper::mapReturnCodeToString(m_Controller->getTreeStatus()));
+        }
 
-    //    return true;
-    //}
+        return true;
+    }
 
     return false;
 }
@@ -338,13 +446,16 @@ void ViewerWidget::textFilterChanged()
     m_FilterPatternLineEdit->selectAll();
 }
 
+void ViewerWidget::onImageCalcStartStop(bool start)
+{
+    start ? m_pImgCThread->StartProcessing() : m_pImgCThread->StopProcessing();
+}
 
-/* display frames on viewer */
+/* display frames on viewer, the ultimate signal comes from ImageProcessingThread::run() in FrameObserver.cpp */
 void ViewerWidget::onimageReady(QImage image, const QString& sFormat, const QString& sHeight, const QString& sWidth)
 {
     m_FormatLabel->setText("Pixel Format: " + sFormat + " ");
     m_ImageSizeLabel->setText("Size H: " + sHeight + " ,W: " + sWidth + " ");
-
     if (m_bHasJustStarted)
     {
         foreach(QGraphicsItem * item, m_pScene->items())
@@ -403,7 +514,9 @@ void ViewerWidget::onimageReady(QImage image, const QString& sFormat, const QStr
     m_pScene->setSceneRect(0, 0, image.width(), image.height());
     m_PixmapItem->setPixmap(QPixmap::fromImage(image));
     m_ScreenViewer->show();
-
+    /*update pixel value picked by mouse position*/
+    onSetMousePosInScene(m_ScreenViewer->getMouseScenePos());
+    //Sleep(200);
     /* save series of images */
     //if ((0 < m_nNumberOfFramesToSave) && m_bIsTriggeredByMultiSaveBtn)
     //{
@@ -439,7 +552,6 @@ void ViewerWidget::onimageReady(QImage image, const QString& sFormat, const QStr
     //        catch (const std::bad_alloc&/*bex*/)
     //        {
     //            m_bIsRedHighlighted = false;
-
     //            ActionFreerun->setChecked(false);
     //            on_ActionFreerun_triggered();
     //            ActionFreerun->setEnabled(isStreamingAvailable());
@@ -453,6 +565,297 @@ void ViewerWidget::onimageReady(QImage image, const QString& sFormat, const QStr
     //        }
     //    }
     //}
+}
+
+void ViewerWidget::onimageReady(QVector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth)
+{
+    m_FormatLabel->setText("Pixel Format: " + sFormat + " ");
+    m_ImageSizeLabel->setText("Size H: " + sHeight + " ,W: " + sWidth + " ");
+    if (m_bHasJustStarted)
+    {
+        foreach(QGraphicsItem * item, m_pScene->items())
+        {
+            if (item->type() == QGraphicsTextItem::Type)
+            {
+                m_pScene->removeItem(m_TextItem);
+                m_FormatLabel->setStyleSheet("background-color: rgb(195,195,195); color: rgb(0,0,0)");
+                m_bIsRedHighlighted = false;
+                continue;
+            }
+
+            m_pScene->removeItem(m_PixmapItem);
+        }
+
+        m_pScene->addItem(m_PixmapItem);
+        m_bHasJustStarted = false;
+    }
+
+    if ((sFormat.contains("Convert Error")))
+    {
+        if (false == m_bIsRedHighlighted)
+        {
+            m_bIsRedHighlighted = true;
+            m_FormatLabel->setStyleSheet("background-color: rgb(196,0, 0); color: rgb(255,255,255)");
+
+            if (sFormat.contains("height") || sFormat.contains("width"))
+            {
+                m_TextItem->setPlainText("The Resolution you set is not supported by VimbaImageTransform.\n"
+                    "Please change height or width !");
+            }
+            else
+            {
+                m_TextItem->setPlainText("PixelFormat transformation not supported.");
+            }
+
+            m_TextItem->setPos(m_pScene->width() / 6, m_pScene->height() / 2);
+            m_pScene->addItem(m_TextItem);
+        }
+    }
+    else
+    {
+        if (m_bIsRedHighlighted)
+        {
+            m_FormatLabel->setStyleSheet("background-color: rgb(195,195,195); color: rgb(0,0,0)");
+            m_bIsRedHighlighted = false;
+
+            if (!m_pScene->items().isEmpty())
+            {
+                m_pScene->removeItem(m_TextItem);
+            }
+        }
+    }
+    
+    /* display it on QCPColorMap and replot it */
+    m_colorMap->data()->setSize(sWidth.toInt(), sHeight.toInt());
+    /*QVector<double> tmp(vec1d.begin(),vec1d.end());*/
+    auto width = sWidth.toInt();
+    auto height = sHeight.toInt();
+    for (size_t i = 0; i < height; i++)
+    {
+        for (size_t j = 0; j < width; j++)
+        {
+            //m_colorMap->setData()
+            m_colorMap->data()->setCell(j, i, vec1d.at(i * width + j)); 
+        }
+    }
+
+
+    m_colorMap->rescaleDataRange();
+    m_QCP->rescaleAxes();
+    m_QCP->replot();
+
+
+    /*update pixel value picked by mouse position*/
+    //onSetMousePosInScene(m_ScreenViewer->getMouseScenePos());
+}
+
+void ViewerWidget::onimageReady(std::vector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth)
+{
+    m_FormatLabel->setText("Pixel Format: " + sFormat + " ");
+    m_ImageSizeLabel->setText("Size H: " + sHeight + " ,W: " + sWidth + " ");
+    if (m_bHasJustStarted)
+    {
+        foreach(QGraphicsItem * item, m_pScene->items())
+        {
+            if (item->type() == QGraphicsTextItem::Type)
+            {
+                m_pScene->removeItem(m_TextItem);
+                m_FormatLabel->setStyleSheet("background-color: rgb(195,195,195); color: rgb(0,0,0)");
+                m_bIsRedHighlighted = false;
+                continue;
+            }
+
+            m_pScene->removeItem(m_PixmapItem);
+        }
+
+        m_pScene->addItem(m_PixmapItem);
+        m_bHasJustStarted = false;
+    }
+
+    if ((sFormat.contains("Convert Error")))
+    {
+        if (false == m_bIsRedHighlighted)
+        {
+            m_bIsRedHighlighted = true;
+            m_FormatLabel->setStyleSheet("background-color: rgb(196,0, 0); color: rgb(255,255,255)");
+
+            if (sFormat.contains("height") || sFormat.contains("width"))
+            {
+                m_TextItem->setPlainText("The Resolution you set is not supported by VimbaImageTransform.\n"
+                    "Please change height or width !");
+            }
+            else
+            {
+                m_TextItem->setPlainText("PixelFormat transformation not supported.");
+            }
+
+            m_TextItem->setPos(m_pScene->width() / 6, m_pScene->height() / 2);
+            m_pScene->addItem(m_TextItem);
+        }
+    }
+    else
+    {
+        if (m_bIsRedHighlighted)
+        {
+            m_FormatLabel->setStyleSheet("background-color: rgb(195,195,195); color: rgb(0,0,0)");
+            m_bIsRedHighlighted = false;
+
+            if (!m_pScene->items().isEmpty())
+            {
+                m_pScene->removeItem(m_TextItem);
+            }
+        }
+    }
+
+    /* display it on QCPColorMap and replot it */
+    m_colorMap->data()->setSize(sWidth.toInt(), sHeight.toInt());
+    //QVector<double> tmp(vec1d.begin(),vec1d.end());
+    auto width = sWidth.toInt();
+    auto height = sHeight.toInt();
+    for (size_t i = 0; i < height; i++)
+    {
+        for (size_t j = 0; j < width; j++)
+        {
+            //m_colorMap->setData()
+            m_colorMap->data()->setCell(j, i, vec1d.at(i * width + j));
+        }
+    }
+
+
+    m_colorMap->rescaleDataRange();
+    m_QCP->rescaleAxes();
+    m_QCP->replot();
+
+
+    /*update pixel value picked by mouse position*/
+    //onSetMousePosInScene(m_ScreenViewer->getMouseScenePos());
+}
+
+void ViewerWidget::onimageReadyFromCalc()
+{
+    m_colorMap->rescaleDataRange(true);
+    m_QCP->yAxis->setScaleRatio(m_QCP->xAxis, 1.0);
+    QMouseEvent event(QMouseEvent::None, m_pImgCThread->mousePos(), Qt::NoButton, 0, 0);
+
+    m_pImgCThread->mutex().lock();
+
+    m_FormatLabel->setText("Pixel Format: " + m_pImgCThread->format() + " ");
+    auto [w, h] = m_pImgCThread->WidthHeight();
+    m_ImageSizeLabel->setText("Size H: " + QString::number(h) + " ,W: " + QString::number(w) + " ");
+    m_QCP->replot();
+    onSetMousePosInCMap(&event);
+    m_pImgCThread->mutex().unlock();
+    
+    
+    qDebug() << m_QCP->xAxis->range() << "," << m_QCP->yAxis->range();
+}
+
+void ViewerWidget::SetCurrentScreenROI()
+{
+    auto [maxw, maxh] = m_pImgCThread->maxWidthHeight();
+    QCPRange xr = m_QCP->xAxis->range();
+    QCPRange yr = m_QCP->yAxis->range();
+    if (xr.lower > 0 && xr.upper < maxw && yr.lower>0 && yr.upper < maxh)
+    {
+        int xlower = 2 * std::floor(xr.lower / 2);
+        int xupper = 2 * std::ceil(xr.upper / 2);
+        int ylower = 2 * std::floor(yr.lower / 2);
+        int yupper = 2 * std::ceil(yr.upper / 2);
+        xupper += (xupper - xlower) % 4 == 0 ? 0 : 2;
+        yupper += (yupper - ylower) % 4 == 0 ? 0 : 2;
+        int xw = (xupper - xlower) > 2 ? xupper - xlower : 4;
+        int yw = (yupper - ylower) > 2 ? yupper - ylower : 4;
+        emit m_Controller->acquisitionStartStop("AcquisitionStopWidthHeight");
+
+        /*first reset the value to full*/
+        ResetFullROI(true);
+        FeaturePtr pFeat;
+        if (VmbErrorSuccess == m_pCam->GetFeatureByName("Width", pFeat))
+        {
+            auto tmp = pFeat->SetValue(xw);
+            if (VmbErrorSuccess != tmp)
+            {
+                m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to x width " + QString::number(xw) + ", " + QString::number(tmp), VimbaViewerLogCategory_ERROR);
+                return;
+            }
+        }
+        if (VmbErrorSuccess == m_pCam->GetFeatureByName("Height", pFeat))
+        {
+            if (VmbErrorSuccess != pFeat->SetValue(yw))
+            {
+                m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to y height " + QString::number(yw), VimbaViewerLogCategory_ERROR);
+                return;
+            }
+        }
+        if (VmbErrorSuccess == m_pCam->GetFeatureByName("OffsetX", pFeat))
+        {
+            if (VmbErrorSuccess != pFeat->SetValue(xlower))
+            {
+                m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to lower bound of x " + QString::number(xlower), VimbaViewerLogCategory_ERROR);
+                return;
+            }
+        }
+        if (VmbErrorSuccess == m_pCam->GetFeatureByName("OffsetY", pFeat))
+        {
+            if (VmbErrorSuccess != pFeat->SetValue(ylower))
+            {
+                m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to lower bound of y " + QString::number(ylower), VimbaViewerLogCategory_ERROR);
+                return;
+            }
+        }
+        emit m_Controller->acquisitionStartStop("AcquisitionStart");
+        //m_QCP->rescaleAxes();
+    }
+    else
+    {
+        m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to invalid region", VimbaViewerLogCategory_ERROR);
+    }
+}
+
+void ViewerWidget::ResetFullROI(bool notStartReStart)
+{
+    if (!notStartReStart)
+    {
+        emit m_Controller->acquisitionStartStop("AcquisitionStopWidthHeight");
+    }
+    FeaturePtr pFeat;
+    if (VmbErrorSuccess == m_pCam->GetFeatureByName("OffsetX", pFeat))
+    {
+        if (VmbErrorSuccess != pFeat->SetValue(0))
+        {
+            m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to lower bound of x", VimbaViewerLogCategory_ERROR);
+            return;
+        }
+    }
+    if (VmbErrorSuccess == m_pCam->GetFeatureByName("OffsetY", pFeat))
+    {
+        if (VmbErrorSuccess != pFeat->SetValue(0))
+        {
+            m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to lower bound of y", VimbaViewerLogCategory_ERROR);
+            return;
+        }
+    }
+    if (VmbErrorSuccess == m_pCam->GetFeatureByName("Width", pFeat))
+    {
+        auto tt = m_pImgCThread->maxWidthHeight();
+        if (VmbErrorSuccess != pFeat->SetValue(m_pImgCThread->maxWidthHeight().first))
+        {
+            m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to x width", VimbaViewerLogCategory_ERROR);
+            return;
+        }
+    }
+    if (VmbErrorSuccess == m_pCam->GetFeatureByName("Height", pFeat))
+    {
+        if (VmbErrorSuccess != pFeat->SetValue(m_pImgCThread->maxWidthHeight().second))
+        {
+            m_InformationWindow->feedLogger("Logging", "Failed to set ROI due to y height", VimbaViewerLogCategory_ERROR);
+            return;
+        }
+    }
+    if (!notStartReStart)
+    {
+        emit m_Controller->acquisitionStartStop("AcquisitionStart");
+    }
 }
 
 void ViewerWidget::onFullBitDepthImageReady(tFrameInfo mFullImageInfo)
@@ -778,7 +1181,7 @@ VmbError_t ViewerWidget::getOpenError() const
 }
 
 
-
+/*this is for the command from tree controller*/
 void ViewerWidget::onAcquisitionStartStop(const QString& sThisFeature)
 {
 
@@ -789,7 +1192,7 @@ void ViewerWidget::onAcquisitionStartStop(const QString& sThisFeature)
     if (((0 == sThisFeature.compare("AcquisitionStart")) && (m_bIsCameraRunning)))
     {
         m_aStartStopCap->setChecked(true);
-        on_ActionFreerun_triggered();
+        on_ActionFreerun_triggered(); //mainly for the gui and logger stuff
     }
     else if (sThisFeature.contains("AcquisitionStartFreerun"))
     {

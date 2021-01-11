@@ -629,6 +629,15 @@
     <ClCompile Include="UI\LineEditCompleter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GraphViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExternLib\qcustomplot\qcustomplot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\ImageCalculatingThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ExternLib\qwt\qwt_abstract_legend.h">
@@ -776,6 +785,15 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="UI\LineEditCompleter.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="UI\GraphViewer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ExternLib\qcustomplot\qcustomplot.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="UI\ImageCalculatingThread.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

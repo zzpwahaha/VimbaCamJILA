@@ -5,6 +5,7 @@
 
 
 #include "UI/Viewer.h"
+#include "UI/GraphViewer.h"
 #include <VimbaCPP/Include/VimbaSystem.h>
 #include "FrameObserver.h"
 #include "ILogTarget.h"
@@ -13,6 +14,9 @@
 #include "UI/MainInformationWindow.h"
 #include "UI/LineEditCompleter.h"
 #include "UI/SortFilterProxyModel.h"
+
+#include "UI/ImageCalculatingThread.h"
+#include "ExternLib/qcustomplot/qcustomplot.h"
 
 class ViewerWidget :  public QWidget
 {
@@ -33,15 +37,16 @@ private:
     bool                                m_bIsViewerWindowClosing;
 
     QString                             m_sAccessMode;
-    QAction*                            m_ResetPosition;
-    QCheckBox*                          m_ToolTipCheckBox;
+    //QAction*                            m_ResetPosition;
+    //QCheckBox*                          m_ToolTipCheckBox;
 
     QDialog*                            m_DiagController;
     QDialog*                            m_DiagInfomation;
     //DockWidgetWindow* m_DockInformation;
     //DockWidgetWindow* m_DockHistogram;
 
-    Viewer*                             m_ScreenViewer;
+    //Viewer*                             m_ScreenViewer;
+    GraphViewer*                        m_ScreenViewer;
     MainInformationWindow*              m_InformationWindow;
     ControllerTreeWindow*               m_Controller;
     //HistogramWindow* m_HistogramWindow;
@@ -54,7 +59,12 @@ private:
     QLabel*                             m_ImageSizeLabel;
     QLabel*                             m_FramerateLabel;
     QLabel*                             m_FramesLabel;
+    QLabel*                             m_CursorScenePosLabel;
 
+
+    QSharedPointer<QCustomPlot>         m_QCP;
+    QSharedPointer<QCPColorMap>         m_colorMap;
+    QCPColorScale*                      m_colorScale;
     QSharedPointer<QGraphicsScene>      m_pScene;
     QGraphicsPixmapItem*                m_PixmapItem;
     QGraphicsTextItem*                  m_TextItem;
@@ -62,10 +72,13 @@ private:
     QAction*                            m_aStartStopCap;
     QAction*                            m_aDiagCtrler;
     QAction*                            m_aDiagInfo;
+    QAction*                            m_aSetCurrScrROI;
+    QAction*                            m_aResetFullROI;
     QAction*                            m_aCamlist;
     QAction*                            m_aDisconnect;
 
     SP_DECL(FrameObserver)              m_pFrameObs;
+    ImageCalculatingThread*             m_pImgCThread;
 
     //QString                             m_SaveFileDir;
     //QString                             m_SelectedExtension;
@@ -184,12 +197,17 @@ private slots:
     //void on_ActionAllow16BitTiffSaving_triggered();
 
     /* custom */
-    void onAcquisitionStartStop(const QString& sThisFeature);
+    /*this is for the command from tree controller*/
+    void onAcquisitionStartStop(const QString& sThisFeature); 
+    void onImageCalcStartStop(bool);
     //void onfloatingDockChanged(bool bIsFloating);
     //void onVisibilityChanged(bool bIsVisible);
     //void displayEveryFrameClick(bool bValue);
     void onSetDescription(const QString& sDesc);
     void onimageReady(QImage image, const QString& sFormat, const QString& sHeight, const QString& sWidth);
+    void onimageReady(QVector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
+    void onimageReady(std::vector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth);
+    void onimageReadyFromCalc();
     void onFullBitDepthImageReady(tFrameInfo mFullImageInfo);
     //void onSaving(unsigned int nPos);
     void onSetEventMessage(const QStringList& sMsg);
@@ -216,10 +234,13 @@ private slots:
     //void optionsAccepted();
     void textFilterChanged();
     //bool loadPlugin();  // Closed source injected
-
+    void onSetMousePosInScene(const QPointF& pPoint);
+    void onSetMousePosInCMap(QMouseEvent* event);
+    void SetCurrentScreenROI();
+    void ResetFullROI(bool notStartReStart = false);
 
 signals:
-    //void closeViewer(CameraPtr cam);
-    void acquisitionRunning(bool bValue);
+    void closeViewer(CameraPtr cam);
+    void acquisitionRunning(bool bValue); // this is for the plugin, not needed here
 };
 

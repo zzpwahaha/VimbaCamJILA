@@ -1,30 +1,6 @@
-﻿/*=============================================================================
-  Copyright (C) 2012 - 2016 Allied Vision Technologies.  All Rights Reserved.
-
-  Redistribution of this file, in original or modified form, without
-  prior written consent of Allied Vision Technologies is prohibited.
-
--------------------------------------------------------------------------------
-
-  File:        FrameObserver.cpp
-
-  Description: Frame callback.
+﻿//Description: Frame callback.
                
 
--------------------------------------------------------------------------------
-
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF TITLE,
-  NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR  PURPOSE ARE
-  DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
-  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-  AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-=============================================================================*/
 
 
 #include "FrameObserver.h"
@@ -33,6 +9,8 @@
 #include <QMetaType>
 #include <QTextStream>
 #include <math.h>
+
+#include <windows.h>
 
 FrameObserver::FrameObserver ( CameraPtr pCam )
     : IFrameObserver                ( pCam )
@@ -57,9 +35,20 @@ FrameObserver::FrameObserver ( CameraPtr pCam )
     connect ( m_pImageProcessingThread.data(), SIGNAL ( frameReadyFromThreadFullBitDepth ( tFrameInfo) ), 
               this, SLOT ( getFullBitDepthFrameFromThread ( tFrameInfo) ) );
 
+    connect(m_pImageProcessingThread.data(), SIGNAL(frameReadyFromThread(QVector<ushort>, const QString&, const QString&, const QString&)),
+        this, SLOT(getFrameFromThread(QVector<ushort>, const QString&, const QString&, const QString&)));
+
+
+    connect(m_pImageProcessingThread.data(), SIGNAL(frameReadyFromThread(std::vector<ushort>, const QString&, const QString&, const QString&)),
+        this, SLOT(getFrameFromThread(std::vector<ushort>, const QString&, const QString&, const QString&)));
+
     // We need to register QVector <quint32> because it is not known to Qt's meta-object system
     qRegisterMetaType< QVector<QVector <quint32> > >("QVector<QVector <quint32> >");
     qRegisterMetaType< QVector <QStringList> >("QVector <QStringList>");
+
+    //also this for QCustomPlot
+    qRegisterMetaType< QVector<ushort> >("QVector<ushort>");
+    qRegisterMetaType< std::vector<ushort> >("std::vector<ushort>");
 
     // register tFrameInfo type to use with frameReadyFromObserver signal
     qRegisterMetaType< tFrameInfo >("tFrameInfo");
@@ -215,6 +204,15 @@ void FrameObserver::getFrameFromThread ( QImage image, const QString &sFormat, c
     emit frameReadyFromObserver (image, sFormat, sHeight, sWidth);    
 }
 
+void FrameObserver::getFrameFromThread(QVector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth)
+{
+    emit frameReadyFromObserver(vec1d, sFormat, sHeight, sWidth);
+}
+
+void FrameObserver::getFrameFromThread(std::vector<ushort> vec1d, const QString& sFormat, const QString& sHeight, const QString& sWidth)
+{
+    emit frameReadyFromObserver(vec1d, sFormat, sHeight, sWidth);
+}
 
 void FrameObserver::getFullBitDepthFrameFromThread ( tFrameInfo mFullImageInfo )
 {
@@ -238,6 +236,7 @@ void ImageProcessingThread::run()
             &&  m_FrameQueue.WaitData( tmpFrameData) 
             )
     {
+        m_imageDataReady = false;
         if( m_LimitFrameRate )
         {
             double currentTime = m_Timer.elapsed();
@@ -257,67 +256,104 @@ void ImageProcessingThread::run()
                 m_LastTime( currentTime);
             }
         }
-        m_FrameCount++;
-        m_FPSCounter.count( m_FrameCount );
-        QImage convertedImage( tmpFrameData.Width(), tmpFrameData.Height(), QImage::Format_RGB32 ); 
-   
-        if(! convertedImage.isNull())
-        {
-
-            if (NULL != tmpFrameData.GetFrameData()) // unlikely
-            {
-                VmbError_t error;
-
-                VmbPixelFormatType outputPixelFormat;
-                if(tmpFrameData.ColorInterpolation())
-                {
-                    outputPixelFormat = tmpFrameData.PixelFormat();
-                }
-                else
-                {
-                    try
-                    {
-                        outputPixelFormat = AVT::GetCompatibleMonoPixelFormatForRaw(tmpFrameData.PixelFormat() ) ;
-
-                    }
-                    catch(...)// lands here if GetCompatibleMonoPixelFromatForRaw throws
-                    {
-                        outputPixelFormat =tmpFrameData.PixelFormat() ;
-                    }
-                }
-                error = AVT::VmbImageTransform( convertedImage, tmpFrameData.GetFrameData().data(), tmpFrameData.Width(),  tmpFrameData.Height(), outputPixelFormat );
         
-                QString sFormat = Helper::convertFormatToString( outputPixelFormat );
+        //QImage convertedImage( tmpFrameData.Width(), tmpFrameData.Height(), QImage::Format_RGB32); //QImage::Format_RGB32
+        
+        //if(! convertedImage.isNull())
+        //{
 
-                if( VmbErrorSuccess != error )
+        if (NULL != tmpFrameData.GetFrameData()) // unlikely
+        {
+            VmbError_t error;
+
+            VmbPixelFormatType outputPixelFormat;
+            if(tmpFrameData.ColorInterpolation())
+            {
+                outputPixelFormat = tmpFrameData.PixelFormat();
+            }
+            else
+            {
+                try
                 {
-                    sFormat = "Convert Error: " + QString::number(error,16);
-                    if( VmbErrorBadParameter == error )
-                        if (((tmpFrameData.Width()%4!=0) || (tmpFrameData.Height()%2!=0)))
-                        {
-                            sFormat.append(" (height or width not supported!)");
-                        }
-                        else
-                        {
-                            sFormat.append(" (PixelFormat not supported!)");
-                        }
-                    convertedImage = QImage();
+                    outputPixelFormat = AVT::GetCompatibleMonoPixelFormatForRaw(tmpFrameData.PixelFormat() ) ;
+
                 }
-
+                catch(...)// lands here if GetCompatibleMonoPixelFromatForRaw throws
                 {
-                    if( !m_Stopping )
-                    {
-                        emit frameReadyFromThread (convertedImage, sFormat, QString::number (tmpFrameData.Height() ),
-                                           QString::number (tmpFrameData.Width() ));
-                    }
+                    outputPixelFormat =tmpFrameData.PixelFormat() ;
                 }
             }
+            //error = AVT::VmbImageTransform( convertedImage, tmpFrameData.GetFrameData().data(), tmpFrameData.Width(),  tmpFrameData.Height(), outputPixelFormat );
+                
+            /*my custom readout for mono8 and mono12*/
+            QString sFormat = Helper::convertFormatToString(outputPixelFormat);
+
+            if (((tmpFrameData.Width() % 4 != 0) || (tmpFrameData.Height() % 2 != 0)))
+            {
+                sFormat.append(" (height" + QString::number(tmpFrameData.Width()) + " or width" + QString::number(tmpFrameData.Height()) + " not supported!)");
+                emit logging("From FrameObserver: " + sFormat + "width is module zero for 4, height is module zero for 2");
+                continue;
+            }
+
+                
+            QVector<ushort> uint16QVector;
+            if (0 == sFormat.compare("Mono12"))
+            {
+                ushort* dstDataPtr = reinterpret_cast<ushort*> (tmpFrameData.GetFrameData().data());
+                uint16QVector = QVector<ushort>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+            }
+            else if (0 == sFormat.compare("Mono8"))
+            {
+                uint8_t* dstDataPtr = tmpFrameData.GetFrameData().data();
+                uint16QVector = QVector<ushort>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+            }
+            else
+            {
+                emit logging("From FrameObserver: " + sFormat + "is neither Mono8 nor Mono12. Only these two are supported now.");
+                continue;
+            }
+            //QVector<double> double64QVector(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+            //std::vector<ushort> uint16Vector(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+            //to initialize a vector with different type, can directly use above two commented
+   
+            {
+                if (!m_Stopping)
+                {
+                    m_imageLock.lock();
+                    m_FrameCount++;
+                    m_FPSCounter.count(m_FrameCount);
+
+                    m_uint16QVector.swap(uint16QVector); //this does not involve any copy constructor, just switching the pointer hence super fast. After this, the uintQVector is junk and wait for destruction at the end of the loop
+                    m_format = sFormat;
+                    m_height = tmpFrameData.Height();
+                    m_width = tmpFrameData.Width();
+                    m_imageDataReady = true;
+                    m_imageCalcWait.wakeOne();
+                    m_imageProcWait.wait(&m_imageLock);
+                        
+                    m_imageLock.unlock();
+                        
+
+                    /*emit frameReadyFromThread(uint16Vector, sFormat, QString::number(tmpFrameData.Height()),
+                        QString::number(tmpFrameData.Width()));*/
+
+                    /*emit frameReadyFromThread(uint16QVector, sFormat, QString::number(tmpFrameData.Height()),
+                        QString::number(tmpFrameData.Width()));*/
+
+                    /*emit frameReadyFromThread (convertedImage, sFormat, QString::number (tmpFrameData.Height() ),
+                                        QString::number (tmpFrameData.Width() ));*/
+                        
+                }
+
+            }
         }
-        // send the full bit depth image if requested
-        if ( true == tmpFrameData.TransformFullBitDepth() )
-        {
-            emit frameReadyFromThreadFullBitDepth ( tmpFrameData.FrameInfo() );
-        }  
+        //}
+
+    // send the full bit depth image if requested
+    if ( true == tmpFrameData.TransformFullBitDepth() )
+    {
+        emit frameReadyFromThreadFullBitDepth ( tmpFrameData.FrameInfo() );
+    }  
     }
 }
 
