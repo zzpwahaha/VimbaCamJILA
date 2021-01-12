@@ -918,6 +918,7 @@ void ViewerWidget::on_ActionFreerun_triggered()
 VmbError_t ViewerWidget::releaseBuffer()
 {
     m_pFrameObs->Stopping();
+    m_pImgCThread->StopProcessing();
     VmbError_t error = m_pCam->EndCapture();
     if (VmbErrorSuccess == error)
         error = m_pCam->FlushQueue();
