@@ -614,9 +614,6 @@
     <ClCompile Include="UI\HexEditor\XByteArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UI\MainInformationWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="UI\MdiChild.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -633,6 +630,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FrameObserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\MainInformationWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -769,9 +769,6 @@
     <QtMoc Include="UI\HexEditor\QHexEdit_p.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="UI\MainInformationWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="UI\MdiChild.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -788,6 +785,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ImageProcessingThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="UI\MainInformationWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

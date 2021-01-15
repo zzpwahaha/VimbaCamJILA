@@ -175,6 +175,11 @@ class ControllerTreeWindow : public QTreeView
                 MultiCompleter *getListCompleter() const;
                 void   saveFeaturesToTextFile   ( const QString &sDestPathAndFileName );
 
+                /*getter for m_model*/
+                const QStandardItemModel* const controllerModel() { return m_Model; }
+                /*bring the private to public*/
+                QString getFeatureValue(const FeaturePtr& featPtr) const;
+
     protected:
                 void showEvent(QShowEvent *event);
                 void hideEvent(QHideEvent *event);
@@ -186,7 +191,7 @@ class ControllerTreeWindow : public QTreeView
                 unsigned int getGrandParentLevel( const QList<QStandardItem *>& items, const QString &sGrandParent) const;
 
                 bool    isEventFeature          ( const FeaturePtr pFeature ) const;
-                QString getFeatureValue         ( const FeaturePtr &featPtr ) const;
+                
                 QString getFeatureName          ( const QModelIndex& item ) const;
 
                 void updateExpandedTreeValue    ( const FeaturePtr &featPtr, const QString &sName );
@@ -229,6 +234,7 @@ class ControllerTreeWindow : public QTreeView
 
        public slots:
                 void closeControls(void);
+                void onClicked(const QModelIndex& index);
 
     protected slots:
                 void setAdjustPacketSizeTimeout ();
@@ -237,7 +243,7 @@ class ControllerTreeWindow : public QTreeView
                 void setLogarithmicSliderValue  ( double v );
 
     private slots:
-                void onClicked                  ( const QModelIndex & index );
+                
                 void onCmdButtonClick           ();
                 void onConfirmClick             ();
                 void onIntSpinBoxClick          ();

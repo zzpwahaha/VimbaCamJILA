@@ -30,11 +30,6 @@ void ImageProcessingThread::run()
             }
         }
 
-        //QImage convertedImage( tmpFrameData.Width(), tmpFrameData.Height(), QImage::Format_RGB32); //QImage::Format_RGB32
-
-        //if(! convertedImage.isNull())
-        //{
-
         if (NULL != tmpFrameData.GetFrameData()) // unlikely
         {
             VmbError_t error;
@@ -69,22 +64,40 @@ void ImageProcessingThread::run()
             }
 
 
-            QVector<ushort> uint16QVector;
+            //QVector<ushort> uint16QVector;
+            //if (0 == sFormat.compare("Mono12"))
+            //{
+            //    ushort* dstDataPtr = reinterpret_cast<ushort*> (tmpFrameData.GetFrameData().data());
+            //    uint16QVector = QVector<ushort>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+            //}
+            //else if (0 == sFormat.compare("Mono8"))
+            //{
+            //    uint8_t* dstDataPtr = tmpFrameData.GetFrameData().data();
+            //    uint16QVector = QVector<ushort>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+            //}
+            //else
+            //{
+            //    emit logging("From FrameObserver: " + sFormat + "is neither Mono8 nor Mono12. Only these two are supported now.");
+            //    continue;
+            //}
+
+            QVector<double> doubleQVector;
             if (0 == sFormat.compare("Mono12"))
             {
                 ushort* dstDataPtr = reinterpret_cast<ushort*> (tmpFrameData.GetFrameData().data());
-                uint16QVector = QVector<ushort>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+                doubleQVector = QVector<double>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
             }
             else if (0 == sFormat.compare("Mono8"))
             {
                 uint8_t* dstDataPtr = tmpFrameData.GetFrameData().data();
-                uint16QVector = QVector<ushort>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
+                doubleQVector = QVector<double>(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
             }
             else
             {
                 emit logging("From FrameObserver: " + sFormat + "is neither Mono8 nor Mono12. Only these two are supported now.");
                 continue;
             }
+
             //QVector<double> double64QVector(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
             //std::vector<ushort> uint16Vector(dstDataPtr, dstDataPtr + tmpFrameData.Height() * tmpFrameData.Width());
             //to initialize a vector with different type, can directly use above two commented
@@ -96,7 +109,8 @@ void ImageProcessingThread::run()
                     m_FrameCount++;
                     m_FPSCounter.count(m_FrameCount);
 
-                    m_uint16QVector.swap(uint16QVector); //this does not involve any copy constructor, just switching the pointer hence super fast. After this, the uintQVector is junk and wait for destruction at the end of the loop
+                    //m_uint16QVector.swap(uint16QVector); //this does not involve any copy constructor, just switching the pointer hence super fast. After this, the uintQVector is junk and wait for destruction at the end of the loop
+                    m_doubleQVector.swap(doubleQVector);
                     m_format = sFormat;
                     m_height = tmpFrameData.Height();
                     m_width = tmpFrameData.Width();
@@ -120,7 +134,7 @@ void ImageProcessingThread::run()
 
             }
         }
-        //}
+
 
     // send the full bit depth image if requested
         if (true == tmpFrameData.TransformFullBitDepth())

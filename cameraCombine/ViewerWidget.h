@@ -46,20 +46,27 @@ private:
     QTextEdit*                          m_Description;
 
     QLabel*                             m_OperatingStatusLabel;
-    QLabel*                             m_FormatLabel;
-    QLabel*                             m_ImageSizeLabel;
-    QLabel*                             m_FramerateLabel;
+    QPushButton*                        m_FormatButton;
+    QPushButton*                        m_ImageSizeButtonH;
+    QPushButton*                        m_ImageSizeButtonW;
+    QPushButton*                        m_FramerateButton;
     QLabel*                             m_FramesLabel;
     QLabel*                             m_CursorScenePosLabel;
-
+    QPushButton*                        m_ExposureTimeButton;
+    QPushButton*                        m_CameraGainButton;
 
     QSharedPointer<QCustomPlot>         m_QCP;
     QCPAxisRect*                        m_QCPcenterAxisRect;
     QCPAxisRect*                        m_QCPbottomAxisRect;
     QCPAxisRect*                        m_QCPleftAxisRect;
     QSharedPointer<QCPColorMap>         m_colorMap;
+    QSharedPointer<QCPGraph>            m_bottomGraph;
+    QSharedPointer<QCPGraph>            m_leftGraph;
     QCPColorScale*                      m_colorScale;
-
+    QCPItemTracer*                      m_QCPtracerbottom;
+    QCPItemText*                        m_QCPtraceTextbottom;
+    QCPItemTracer*                      m_QCPtracerleft;
+    QCPItemText*                        m_QCPtraceTextleft;
 
     QGraphicsTextItem*                  m_TextItem;
     QMenu*                              m_ContextMenu;
@@ -68,8 +75,10 @@ private:
     QAction*                            m_aDiagInfo;
     QAction*                            m_aSetCurrScrROI;
     QAction*                            m_aResetFullROI;
+    QAction*                            m_aPlotTracer;
     QAction*                            m_aCamlist;
     QAction*                            m_aDisconnect;
+
 
     SP_DECL(FrameObserver)              m_pFrameObs;
     ImageCalculatingThread*             m_pImgCThread;
@@ -196,6 +205,8 @@ private slots:
     void onSetMousePosInCMap(QMouseEvent* event);
     void SetCurrentScreenROI();
     void ResetFullROI(bool notStartReStart = false);
+    void updateExposureTime();
+    void updateCameraGain();
     //void onfloatingDockChanged(bool bIsFloating);
     //void onVisibilityChanged(bool bIsVisible);
     //void displayEveryFrameClick(bool bValue);

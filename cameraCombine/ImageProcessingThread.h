@@ -170,6 +170,7 @@ private:
     ValueWithState<double>      m_LastTime;
 
     QVector<ushort>             m_uint16QVector;
+    QVector<double>             m_doubleQVector;
     int                         m_width; //this width and height are used in data transfer to imgCThread
     int                         m_height;
     QString                     m_format;
@@ -184,6 +185,7 @@ public:
     QWaitCondition& calcWait() { return m_imageCalcWait; }
     QWaitCondition& procWait() { return m_imageProcWait; }
     QVector<ushort>& uint16Vec() { return m_uint16QVector; }
+    QVector<double>& doubleVec() { return m_doubleQVector; }
     const int& width() const { return m_width; }
     const int& height() const { return m_height; }
     const QString& format() const { return m_format; }

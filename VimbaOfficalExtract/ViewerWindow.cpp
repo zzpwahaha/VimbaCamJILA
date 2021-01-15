@@ -1580,7 +1580,7 @@ void ViewerWindow::onimageReady ( QImage image, const QString &sFormat, const QS
     m_PixmapItem->setPixmap(QPixmap::fromImage(image));
     m_ScreenViewer->show();
 
-    Sleep(1000);
+    
     /* save series of images */
     if( (0 < m_nNumberOfFramesToSave) && m_bIsTriggeredByMultiSaveBtn )
     {

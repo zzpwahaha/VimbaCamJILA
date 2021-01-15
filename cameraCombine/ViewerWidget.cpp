@@ -3,7 +3,7 @@
 
 #include "VmbImageTransformHelper.hpp"
 #include "ExternLib/qcustomplot/qcustomplot.h"
-
+#include <tuple>
 #include <QDebug>
 
 using AVT::VmbAPI::Frame;
@@ -72,10 +72,6 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     /*QCP viewer widget: colormap + side/bottom plot*/
     m_QCP = QSharedPointer<QCustomPlot>(new QCustomPlot());
     m_QCP->plotLayout()->clear();
-    //m_QCP->xAxis->grid()->setVisible(false);
-    //m_QCP->yAxis->grid()->setVisible(false);
-    //m_QCP->xAxis->setTickLabels(false);
-    //m_QCP->yAxis->setTickLabels(false);
     m_QCPcenterAxisRect = new QCPAxisRect(m_QCP.data());
     m_QCPbottomAxisRect = new QCPAxisRect(m_QCP.data());
     m_QCPleftAxisRect = new QCPAxisRect(m_QCP.data());
@@ -84,25 +80,28 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_QCP->plotLayout()->addElement(1, 1, m_QCPbottomAxisRect);
 
     m_QCPcenterAxisRect->setupFullAxesBox(true);
+    for (auto& plt : { m_QCPleftAxisRect, m_QCPbottomAxisRect })
+    { plt->setupFullAxesBox(false); }
+    m_QCPleftAxisRect->axis(QCPAxis::atRight)->setTickLabels(true);
+    m_QCPbottomAxisRect->axis(QCPAxis::atTop)->setTickLabels(true);
+
     QCPMarginGroup* marginGroup = new QCPMarginGroup(m_QCP.data());
     m_QCPbottomAxisRect->setMarginGroup(QCP::msLeft | QCP::msRight, marginGroup);
     m_QCPleftAxisRect->setMarginGroup(QCP::msTop | QCP::msBottom, marginGroup);
     m_QCPcenterAxisRect->setMarginGroup(QCP::msAll, marginGroup);
 
 
-    
     m_colorScale = new QCPColorScale(m_QCP.data());
-    m_QCP->plotLayout()->addElement(0, 2, m_colorScale);
     m_colorScale->setType(QCPAxis::atRight);
     m_colorScale->setRangeZoom(false);
     m_colorScale->setRangeDrag(false);
-
+    m_QCP->plotLayout()->addElement(0, 2, m_colorScale);
     m_colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
 
-    m_QCPbottomAxisRect->setMinimumSize(400, 100);
-    m_QCPbottomAxisRect->setMaximumSize(400, 100);
-    m_QCPleftAxisRect->setMinimumSize(100, 400);
-    m_QCPleftAxisRect->setMaximumSize(100, 400);
+    m_QCPbottomAxisRect->setMinimumSize(600, 120);
+    m_QCPbottomAxisRect->setMaximumSize(600, 120);
+    m_QCPleftAxisRect->setMinimumSize(120, 600);
+    m_QCPleftAxisRect->setMaximumSize(120, 600);
 
     // move newly created axes on "axes" layer and grids on "grid" layer:
     foreach(QCPAxisRect * rect, m_QCP->axisRects())
@@ -114,9 +113,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         }
     }
 
-
     /*m_QCP->setNotAntialiasedElements(QCP::aeAll);*/
-    m_QCP->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
     
     m_colorMap = QSharedPointer<QCPColorMap>(new QCPColorMap(
         m_QCPcenterAxisRect->axis(QCPAxis::atBottom), 
@@ -125,16 +122,67 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_colorMap->setColorScale(m_colorScale);
     m_colorMap->setGradient(QCPColorGradient::gpGrayscale);
     
+    //m_colorMap->valueAxis()->setTickLabelPadding(0);
+
+    m_bottomGraph = QSharedPointer<QCPGraph>(
+        new QCPGraph(m_QCPbottomAxisRect->axis(QCPAxis::atTop),
+        m_QCPbottomAxisRect->axis(QCPAxis::atLeft)));
+    m_leftGraph = QSharedPointer<QCPGraph>(
+        new QCPGraph(m_QCPleftAxisRect->axis(QCPAxis::atRight),
+            m_QCPleftAxisRect->axis(QCPAxis::atBottom)));
+    m_leftGraph->valueAxis()->setTickLabelRotation(90);
+    
+    m_QCP->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
+    m_QCPbottomAxisRect->setRangeDragAxes(m_bottomGraph->keyAxis(), m_bottomGraph->valueAxis());
+    m_QCPbottomAxisRect->setRangeZoomAxes(m_bottomGraph->keyAxis(), m_bottomGraph->valueAxis());
+    m_QCPleftAxisRect->setRangeDragAxes(m_leftGraph->valueAxis(), m_leftGraph->keyAxis());
+    m_QCPleftAxisRect->setRangeZoomAxes(m_leftGraph->valueAxis(), m_leftGraph->keyAxis());
+    for (auto& p : { m_QCPbottomAxisRect ,m_QCPleftAxisRect ,m_QCPcenterAxisRect})
+    { p->setRangeZoomFactor(0.95); }
+
     // setup a ticker for colormap that only gives integer ticks:
     QSharedPointer<QCPAxisTickerFixed> intTicker(new QCPAxisTickerFixed);
     intTicker->setTickStep(1.0);
     intTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples);
     m_colorMap->keyAxis()->setTicker(intTicker);
     m_colorMap->valueAxis()->setTicker(intTicker);
+    m_leftGraph->keyAxis()->setTicker(intTicker);
+    m_bottomGraph->keyAxis()->setTicker(intTicker);
 
+    /*tracer for the bottom and left plot*/
+    m_QCPtracerbottom = new QCPItemTracer(m_QCP.data());
+    m_QCPtracerbottom->setClipAxisRect(m_bottomGraph->keyAxis()->axisRect());
+    m_QCPtracerbottom->setGraph(m_bottomGraph.data());
+    m_QCPtracerleft = new QCPItemTracer(m_QCP.data());
+    m_QCPtracerleft->setClipAxisRect(m_leftGraph->keyAxis()->axisRect());
+    m_QCPtracerleft->setGraph(m_leftGraph.data());
+    for (auto& tracer : { m_QCPtracerbottom ,m_QCPtracerleft })
+    {
+        tracer->setInterpolating(false);
+        tracer->setStyle(QCPItemTracer::tsCircle);
+        tracer->setPen(QPen(Qt::red));
+        tracer->setBrush(Qt::red);
+        tracer->setSize(7);
+    }
+
+    m_QCPtraceTextbottom = new QCPItemText(m_QCP.data());
+    m_QCPtraceTextbottom->position->setParentAnchor(m_QCPtracerbottom->position);
+    m_QCPtraceTextbottom->setClipAxisRect(m_QCPbottomAxisRect);
+    m_QCPtraceTextbottom->position->setCoords(0, 12);
+    m_QCPtraceTextleft = new QCPItemText(m_QCP.data());
+    m_QCPtraceTextleft->position->setParentAnchor(m_QCPtracerleft->position);
+    m_QCPtraceTextleft->setClipAxisRect(m_QCPleftAxisRect);
+    m_QCPtraceTextleft->setRotation(90);
+    m_QCPtraceTextleft->position->setCoords(-12, 0);
 
     connect(m_QCP.data(), &QCustomPlot::mouseMove, this, &ViewerWidget::onSetMousePosInCMap);
-    //another connect for image coming in update is made afater m_pImgCThread
+    connect(m_QCP.data(), &QCustomPlot::mousePress, this, [this](QMouseEvent* event) {
+        if (event->button() == Qt::LeftButton) { return false; }
+        else { m_ContextMenu->exec(QCursor::pos()); return true; } });
+    connect(m_QCP.data(), &QCustomPlot::mouseDoubleClick, this, [this]() {
+        m_pImgCThread->setDefaultView();
+        m_QCP->replot(); });
+    
 
 
     /* add Viewer Widget to ViewerWindow*/
@@ -252,6 +300,23 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_ContextMenu->addAction(m_aResetFullROI);
     connect(m_aResetFullROI, &QAction::triggered, this, &ViewerWidget::ResetFullROI);
 
+
+    m_aPlotTracer = new QAction("Tracer");
+    m_aPlotTracer->setCheckable(true);
+    m_aPlotTracer->setChecked(true);
+    m_ContextMenu->addAction(m_aPlotTracer);
+    connect(m_aPlotTracer, &QAction::triggered, this, [this]() {
+        for (auto& tra : { m_QCPtracerbottom,m_QCPtracerleft })
+        {
+            m_aPlotTracer->isChecked() ? tra->setVisible(true) : tra->setVisible(false);
+        }
+        for (auto& tra : { m_QCPtraceTextbottom,m_QCPtraceTextleft })
+        {
+            m_aPlotTracer->isChecked() ? tra->setVisible(true) : tra->setVisible(false);
+        }
+        m_QCP->replot(); });
+        
+
     m_ContextMenu->addSeparator();
 
     //connecting the following action to a slot happens at cameraMainWindow, be careful of the order
@@ -265,12 +330,12 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     
     /* create FrameObserver to get frames from camera, add for QCPColorMap */
     SP_SET(m_pFrameObs, new FrameObserver(m_pCam));
-    connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(QImage, const QString&, const QString&, const QString&)),
-        this, SLOT(onimageReady(QImage, const QString&, const QString&, const QString&)));
-    /*connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(QVector<ushort>, const QString&, const QString&, const QString&)),
-        this, SLOT(onimageReady(QVector<ushort>, const QString&, const QString&, const QString&)));*/
-    connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(std::vector<ushort>, const QString&, const QString&, const QString&)),
-        this, SLOT(onimageReady(std::vector<ushort>, const QString&, const QString&, const QString&)));
+    //connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(QImage, const QString&, const QString&, const QString&)),
+    //    this, SLOT(onimageReady(QImage, const QString&, const QString&, const QString&)));
+    //connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(QVector<ushort>, const QString&, const QString&, const QString&)),
+    //    this, SLOT(onimageReady(QVector<ushort>, const QString&, const QString&, const QString&)));
+    //connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(std::vector<ushort>, const QString&, const QString&, const QString&)),
+    //    this, SLOT(onimageReady(std::vector<ushort>, const QString&, const QString&, const QString&)));
     
     connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserverFullBitDepth(tFrameInfo)),
         this, SLOT(onFullBitDepthImageReady(tFrameInfo)));
@@ -284,7 +349,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
 
 
     /*create image calculating thread*/
-    m_pImgCThread = new ImageCalculatingThread(m_pFrameObs, m_pCam, m_QCP, m_colorMap);
+    m_pImgCThread = new ImageCalculatingThread(m_pFrameObs, m_pCam, m_QCP, m_colorMap, m_bottomGraph, m_leftGraph);
     connect(m_pImgCThread, &ImageCalculatingThread::imageReadyForPlot,
         this, &ViewerWidget::onimageReadyFromCalc);
     connect(this, &ViewerWidget::acquisitionRunning, this, &ViewerWidget::onImageCalcStartStop);
@@ -295,22 +360,73 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_Timer = new QTimer(this);
     
     /* Statusbar */
-    QStatusBar* statusbar = new QStatusBar;
+    QStatusBar* statusbar1 = new QStatusBar;
+    QStatusBar* statusbar2 = new QStatusBar;
     m_OperatingStatusLabel = new QLabel(" Ready ");
-    m_FormatLabel = new QLabel;
-    m_ImageSizeLabel = new QLabel;
+    m_FormatButton = new QPushButton;
+    m_ImageSizeButtonH = new QPushButton;
+    m_ImageSizeButtonW = new QPushButton;
     m_FramesLabel = new QLabel;
-    m_FramerateLabel = new QLabel;
+    m_FramerateButton = new QPushButton;
     m_CursorScenePosLabel = new QLabel;
+    m_ExposureTimeButton = new QPushButton;
+    m_CameraGainButton = new QPushButton();
+    //for (auto& tmp : QList<QLabel*>{ m_OperatingStatusLabel ,m_FormatLabel ,m_ImageSizeLabel,m_CursorScenePosLabel })
+    //{
+    //    tmp->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    //}
 
-    statusbar->addWidget(m_OperatingStatusLabel);
-    statusbar->addWidget(m_ImageSizeLabel);
-    statusbar->addWidget(m_FormatLabel);
-    statusbar->addWidget(m_FramesLabel);
-    statusbar->addWidget(m_FramerateLabel);
-    statusbar->addWidget(m_CursorScenePosLabel);
+    QWidget* imageSizeBtn = new QWidget();
+    QHBoxLayout* imageSizeBtnLayout = new QHBoxLayout(imageSizeBtn);
+    imageSizeBtnLayout->setMargin(0);
+    imageSizeBtnLayout->addWidget(m_ImageSizeButtonH);
+    imageSizeBtnLayout->addWidget(m_ImageSizeButtonW);
+    statusbar1->addWidget(m_OperatingStatusLabel);
+    statusbar1->addWidget(imageSizeBtn);
+    statusbar1->addWidget(m_FormatButton);
+    statusbar2->addWidget(m_ExposureTimeButton);
+    statusbar2->addWidget(m_CameraGainButton);
+    statusbar2->addWidget(m_FramesLabel);
+    statusbar2->addWidget(m_FramerateButton);
+    statusbar1->addWidget(m_CursorScenePosLabel);
+
     m_OperatingStatusLabel->setStyleSheet("background-color: rgb(0,0, 0); color: rgb(255,255,255)");
-    m_VertLayout->addWidget(statusbar, 0);
+    for (auto& btn: { m_ImageSizeButtonH ,m_ImageSizeButtonW,m_CameraGainButton,m_ExposureTimeButton,m_FormatButton,m_FramerateButton })
+        btn->setStyleSheet("border: none; color: rgb(128, 89, 255)");
+    m_VertLayout->addWidget(statusbar1, 0);
+    m_VertLayout->addWidget(statusbar2, 0);
+    connect(m_FormatButton, &QPushButton::clicked, this, [this]() {
+        m_Controller->updateRegisterFeature();
+        QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("PixelFormat", Qt::MatchRecursive | Qt::MatchWrap);
+        if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
+        });
+    connect(m_ImageSizeButtonH, &QPushButton::clicked, this, [this]() {
+        m_Controller->updateRegisterFeature();
+        QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("Height", Qt::MatchRecursive | Qt::MatchWrap);
+        if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
+        });
+    connect(m_ImageSizeButtonW, &QPushButton::clicked, this, [this]() {
+        m_Controller->updateRegisterFeature();
+        QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("Width", Qt::MatchRecursive | Qt::MatchWrap);
+        if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
+        });
+    connect(m_CameraGainButton, &QPushButton::clicked, this, [this]() {
+        m_Controller->updateRegisterFeature();
+        QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("Gain", Qt::MatchRecursive | Qt::MatchWrap);
+        if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
+         });
+    connect(m_ExposureTimeButton, &QPushButton::clicked, this, [this]() {
+        m_Controller->updateRegisterFeature();
+        QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("ExposureTimeAbs", Qt::MatchRecursive | Qt::MatchWrap);
+        if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
+        });
+    connect(m_FramerateButton, &QPushButton::clicked, this, [this]() {
+        m_Controller->updateRegisterFeature();
+        QList<QStandardItem*> tmp = m_Controller->controllerModel()->findItems("AcquisitionFrameRateAbs", Qt::MatchRecursive | Qt::MatchWrap);
+        if (!tmp.isEmpty()) { m_Controller->onClicked(tmp.at(0)->index().siblingAtColumn(1)); }
+        });
+
+
 
     m_TextItem = new QGraphicsTextItem;
     QFont serifFont("Arial", 12, QFont::Bold);
@@ -360,6 +476,38 @@ void ViewerWidget::onSetMousePosInCMap(QMouseEvent* event)
     m_CursorScenePosLabel->setText("(" + QString::number(std::floor(x + 0.5)) + " , " +
         QString::number(std::floor(y + 0.5)) + " , " +
         QString::number(m_colorMap->data()->data(x, y)) + ")");
+    
+    /*tracer part*/
+    {
+        double bottomKey = m_bottomGraph->keyAxis()->pixelToCoord(event->pos().x());
+        m_QCPtracerbottom->setGraphKey(bottomKey);
+        bottomKey = m_bottomGraph->keyAxis()->pixelToCoord(m_QCPtracerbottom->position->pixelPosition().x());
+        /*the y value is more self-contained than obtaining it from imgCThread, which depends on the availability of m_Crx*/
+        double bottomVal = m_bottomGraph->valueAxis()->pixelToCoord(m_QCPtracerbottom->position->pixelPosition().y());
+
+        m_QCPtraceTextbottom->setText(QString::number(bottomKey) +
+            "(" + QString::number(bottomKey - m_bottomGraph->dataMainKey(0)) + ")" + "," +
+            QString::number(bottomVal, 'e', 3));
+    }
+    {
+        double leftKey = m_leftGraph->keyAxis()->pixelToCoord(event->pos().y());
+        m_QCPtracerleft->setGraphKey(leftKey);
+        leftKey = m_leftGraph->keyAxis()->pixelToCoord(m_QCPtracerleft->position->pixelPosition().y());
+        /*the y value is more self-contained than obtaining it from imgCThread, which depends on the availability of m_Crx*/
+        double leftVal = m_leftGraph->valueAxis()->pixelToCoord(m_QCPtracerleft->position->pixelPosition().x());
+
+        m_QCPtraceTextleft->setText(QString::number(leftKey) +
+            "(" + QString::number(leftKey - m_leftGraph->dataMainKey(0)) + ")" + "," +
+            QString::number(leftVal, 'e', 3));
+    }
+    if (!m_bIsCameraRunning) { m_QCP->replot(); }
+    //TODO: add criteria for trigger setting
+        
+
+    //qDebug() << bottomKey << "," << m_bottomGraph->valueAxis()->pixelToCoord(m_QCPtracer->position->pixelPosition().y()) <<
+    //    "," << m_QCPtracer->position->pixelPosition()<< event->pos();
+    /*qDebug() << m_QCPcenterAxisRect->axis(QCPAxis::atBottom)->range() << "," <<
+        m_QCPcenterAxisRect->axis(QCPAxis::atLeft)->range();*/
 }
 
 
@@ -390,7 +538,9 @@ ViewerWidget::~ViewerWidget()
         //}
 
         releaseBuffer();
-
+        //delete m_pImgCThread; // NO: might need this? since need to explicitly release the sharedpointer in that class
+        //no need for above since Qt will take care of that destruction
+        m_QCP->~QCustomPlot(); // somehow need to call the destructor myself, otherwise the mouseevent from QCP will give memory exception
         m_pCam->Close();
     }
 }
@@ -438,7 +588,7 @@ bool  ViewerWidget::getAdjustPacketSizeMessage(QString& sMessage)
 
 void ViewerWidget::onSetCurrentFPS(const QString& sFPS)
 {
-    m_FramerateLabel->setText(QString::fromStdString(" Current FPS: ") + sFPS + " ");
+    m_FramerateButton->setText(QString::fromStdString(" FPS: ") + sFPS + " ");
 }
 
 void ViewerWidget::onResetFPS()
@@ -471,6 +621,25 @@ void ViewerWidget::textFilterChanged()
     Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
 
     QRegExp regExp(m_FilterPatternLineEdit->text(), caseSensitivity, syntax);
+
+    /*ways to find index in model from text*/
+    //QList<QStandardItem*> tt = m_Controller->controllerModel()->findItems("ExposureTimeAbs", Qt::MatchRecursive | Qt::MatchWrap);
+    //
+    //QString t0 = tt.at(0)->text();
+    //QVariant t1 = tt.at(0)->data(0); //text and data(role=display) are the same, but the second return a qvariant
+    //int t2 = tt.at(0)->row();
+    //QModelIndex asd = tt.at(0)->index(); //can find QModelIndex directly from item
+    //
+    //QModelIndex tmp = m_Controller->controllerModel()->indexFromItem(tt.at(0));//or can call from QStandardItemModel
+    //QVariant tmp0 = tmp.data(0);
+    //QModelIndex t3 = tmp.siblingAtColumn(1);//can access siblings at different column at same row
+    //QVariant as = t3.data();// in this case, we have the value of ExposureTimeAbs
+    //
+    ////or can use match method from QAbstractItemModel
+    //QModelIndexList currentItems = m_Controller->controllerModel()->match(
+    //    m_Controller->controllerModel()->index(0, 0),
+    //    Qt::DisplayRole, QVariant::fromValue(QString("ExposureTimeAbs")), 1, Qt::MatchWrap | Qt::MatchRecursive);
+
     m_Controller->m_ProxyModel->setFilterRegExp(regExp);
     m_Controller->expandAll();
     m_Controller->updateUnRegisterFeature();
@@ -490,19 +659,32 @@ void ViewerWidget::onimageReadyFromCalc()
     m_colorMap->rescaleDataRange(true);
     m_QCPcenterAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(m_QCPcenterAxisRect->axis(QCPAxis::atBottom), 1.0);
     QMouseEvent event(QMouseEvent::None, m_pImgCThread->mousePos(), Qt::NoButton, 0, 0);
+    m_bottomGraph->rescaleValueAxis(true,true); //only enlarge y and scale corresponde to visible x
+    m_bottomGraph->keyAxis()->setRange(m_colorMap->keyAxis()->range());
+    m_leftGraph->rescaleValueAxis(true, true);
+    
+    m_leftGraph->keyAxis()->setRange(m_colorMap->valueAxis()->range());
+    
+    /*set the secondary relative axis*/
+    m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setRange(m_leftGraph->keyAxis()->range() - m_leftGraph->data()->at(0)->key);
+    m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setRange(m_bottomGraph->keyAxis()->range() - m_bottomGraph->data()->at(0)->key);
+
 
     m_pImgCThread->mutex().lock();
 
-    m_FormatLabel->setText("Pixel Format: " + m_pImgCThread->format() + " ");
+    m_FormatButton->setText("Pixel Format: " + m_pImgCThread->format() + " ");
     auto [w, h] = m_pImgCThread->WidthHeight();
-    m_ImageSizeLabel->setText("Size H: " + QString::number(h) + " ,W: " + QString::number(w) + " ");
-    m_QCP->replot();
+    m_ImageSizeButtonH->setText("Size H: " + QString::number(h));
+    m_ImageSizeButtonW->setText(",W: " + QString::number(w) + " ");
     onSetMousePosInCMap(&event);
+    m_QCP->replot();
+    
+    updateExposureTime();
+    updateCameraGain();
     m_pImgCThread->mutex().unlock();
     
     
-    qDebug() << m_QCPcenterAxisRect->axis(QCPAxis::atBottom)->range() << "," << 
-        m_QCPcenterAxisRect->axis(QCPAxis::atLeft)->range();
+
 }
 
 void ViewerWidget::SetCurrentScreenROI()
@@ -521,7 +703,7 @@ void ViewerWidget::SetCurrentScreenROI()
         int xw = (xupper - xlower) > 2 ? xupper - xlower : 4;
         int yw = (yupper - ylower) > 2 ? yupper - ylower : 4;
         emit m_Controller->acquisitionStartStop("AcquisitionStopWidthHeight");
-
+        Sleep(5);//give some time for it to shut down
         /*first reset the value to full*/
         ResetFullROI(true);
         FeaturePtr pFeat;
@@ -652,6 +834,18 @@ void ViewerWidget::onFullBitDepthImageReady(tFrameInfo mFullImageInfo)
 void ViewerWidget::onFeedLogger(const QString& sMessage)
 {
     m_InformationWindow->feedLogger("Logging", QString(QTime::currentTime().toString("hh:mm:ss:zzz") + "\t" + sMessage), VimbaViewerLogCategory_ERROR);
+}
+
+void ViewerWidget::updateExposureTime()
+{
+    m_pImgCThread->updateExposureTime();
+    m_ExposureTimeButton->setText("Exposure time (ms): " + QString::number(m_pImgCThread->exposureTime() / 1.0e3, 'f', 3));
+}
+
+void ViewerWidget::updateCameraGain()
+{
+    m_pImgCThread->updateCameraGain();
+    m_CameraGainButton->setText("Gain (dB): " + QString::number(m_pImgCThread->cameraGain() ));
 }
 
 void ViewerWidget::checkDisplayInterval()
@@ -820,7 +1014,13 @@ void ViewerWidget::on_ActionFreerun_triggered()
 
         error = m_pCam->GetFeatureByName("AcquisitionStart", pFeat);
         int nResult = m_sAccessMode.compare(tr("(READ ONLY)"));
-        if ((VmbErrorSuccess == error) && (0 != nResult))
+        
+        FeaturePtr pFeatFormat;
+        auto error2 = m_pCam->GetFeatureByName("PixelFormat", pFeatFormat);
+        QString Pixformat = m_Controller->getFeatureValue(pFeatFormat);
+        int nResult2 = Pixformat.compare("Mono12Packed");
+        
+        if ((VmbErrorSuccess == error) && (0 != nResult) && (VmbErrorSuccess == error2) && (0 != nResult2))
         {
             SP_ACCESS(m_pFrameObs)->resetFrameCounter(true);
 
@@ -871,6 +1071,10 @@ void ViewerWidget::on_ActionFreerun_triggered()
                 //    ActionSaveImages->setEnabled(true);
 
             }
+        }
+        else if ((VmbErrorSuccess == error2) && (0 == nResult2))
+        {
+            m_InformationWindow->feedLogger("Logging", "Please do NOT use Mono12Packed, we are not bandwidth limited and I am lazy to add that support", VimbaViewerLogCategory_ERROR);
         }
     }
     /* OFF */

@@ -34,9 +34,9 @@
     <QtMoc Include="UI\Histogram\HistogramThread.h" />
     <QtMoc Include="UI\MultiCompleter.h" />
     <QtMoc Include="UI\IntSpinBox.h" />
-    <QtMoc Include="UI\MainInformationWindow.h" />
     <QtMoc Include="UI\MdiChild.h" />
     <QtMoc Include="UI\LineEditCompleter.h" />
+    <QtMoc Include="UI\MainInformationWindow.h" />
     <ClInclude Include="UI\SortFilterProxyModel.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="VmbImageTransformHelper.hpp" />

@@ -1717,6 +1717,7 @@ void ControllerTreeWindow::createFloatSliderEditBox ( const QModelIndex item )
         AdjustOffscreenPosition(p, *m_FloatSliderEditWidget );
         m_FloatSliderEditWidget->move(p.x(), p.y());
         m_FloatSliderEditWidget->show();
+        m_FloatSliderEditWidget->setFocus();
 
         /* As of Vimba >= 1.4, float features other than ExposureTime don't use spin box anymore */
         connect( m_Slider_Float, SIGNAL( valueChanged( double ) ), this, SLOT( onFloatSliderChanged( double ) ) );
