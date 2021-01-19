@@ -76,6 +76,10 @@ private:
     QAction*                            m_aSetCurrScrROI;
     QAction*                            m_aResetFullROI;
     QAction*                            m_aPlotTracer;
+    QAction*                            m_aPlotFitter;
+    QAction*                            m_aSaveCamSetting;
+    QAction*                            m_aLoadCamSetting;
+    QAction*                            m_aSaveImg;
     QAction*                            m_aCamlist;
     QAction*                            m_aDisconnect;
 
@@ -85,13 +89,13 @@ private:
 
 
     /* Save Image Option */
-    //QString                             m_SaveFileDir;
-    //QString                             m_SelectedExtension;
+    QString                             m_SaveFileDir;
+    QString                             m_SelectedExtension;
     //QString                             m_SaveImageName;
     //Ui::SavingOptionsDialog             m_SaveImageOption;
     //QDialog* m_ImageOptionDialog;
     //QFileDialog* m_getDirDialog; // multiple images
-    //QFileDialog* m_saveFileDialog; // save an image
+    QFileDialog*                        m_saveFileDialog; // save an image
 
     bool                                m_bIsDisplayEveryFrame;
 
@@ -167,10 +171,12 @@ private slots:
     
     /* when you use this std convention, you don't need any "connect..." */
     void on_ActionFreerun_triggered();
+    void on_ActionSaveCameraSettings_triggered();
+    void on_ActionLoadCameraSettings_triggered();
+    void on_ActionSaveAs_triggered();
     //void on_ActionResetPosition_triggered();
     //void on_ActionHistogram_triggered();
     //void on_ActionOriginalSize_triggered();
-    //void on_ActionSaveAs_triggered();
     //void on_ActionSaveOptions_triggered();
     //void on_ActionSaveImages_triggered();
     //void on_ActionRegister_triggered();
@@ -180,8 +186,6 @@ private slots:
     //void on_ActionRightRotation_triggered();
     //void on_ActionZoomOut_triggered();
     //void on_ActionZoomIn_triggered();
-    //void on_ActionLoadCameraSettings_triggered();
-    //void on_ActionSaveCameraSettings_triggered();
     //void on_ActionLoadCameraSettingsMenu_triggered();
     //void on_ActionSaveCameraSettingsMenu_triggered();
     //void on_ActionAllow16BitTiffSaving_triggered();

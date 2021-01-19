@@ -22,8 +22,8 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     , m_bIsRedHighlighted(false)
     , m_bIsViewerWindowClosing(false)
     , m_bIsDisplayEveryFrame(false)
+    , m_saveFileDialog(NULL)
     //, m_ImageOptionDialog(NULL)
-    //, m_saveFileDialog(NULL)
     //, m_getDirDialog(NULL)
     //, m_bIsTriggeredByMultiSaveBtn(false)
     //, m_nNumberOfFramesToSave(0)
@@ -78,6 +78,10 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_QCP->plotLayout()->addElement(0, 1, m_QCPcenterAxisRect);
     m_QCP->plotLayout()->addElement(0, 0, m_QCPleftAxisRect);
     m_QCP->plotLayout()->addElement(1, 1, m_QCPbottomAxisRect);
+    /*note the index of the axrect is labeled with the position, i.e. lf=0,cter=1,bot=2, ignore cbar*/
+    m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(QFont("Times", 10));
+    m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(QFont("Times", 10));
+
 
     m_QCPcenterAxisRect->setupFullAxesBox(true);
     for (auto& plt : { m_QCPleftAxisRect, m_QCPbottomAxisRect })
@@ -102,6 +106,8 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_QCPbottomAxisRect->setMaximumSize(600, 120);
     m_QCPleftAxisRect->setMinimumSize(120, 600);
     m_QCPleftAxisRect->setMaximumSize(120, 600);
+    QRect rec = QApplication::desktop()->screenGeometry();
+    m_QCP->setMaximumSize(rec.width() / 2, rec.height());
 
     // move newly created axes on "axes" layer and grids on "grid" layer:
     foreach(QCPAxisRect * rect, m_QCP->axisRects())
@@ -131,7 +137,27 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         new QCPGraph(m_QCPleftAxisRect->axis(QCPAxis::atRight),
             m_QCPleftAxisRect->axis(QCPAxis::atBottom)));
     m_leftGraph->valueAxis()->setTickLabelRotation(90);
-    
+    /*add axis for fitted curve: index=2 is for bot, index=3 is for left*/
+    m_QCP->addGraph(m_bottomGraph->keyAxis(), m_bottomGraph->valueAxis());
+    m_QCP->addGraph(m_leftGraph->keyAxis(), m_leftGraph->valueAxis());
+    /*set pen for all graph*/
+    {
+        QPen pen;
+        pen.setStyle(Qt::DotLine);
+        pen.setWidth(3);
+        pen.setColor(QColor(230, 0, 0));
+        m_QCP->graph(2)->setPen(pen);
+        m_QCP->graph(3)->setPen(pen); 
+    }
+    {
+        QPen pen;
+        pen.setStyle(Qt::SolidLine);
+        pen.setWidth(2);
+        pen.setColor(QColor(97, 53, 242));
+        m_QCP->graph(0)->setPen(pen);
+        m_QCP->graph(1)->setPen(pen);
+    }
+
     m_QCP->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
     m_QCPbottomAxisRect->setRangeDragAxes(m_bottomGraph->keyAxis(), m_bottomGraph->valueAxis());
     m_QCPbottomAxisRect->setRangeZoomAxes(m_bottomGraph->keyAxis(), m_bottomGraph->valueAxis());
@@ -316,6 +342,36 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         }
         m_QCP->replot(); });
         
+    m_aPlotFitter = new QAction("Fitting");
+    m_aPlotFitter->setCheckable(true);
+    m_aPlotFitter->setChecked(true);
+    m_ContextMenu->addAction(m_aPlotFitter);
+    connect(m_aPlotFitter, &QAction::triggered, this, [this]() {
+        for (auto& fitgraph : { m_QCP->graph(2),m_QCP->graph(3) })
+        {
+            m_aPlotFitter->isChecked() ? fitgraph->setVisible(true) : fitgraph->setVisible(false);
+        }
+        for (auto& ax : { m_QCPbottomAxisRect->axis(QCPAxis::atBottom),m_QCPleftAxisRect->axis(QCPAxis::atLeft) })
+        {
+            m_aPlotFitter->isChecked() ?  0 : ax->setLabel(" ");
+        }
+        m_aPlotFitter->isChecked() ? m_pImgCThread->toggleDoFitting(true) : m_pImgCThread->toggleDoFitting(false);
+        m_QCP->replot(); });
+
+    m_ContextMenu->addSeparator();
+
+    m_aSaveCamSetting = new QAction("Save Setting");
+    m_ContextMenu->addAction(m_aSaveCamSetting);
+    connect(m_aSaveCamSetting, &QAction::triggered, this, &ViewerWidget::on_ActionSaveCameraSettings_triggered);
+
+    m_aLoadCamSetting = new QAction("Load Setting");
+    m_ContextMenu->addAction(m_aLoadCamSetting);
+    connect(m_aLoadCamSetting, &QAction::triggered, this, &ViewerWidget::on_ActionLoadCameraSettings_triggered);
+
+    m_aSaveImg = new QAction("Save Image");
+    m_ContextMenu->addAction(m_aSaveImg);
+    connect(m_aSaveImg, &QAction::triggered, this, &ViewerWidget::on_ActionSaveAs_triggered);
+
 
     m_ContextMenu->addSeparator();
 
@@ -536,7 +592,7 @@ ViewerWidget::~ViewerWidget()
         //    delete m_saveFileDialog;
         //    m_saveFileDialog = NULL;
         //}
-
+        Sleep(10);
         releaseBuffer();
         //delete m_pImgCThread; // NO: might need this? since need to explicitly release the sharedpointer in that class
         //no need for above since Qt will take care of that destruction
@@ -741,6 +797,7 @@ void ViewerWidget::SetCurrentScreenROI()
             }
         }
         emit m_Controller->acquisitionStartStop("AcquisitionStart");
+        Sleep(10);
         //m_QCP->rescaleAxes();
     }
     else
@@ -1243,4 +1300,403 @@ void ViewerWidget::onAcquisitionStartStop(const QString& sThisFeature)
 
     // update state of full bit depth image transfer flag in case pixel format has changed
     //on_ActionAllow16BitTiffSaving_triggered();
+}
+
+
+void ViewerWidget::on_ActionSaveCameraSettings_triggered()
+{
+    VmbErrorType err = VmbErrorSuccess;
+
+    //  create window title
+    QString windowTitle = tr("Save Camera Settings");
+
+    //  create message box
+    QMessageBox msgbox;
+    msgbox.setWindowTitle(windowTitle);
+
+    //  check if camera was opened in 'full access' mode
+    if (0 != m_sAccessMode.compare(tr("(FULL ACCESS)")))
+    {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("Camera must be opened in FULL ACCESS mode to use this feature"));
+        msgbox.exec();
+        return;
+    }
+
+    //  check if any file dialog was created already
+    if (NULL != m_saveFileDialog)
+    {
+        delete m_saveFileDialog;
+        m_saveFileDialog = NULL;
+    }
+
+    //  setup file dialog
+    m_saveFileDialog = new QFileDialog(this, windowTitle, QDir::home().absolutePath(), "*.xml");
+    m_saveFileDialog->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
+    m_saveFileDialog->selectNameFilter("*.xml");
+    m_saveFileDialog->setAcceptMode(QFileDialog::AcceptSave);
+
+    //  show dialog
+    int rval = m_saveFileDialog->exec();
+    if (0 == rval)
+    {
+        return;
+    }
+
+    //  get selected file
+    m_SaveFileDir = m_saveFileDialog->directory().absolutePath();
+    QStringList selectedFiles = m_saveFileDialog->selectedFiles();
+    if (true == selectedFiles.isEmpty())
+    {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("No file selected"));
+        msgbox.exec();
+        return;
+    }
+
+    //  delete file dialog
+    //  (to prevent OCT-1870 bug occured with Qt v4.7.1)
+    delete m_saveFileDialog;
+    m_saveFileDialog = NULL;
+
+    //  get selected file
+    QString selectedFile = selectedFiles.at(0);
+    if (false == selectedFile.endsWith(".xml"))
+    {
+        selectedFile.append(".xml");
+    }
+
+    //  setup behaviour for loading and saving camera features
+    m_pCam->LoadSaveSettingsSetup(VmbFeaturePersistNoLUT, 5, 4);
+
+    //  call VimbaCPP save function
+    QString msgtext;
+    err = m_pCam->SaveCameraSettings(selectedFile.toStdString());
+    if (VmbErrorSuccess != err)
+    {
+        msgtext = tr("There have been errors during saving feature values.\n");
+        msgtext.append(tr("[Error code: %1]\n").arg(err));
+        msgtext.append(tr("[file: %1]").arg(selectedFile));
+        onFeedLogger("ERROR: SaveCameraSettings returned: " + QString::number(err) + ". For details activate VimbaC logging and check out VmbCameraSettingsSave.log");
+        msgbox.setIcon(QMessageBox::Warning);
+        msgbox.setText(msgtext);
+        msgbox.exec();
+        return;
+    }
+    else
+    {
+        msgtext = tr("Successfully saved device settings to\n'");
+        msgtext.append(selectedFile);
+        msgtext.append("'");
+        msgbox.setIcon(QMessageBox::Information);
+        msgbox.setText(msgtext);
+        msgbox.exec();
+    }
+}
+
+void ViewerWidget::on_ActionLoadCameraSettings_triggered()
+{
+    bool proceedLoading = true;
+
+    //  create window title
+    QString windowTitle = tr("Load Camera Settings");
+
+    //  setup message boxes
+    QMessageBox msgbox;
+    msgbox.setWindowTitle(windowTitle);
+    QMessageBox msgbox2;
+    msgbox2.setStandardButtons(QMessageBox::Yes);
+    msgbox2.addButton(QMessageBox::No);
+    msgbox2.setDefaultButton(QMessageBox::No);
+
+    //  check if camera was opened in 'full access' mode
+    if (0 != m_sAccessMode.compare(tr("(FULL ACCESS)")))
+    {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("Camera must be opened in FULL ACCESS mode to use this feature"));
+        msgbox.exec();
+        return;
+    }
+
+    //  check if any file dialog was created already
+    if (NULL != m_saveFileDialog)
+    {
+        delete m_saveFileDialog;
+        m_saveFileDialog = NULL;
+    }
+
+    //  create file dialog
+    m_saveFileDialog = new QFileDialog(this, windowTitle, QDir::home().absolutePath(), "*.xml");
+    m_saveFileDialog->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
+    m_saveFileDialog->selectNameFilter("*.xml");
+    m_saveFileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+    m_saveFileDialog->setFileMode(QFileDialog::ExistingFile);
+
+    //  show dialog
+    int rval = m_saveFileDialog->exec();
+    if (0 == rval)
+    {
+        return;
+    }
+
+    //  get selected file
+    m_SaveFileDir = m_saveFileDialog->directory().absolutePath();
+    QStringList selectedFiles = m_saveFileDialog->selectedFiles();
+    if (true == selectedFiles.isEmpty())
+    {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("No file selected"));
+        msgbox.exec();
+        return;
+    }
+
+    //  delete file dialog
+    //  (to prevent OCT-1870 bug occured with Qt v4.7.1)
+    delete m_saveFileDialog;
+    m_saveFileDialog = NULL;
+
+    //  get selected file
+    QString selectedFile = selectedFiles.at(0);
+
+    //  check if xml file is valid
+    if (false == selectedFile.endsWith(".xml"))
+    {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("Invalid xml file selected.\nFile must be of type '*.xml'"));
+        msgbox.exec();
+        return;
+    }
+
+    //  create and prepare xml parser
+    //  to check if model name differences between xxml file
+    //  and connected camera exist
+    QXmlStreamReader xml;
+    QFile xmlFile(selectedFile);
+    QString deviceModel = QString("");
+
+    //  open xml file stream
+    bool check = xmlFile.open(QIODevice::ReadOnly);
+    if (false == check)
+    {
+        msgbox2.setIcon(QMessageBox::Warning);
+        msgbox2.setText(tr("Could not validate camera model.\nDo you want to proceed loading settings to selected camera ?"));
+        rval = msgbox2.exec();
+        if (QMessageBox::No == rval)
+        {
+            proceedLoading = false;
+        }
+    }
+    else
+    {
+        //  connect opened file with xml stream object
+        xml.setDevice(&xmlFile);
+    }
+
+    //  proceed loading camera settings only if flag still true
+    if (true == proceedLoading)
+    {
+        //  read xml structure
+        while (false == xml.atEnd())
+        {
+            //  get current xml token
+            xml.readNext();
+            QString currentToken = xml.name().toString();
+
+            //  check if token is named 'CameraSettings'
+            if (0 == currentToken.compare("CameraSettings"))
+            {
+                //  get token attributes and iterate through them
+                QXmlStreamAttributes attributes = xml.attributes();
+                for (int i = 0; i < attributes.count(); ++i)
+                {
+                    //  get current attribute
+                    QXmlStreamAttribute currentAttribute = attributes.at(i);
+
+                    //  check if current attribute is name 'CameraModel'
+                    QString attributeName = currentAttribute.name().toString();
+                    if (0 == attributeName.compare("CameraModel"))
+                    {
+                        deviceModel = currentAttribute.value().toString();
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        //  close xml file stream
+        xmlFile.close();
+
+        //  check if deviceModel was retrieved from xml file
+        if (true == deviceModel.isEmpty())
+        {
+            msgbox2.setIcon(QMessageBox::Warning);
+            msgbox2.setText(tr("Could not validate camera model.\nDo you want to proceed loading settings to selected camera ?"));
+            rval = msgbox2.exec();
+            if (QMessageBox::No == rval)
+            {
+                proceedLoading = false;
+            }
+        }
+    }
+
+    //  proceed loading camera settings only if flag still true
+    std::string modelName;
+    if (true == proceedLoading)
+    {
+        //  get model name from connected camera
+        const VmbErrorType err = m_pCam->GetModel(modelName);
+        if (VmbErrorSuccess != err)
+        {
+            msgbox2.setIcon(QMessageBox::Warning);
+            msgbox2.setText(tr("Could not validate camera model.\nDo you want to proceed loading settings to selected camera ?"));
+            rval = msgbox2.exec();
+            if (QMessageBox::No == rval)
+            {
+                proceedLoading = false;
+            }
+        }
+    }
+
+    //  proceed loading camera settings only if flag still true
+    if (true == proceedLoading)
+    {
+        //  compare mode names from xml file and from
+        //  connected device with each other
+        if (0 != deviceModel.compare(QString(modelName.c_str())))
+        {
+            QString msgtext = tr("Selected camera model is different from xml file.\n");
+            msgtext.append(tr("[camera: %1]\n").arg(modelName.c_str()));
+            msgtext.append(tr("[xml: %1]\n\n").arg(deviceModel));
+            msgtext.append(tr("Do you want to proceed loading operation ?"));
+            msgbox2.setIcon(QMessageBox::Warning);
+            msgbox2.setText(msgtext);
+            rval = msgbox2.exec();
+            if (QMessageBox::No == rval)
+            {
+                proceedLoading = false;
+            }
+        }
+    }
+
+    //  proceed loading camera settings only if flag still true
+    if (true == proceedLoading)
+    {
+        //  setup behaviour for loading and saving camera features
+        m_pCam->LoadSaveSettingsSetup(VmbFeaturePersistNoLUT, 5, 4);
+
+        //  call load method from VimbaCPP
+        const VmbErrorType err = m_pCam->LoadCameraSettings(selectedFile.toStdString());
+        if (VmbErrorSuccess != err)
+        {
+            QString msgtext = tr("There have been errors during loading of feature values.\n");
+            msgtext.append(tr("[Error code: %1]\n").arg(err));
+            msgtext.append(tr("[file: %1]").arg(selectedFile));
+            onFeedLogger("ERROR: LoadCameraSettings returned: " + QString::number(err) + ". For details activate VimbaC logging and check out VmbCameraSettingsLoad.log");
+            msgbox.setIcon(QMessageBox::Warning);
+            msgbox.setText(msgtext);
+            msgbox.exec();
+            return;
+        }
+        else
+        {
+            msgbox.setIcon(QMessageBox::Information);
+            QString msgtext = tr("Successfully loaded device settings\nfrom '%1'").arg(selectedFile);
+            msgbox.setText(msgtext);
+            msgbox.exec();
+        }
+    }
+}
+
+/* Saving an image */
+void ViewerWidget::on_ActionSaveAs_triggered()
+{
+    // make a copy of the images before save-as dialog appears (image can change during time dialog open)
+    QVector<double> imgSave;
+    imgSave = std::move(m_pImgCThread->rawImageDefinite());
+    //imgSave = QVector<double>(m_pImgCThread->rawImage().begin(), m_pImgCThread->rawImage().end());
+    auto [imgWidth, imgHeight] = m_pImgCThread->WidthHeight();
+
+
+    QString     fileExtension;
+    bool        isImageAvailable = true;
+
+    if (imgSave.isEmpty())
+    {
+        isImageAvailable = false;
+    }
+    else
+    {
+        if (NULL != m_saveFileDialog)
+        {
+            delete m_saveFileDialog;
+            m_saveFileDialog = NULL;
+        }
+
+        fileExtension = "*.pdf ;; *.csv";
+
+        m_saveFileDialog = new QFileDialog(this, tr("Save Image"), m_SaveFileDir, fileExtension);
+        m_saveFileDialog->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
+        m_saveFileDialog->selectNameFilter("*.csv");
+        m_saveFileDialog->setViewMode(QFileDialog::Detail);
+        m_saveFileDialog->setAcceptMode(QFileDialog::AcceptSave);
+
+        if (m_saveFileDialog->exec())
+        {   //OK
+            m_SelectedExtension = m_saveFileDialog->selectedNameFilter();
+            m_SaveFileDir = m_saveFileDialog->directory().absolutePath();
+            QStringList files = m_saveFileDialog->selectedFiles();
+
+            if (!files.isEmpty())
+            {
+                QString fileName = files.at(0);
+
+                bool saved = false;
+
+                if (!fileName.endsWith(m_SelectedExtension.section('*',-1)))
+                {
+                    fileName.append(m_SelectedExtension);
+                }
+                if (0 == m_SelectedExtension.compare("*.pdf"))
+                {
+                    saved = m_QCP->savePdf(fileName, 0, 0, QCP::epNoCosmetic);
+                }
+                else if (0 == m_SelectedExtension.compare("*.csv"))
+                {
+                    QFile file(fileName);
+                    if (file.open(QIODevice::ReadWrite)) 
+                    {
+                        QTextStream stream(&file);
+                        for (size_t i = 0; i < imgHeight; i++)
+                        {
+                            for (size_t j = 0; j < imgWidth; j++)
+                            {
+                                stream << imgSave[i * imgWidth + j];
+                                j == imgWidth - 1 ? stream << "," : stream << endl;
+                            }
+                        }
+                    }
+                    saved = true;
+                }
+                
+                if (true == saved)
+                {
+                    QMessageBox::information(this, tr("Vimba Viewer"), tr("Image: ") + fileName + tr(" saved successfully"));
+                    m_InformationWindow->feedLogger("Logging", "saved successfully to " + m_SaveFileDir + fileName, VimbaViewerLogCategory_OK);
+                }
+                else
+                {
+                    QMessageBox::warning(this, tr("Vimba Viewer"), tr("Error saving image"));
+                    m_InformationWindow->feedLogger("Logging", "Error saving image " + m_SaveFileDir + fileName, VimbaViewerLogCategory_ERROR);
+                }
+
+            }
+        }
+    }
+
+    if (!isImageAvailable)
+    {
+        QMessageBox::warning(this, tr("Vimba Viewer"), tr("No image to save"));
+        m_InformationWindow->feedLogger("Logging", "image is empty, probably because the buffer is clean when click to save. Filepath ", VimbaViewerLogCategory_ERROR);
+    }
 }
