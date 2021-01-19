@@ -19,8 +19,8 @@ typedef QVector<CameraInfo>     CameraInfoVector;
 
 enum ViewerGridGeometry
 {
-    ncols = 3,
-    nrows = 2,
+    ncols = 2,
+    nrows = 1,
     total = nrows * ncols
 };
 
