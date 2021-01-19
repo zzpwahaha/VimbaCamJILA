@@ -1,0 +1,374 @@
+                         Hacking on GSL
+
+The GSL hacker needs some stuff that the end users don't:
+
+   Autoconf >= 2.60
+   Automake >= 1.10
+   Libtool  >= 1.5.24
+   Texinfo  >= 4.0
+
+Once you have this stuff, you can get the repository and start
+working from your own machine.  
+
+GSL development is hosted at http://savannah.gnu.org/projects/gsl
+
+# ANONYMOUS CHECKOUT
+
+To do the initial checkout of the repository try:
+
+   git clone git://git.savannah.gnu.org/gsl.git
+
+[from now on you can just do "git pull" in the gsl directory]
+
+To generate the initial build scripts, run autoreconf -i -v or ./autogen.sh
+
+# PEOPLE WITH SAVANNAH SSH WRITE ACCESS:
+
+  git clone <membername>@git.sv.gnu.org:/srv/git/gsl.git
+
+  # editing and committing
+  <edit file1>
+  git add file2
+  git rm file3
+  git diff  # see changes
+  git commit -m 'commit message' file1 file2 file3
+  
+  # push to repository
+  git push
+
+# PEOPLE WHO JUST WANT A WORKING VERSION
+grab the latest bundled release at
+  ftp://ftp.gnu.org/pub/gnu/gsl/
+
+Please send a message to help-gsl@gnu.org if any of these steps don't
+work.
+
+---------- submitting patches
+
+The best way to send us a patch is to compile from an anonymous git
+checkout and to use a nice diff option, like 
+
+  git diff -p1
+
+Note: Please test your patch before sending it, by applying it to a
+clean set of files and running 'make'.
+
+If your patch contains lines longer than 80 characters please check
+that your mailer does not break these lines.  If in doubt, send the
+patch as a mime attachment or uuencoded file.
+
+Before submitting a patch you may want to search the mailing list
+archives for related information. There is a search facility for the
+mailing list available at,
+
+  http://lists.gnu.org/archive/html/bug-gsl/
+
+---------- useful scripts
+
+There are some useful perl scripts in the scripts/ directory:
+
+  mkheaders.pl -- updates header files for different types from 
+                  the "float" version
+
+  mkdefuns.pl  -- creates a texinfo fragment from the function 
+                  prototypes in a header file
+
+---------- some special targets
+
+To check for ansi compliance define a bash alias "makestrict",
+
+    makestrict () { make $* CFLAGS="-ansi -pedantic -Werror -W -Wall -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -fshort-enums -fno-common -Wmissing-prototypes -Wnested-externs -Dinline= -g -O4" } ;
+
+which lets you type things like
+
+    makestrict check
+
+Note that total compliance to makestrict is not necessary, but it is a
+useful way to locate possible problems. If you can compile your code
+with
+
+    makestrict
+    makestrict CC=c++ 
+
+then that's a good test for portability.
+
+---------- warning about picking up old header files
+
+When compiling the library it's important to use the local copies of
+the header files, and not ones that have been installed previously in
+/usr/local/include.
+
+There can be confusing errors if the installed and local copies of the
+headers get mixed up!  (In particular, some of them only show up when
+doing 'make distcheck')
+
+To put the local copies on your include path you need, in your Makefile.am,
+
+INCLUDES = -I$(srcdir)/..
+
+srcdir is always your working dir, and so $(srcdir)/.. is the
+top-level dir where gsl_math.h and gsl_complex.h are located.
+
+---------- fixing Makefile.am
+
+The SUBDIRS and SUBLIBS variables have to be updated manually.
+
+----------- Pre-release checks
+
+* Make all internal functions static, and have all exported functions
+& variables prefixed with gsl_ or GSL_. Useful command for checking this: 
+
+> nm -A -g -P .libs/*.a  | perl -a -n -e 'print if $F[1] !~ /gsl_/ && $F[2] ne "U"'
+
+* Make sure config.h is used consistently. This is especially relevant
+for HAVE_INLINE use in installed headers.  
+
+> grep config.h gsl/*.h    --- shouldn't match anything
+> grep -L config.h */*.c | grep -v _source | grep -v test_  --- gives files not using config.h
+
+* Make a master gsl header file and try compiling it to test all possible conflicts
+> cat gsl/*.h > tmp.c
+> gcc -g -Wall -W -c tmp.c
+> g++ -g -Wall -W -I. -c tmp.c
+
+* #undef GSL_DISABLE_DEPRECATED in config.h and
+> make clean && make && make check
+
+* Check that the library passes "make check" with various compiler flags
+> make clean && ./configure CFLAGS="-g -Wall -ansi -pedantic" && make && make check
+> make clean && ./configure CFLAGS="-O3 -mfpmath=sse -msse2" && make && make check
+> make clean && ./configure CFLAGS="-funsigned-char" && make && make check
+> make clean && ./configure CFLAGS="-std=c89 -ansi -pedantic" && make && make check
+
+* Check that the library passes parallel build and check
+> make clean && ./configure && make -j8 && make check -j8
+
+* Also do a compilation in c89 and c99 mode explicitly
+> make clean && ./configure CC=c89 && make && make check
+> make clean && ./configure CC=c99 && make && make check
+
+* If intel compilers are available,
+> make clean && ./configure CC=icc && make && make check
+
+* Test example programs compilation and output
+> make check && sh scripts/test_examples.sh
+
+* Make sure the library passes "make check" with GSL_TEST_VERBOSE=1
+(it is possible to get segfaults in the verbose test output functions
+if they are called with the wrong format string, and these don't show up otherwise).
+> export GSL_TEST_VERBOSE=1 && make check
+
+* Do make distcheck with /usr/bin/install and install-sh
+> make distcheck
+> make distcheck INSTALL=/path/to/gsl/install-sh  # absolute location of install-sh
+
+----------- Notes on making a release
+
+* Edit the version numbers in configure.ac:
+  AC_INIT     (remove the + for a release and add it back after the release)
+  dnl gsl-X.Y (follow the comments in this section)
+  GSL_CURRENT
+  GSL_REVISION
+  GSL_AGE
+
+* Adjust the libtool version numbers according to the procedure in the
+  Libtool manual (Updating library version information).  Use 'nm' to
+  check what functions have been added and removed.
+
+* run:
+  > autoreconf -W all
+  to check any obsolete directives in configure.ac, as well
+  as the Makefile.am's
+
+* Update the NEWS file.
+
+* Update the BUGS file using scripts/BUGS.pl
+
+* Update doc version and gsl-ref.info:
+> cd doc
+> *edit conf.py and put correct version number; also make sure copyright years are correct*
+> make info
+
+* Regenerate everything. make dist, unpack somewhere and then
+configure, make, make check.  Try running make check under ulimit -v
+65536 to be sure that excessive memory is not required to do the
+compilation. Also cd doc ; make html
+
+* Test with bounds checking version of GCC and valgrind (belt and braces)
+Note that you can run all the test under valgrind with the TESTS_ENVIRONMENT
+variable
+
+  $ TESTS_ENVIRONMENT="valgrind --tool=memcheck" make check
+
+or
+
+  $ sh scripts/runvalgrind.sh
+
+Note that this only works if configure was run with --disable-shared,
+because otherwise the shared library libtool scripts themselves are
+run under valgrind giving misleading results. Also, compile everything
+with: make CFLAGS="-g -Wall" since optimization can cause valgrind to
+report uninitialized memory errors which don't really exist.
+
+* Tag release:
+> git tag release-X-Y
+> git push origin release-X-Y
+
+* Upload to ftp-upload.gnu.org with GPG signatures (see http://www.gnu.org/prep/maintain/maintain.html)
+  /incoming/ftp for official releases (use scripts/mkrelease.sh)
+  /incoming/alpha for test releases (use scripts/mktestrelease.sh)
+
+  3 files to upload:
+  * gsl-X.Y.tar.gz
+  * gsl-X.Y.tar.gz.sig
+  * gsl-X.Y.tar.gz.directive.asc
+
+  Ensure that the directive file contains a symlink for gsl-latest.tar.gz
+
+* Submit updated entry to GNU Free Software Directory.
+
+* Update webpages, including the link to the NEWS file (see below)
+
+* Announce on the mailing lists info-gsl@gnu.org,
+gsl-announce@sourceware.org, info-gnu@gnu.org.  It is best to announce
+on the smaller lists first before announcing on info-gnu@gnu.org to
+catch any errors. Remember to check the version number is updated in
+all announcements!
+
+* Later you can post an announcement on the na-digest list
+na.digest@na-net.ornl.gov or freshmeat.net
+
+----------- Notes on updating documentation
+
+    # First you must have the sphinx software installed
+    $ pip install -U Sphinx
+    $ pip install -U sphinx_rtd_theme
+
+    # sync new html tree in gsl_www CVS area:
+    $ cd doc
+    *edit conf.py and make sure version number and copyright years are correct*
+    $ make clean ; make html ; make latexpdf
+    $ rsync -av --delete --cvs-exclude _build/ /path/to/www/gsl/doc/
+
+    # Remove any deleted/renamed files
+    $ cd /path/to/www/gsl
+    $ cvs remove
+
+    # Add any new files; first add directories not called CVS; then
+    # add all the files in the directories
+    $ cd /path/to/www/gsl/doc/html
+    $ find . -type d \! -name CVS -exec cvs add '{}' \;
+    $ find . \( -type d -name CVS -prune \) -o \( -type f -exec cvs add '{}' \; \)
+
+    # same for doctrees directory
+    $ cd /path/to/www/gsl/doc/doctrees
+    $ find . -type d \! -name CVS -exec cvs add '{}' \;
+    $ find . \( -type d -name CVS -prune \) -o \( -type f -exec cvs add '{}' \; \)
+
+    # Edit the checked out gsl.html and update version numbers
+
+    # Commit new html tree
+    $ cvs commit
+
+    # Tag for version X.Y
+    $ cvs tag release-X-Y
+
+### Old instructions
+
+* edit doc/gsl-ref.texi and make sure copyright years are current
+
+* At minimum 'touch doc/gsl-ref.texi' so that the date on the first page
+  will be updated correctly
+
+* Make html docs using texi2html, 
+
+    cd doc ; mkdir html ; cd html
+    ../texi2html -verbose -split_chapter -expandinfo ../gsl-ref.texi
+
+* Make complete GNU docs using Gendocs.sh
+
+    $ cd doc
+    $ wget "http://savannah.gnu.org/cgi-bin/viewcvs/~checkout~/texinfo/texinfo/util/gendocs.sh"
+    $ wget "http://savannah.gnu.org/cgi-bin/viewcvs/~checkout~/texinfo/texinfo/util/gendocs_template"
+    $ sh gendocs.sh --html --ifinfo gsl-ref "GNU Scientific Library -- Reference"
+    # The --html --ifinfo flags above ensure that the @ifinfo sections are expanded in the HTML versions,
+    # otherwise the equations won't show up properly
+    # $ sh gendocs.sh gsl-ref "GNU Scientific Library -- Reference"
+
+    # PDF might fail in above step due to eps files, execute these commands for PDF/PS generation
+    $ make ps ; ps2pdf gsl-ref.ps gsl-ref.pdf
+    $ gzip gsl-ref.ps
+    $ mv gsl-ref.ps.gz gsl-ref.pdf manual/
+
+    # Edit manual/index.html and manually add entry for gsl-ref.ps.gz and update size info for gsl-ref.pdf
+
+    # Checkout CVS html tree (see below for instructions) and copy new files over:
+    $ rsync -va manual /path/to/www/gsl
+
+    # Remove any deleted/renamed files
+    $ cd /path/to/www/gsl
+    $ cvs remove
+
+    # Add any new files
+    $ cd /path/to/www/gsl/manual/html_node
+    $ cvs add *.html
+
+    # Edit the checked out gsl.html and update version numbers
+
+    # Commit new html tree
+    $ cvs commit
+
+* Tag with "cvs tag release-X-Y" for version X.Y
+
+----------------------------------------------------------------------
+
+Notes for Volunteers
+====================
+
+1) Study the GSL Design Document at http://www.gnu.org/software/gsl/
+It contains the project coding standards and other useful information.
+
+2) Make sure you are allowed to release code under the GPL. It may be
+necessary to get a written disclaimer from your employer to confirm
+it.  You don't need to assign copyright to us, but you need to check
+that you are allowed to release GPL software -- otherwise the work
+will be wasted.
+
+3) Tell Patrick Alken (alken@colorado.edu) what you plan to do
+(I'll make sure nobody else starts on it).  Subscribe to the
+gsl-discuss@sourceware.org mailing list (a digest version is
+available to avoid too many messages)
+
+4) Literature search (this is discussed in the Design document).
+
+5) Post on gsl-discuss@sourceware.org periodically to keep us
+updated of your progress.  Make patches available somewhere for people
+to try out.  Code goes into GSL when it is stable and well-tested, and
+has documentation.
+
+----------------------------------------------------------------------
+
+Savannah Information
+========================
+
+Developer Access via SSH.
+
+Only project developers can access the git tree via this method. SSH2
+must be installed on your client machine.  Put the following 
+in your ~/.ssh/config file:
+
+  Host git.sv.gnu.org
+    IdentityFile /path/to/savannah_key
+
+In the example below substitute 'USER' with your account username.
+Your savannah web password is not used for git --- you have to
+register an SSH Shared key in the Account Maintenance page.
+
+Source tree:
+
+  git clone USER@git.sv.gnu.org:/srv/git/gsl.git
+
+HTML tree:
+
+  export CVS_RSH=ssh
+  cvs -z3 -d:ext:USER@cvs.sv.gnu.org:/web/gsl co gsl
