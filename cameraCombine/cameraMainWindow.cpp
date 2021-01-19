@@ -1148,6 +1148,8 @@ void cameraMainWindow::openViewer(CameraInfo& info)
             m_ViewerGridPlaceHolder.at(m_activeViewerGrid->getActiveIndex()),
             m_Viewer.back());
         //m_ViewerGridLayout->addWidget()
+        QRect rec = QApplication::desktop()->screenGeometry();
+        m_Viewer.back()->setMaximumSize(rec.width() / 2, rec.height());
         m_Viewer.back()->show();
         //m_Viewer.back()->setStyleSheet("border: 1px solid red");
         m_Viewer.back()->getmContextMenu()->addSeparator();

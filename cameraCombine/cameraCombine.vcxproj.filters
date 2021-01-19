@@ -261,6 +261,9 @@
     <ClInclude Include="UI\HexEditor\XByteArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UI\Gaussian1DFit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExternLib\qwt\qwt_abstract_legend.cpp">
@@ -633,6 +636,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UI\MainInformationWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Gaussian1DFit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

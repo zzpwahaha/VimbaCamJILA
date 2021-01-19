@@ -23,6 +23,7 @@
     <QtMoc Include="UI\CameraTreeWindow.h" />
     <QtMoc Include="UI\ControllerTreeWindow.h" />
     <QtMoc Include="UI\ExComboBox.h" />
+    <ClInclude Include="UI\Gaussian1DFit.h" />
     <ClInclude Include="UI\HexEditor\Commands.h" />
     <QtMoc Include="UI\HexEditor\HexMainWindow.h" />
     <QtMoc Include="UI\HexEditor\HexOptionDialog.h" />
@@ -244,6 +245,7 @@
     <ClCompile Include="FeatureObserver.cpp" />
     <ClCompile Include="FrameObserver.cpp" />
     <ClCompile Include="ImageProcessingThread.cpp" />
+    <ClCompile Include="UI\Gaussian1DFit.cpp" />
     <ClCompile Include="UI\ImageCalculatingThread.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -301,33 +303,33 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>D:\freeglut\include;D:\glew-2.1.0\include;D:\Allied Vision\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>D:\freeglut\lib\x64;D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;D:\glew-2.1.0\lib\Debug\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)ExternLib\GSL_MSVC;D:\Allied Vision\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>D:\freeglut\include;D:\glew-2.1.0\include;D:\Allied Vision\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>D:\freeglut\lib\x64;D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;D:\glew-2.1.0\lib\Release\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)ExternLib\GSL_MSVC;D:\Allied Vision\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>VimbaCPP.lib;VimbaImageTransform.lib;freeglut.lib;glew32d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;GSL_DLL;CBL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>VimbaCPP.lib;VimbaImageTransform.lib;freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\Allied Vision\Vimba_4.2;$(ProjectDir);$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <PreprocessorDefinitions>QCUSTOMPLOT_USE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;GSL_DLL;CBL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">

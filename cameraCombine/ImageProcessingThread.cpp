@@ -116,10 +116,9 @@ void ImageProcessingThread::run()
                     m_width = tmpFrameData.Width();
                     m_imageDataReady = true;
                     m_imageCalcWait.wakeOne();
-                    m_imageProcWait.wait(&m_imageLock);
-
+                    m_imageProcWait.wait(&m_imageLock,2000);
+                    m_doubleQVector.clear();
                     m_imageLock.unlock();
-
 
                     /*emit frameReadyFromThread(uint16Vector, sFormat, QString::number(tmpFrameData.Height()),
                         QString::number(tmpFrameData.Width()));*/

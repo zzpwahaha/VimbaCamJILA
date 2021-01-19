@@ -1,9 +1,12 @@
 #pragma once
 #include <QThread>
+#include <qtconcurrentrun.h>
 #include <VimbaCPP/Include/VimbaSystem.h>
 #include "FrameObserver.h"
 
 #include "ExternLib/qcustomplot/qcustomplot.h"
+#include "Gaussian1DFit.h"
+#include <utility>
 
 class ImageCalculatingThread :
     public QThread
@@ -21,6 +24,8 @@ private:
     QVector<double>                           m_doubleQVector;
     QVector<double>                           m_doubleCrxX;
     QVector<double>                           m_doubleCrxY;
+    QVector<double>                           m_bottomKey;
+    QVector<double>                           m_leftKey;
     int                                       m_height;
     int                                       m_width;
     int                                       m_heightMax;
@@ -32,10 +37,16 @@ private:
     double                                    m_cameraGain;
 
     bool                                      m_firstStart;
+    bool                                      m_dataValid;
 
     bool                                      m_Stopping;
 
+    bool                                      m_doFitting;
+
     QPoint                                    m_mousePos;
+
+    Gaussian1DFit                             m_gfitBottom;
+    Gaussian1DFit                             m_gfitLeft;
 public:
     ImageCalculatingThread(const SP_DECL(FrameObserver)& ,
         const CameraPtr&,
@@ -54,7 +65,7 @@ public:
 
 private:
     void calcCrossSectionXY();
-
+    void fit1dGaussian();
 
 public:
     virtual void run() override;
@@ -68,6 +79,7 @@ public:
     const QString& format() const { return m_format; }
     const double exposureTime() const { return m_exposureTime; }
     const double cameraGain() const { return m_cameraGain; }
+    QVector<double> rawImageDefinite();  /*used in save image*/
     QMutex& mutex() const { return m_pProcessingThread->mutex(); }
 
 signals:
@@ -76,5 +88,6 @@ signals:
 public slots:
     
     void updateMousePos(QMouseEvent* event);
+    void toggleDoFitting(bool dofit);
 };
 
