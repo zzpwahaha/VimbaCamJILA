@@ -34,6 +34,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     QTime openTimer;
     openTimer.start();
 
+    /***********************************************************************/
     /* setup information window */
     m_DiagInfomation = new QDialog(this);
     m_DiagInfomation->setModal(false);
@@ -46,7 +47,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     infoLayout->setContentsMargins(0, 0, 0, 0);
     //m_DiagInfomation->show();
 
-
+    /***********************************************************************/
     /*connect to camera*/
     errorType = m_pCam->Open(VmbAccessModeFull);
     m_sAccessMode = tr("(FULL ACCESS)"); //it is always full access since we do not allow other connection type
@@ -68,7 +69,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     this->setWindowTitle(sID);
     m_bIsCamOpen = true;
 
-
+    /***********************************************************************/
     /*QCP viewer widget: colormap + side/bottom plot*/
     m_QCP = QSharedPointer<QCustomPlot>(new QCustomPlot());
     m_QCP->plotLayout()->clear();
@@ -175,6 +176,8 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_leftGraph->keyAxis()->setTicker(intTicker);
     m_bottomGraph->keyAxis()->setTicker(intTicker);
 
+
+    /***********************************************************************/
     /*tracer for the bottom and left plot*/
     m_QCPtracerbottom = new QCPItemTracer(m_QCP.data());
     m_QCPtracerbottom->setClipAxisRect(m_bottomGraph->keyAxis()->axisRect());
@@ -202,26 +205,98 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_QCPtraceTextleft->position->setCoords(-12, 0);
 
     connect(m_QCP.data(), &QCustomPlot::mouseMove, this, &ViewerWidget::onSetMousePosInCMap);
-    connect(m_QCP.data(), &QCustomPlot::mousePress, this, [this](QMouseEvent* event) {
-        if (event->button() == Qt::LeftButton) { return false; }
-        else { m_ContextMenu->exec(QCursor::pos()); return true; } });
+    m_QCP->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_QCP.data(), &QCustomPlot::customContextMenuRequested, this, [this](QPoint) {
+        m_ContextMenu->exec(QCursor::pos()); });
+    //connect(m_QCP.data(), &QCustomPlot::mousePress, this, [this](QMouseEvent* event) {
+    //    if (event->button() == Qt::LeftButton) { return false; }
+    //    else { m_ContextMenu->exec(QCursor::pos()); return true; } });
+    
     connect(m_QCP.data(), &QCustomPlot::mouseDoubleClick, this, [this]() {
         m_pImgCThread->setDefaultView();
         m_QCP->replot(); });
+
     
+    /***********************************************************************/
+    /*manual range silder*/
+    m_DiagRSlider = new QDialog(this);
+    m_DiagRSlider->setWindowTitle("Color Scale Slider");
+    m_DiagRSlider->setWindowFlags(m_DiagRSlider->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    m_DiagRSlider->setMaximumSize(300, 700);
+    auto axslid = new QCustomPlot();
+    axslid->yAxis->setRange(0, 4095);
+    for (auto& ax : { axslid->xAxis,axslid->xAxis2 ,axslid->yAxis2 })
+    {
+        ax->setVisible(false);
+        ax->setPadding(0);
+        ax->setLabelPadding(0);
+        ax->setTickLabelPadding(0);
+        ax->setTickLabels(false);
+    }
+    //axslid->axisRect()->setSizeConstraintRect(QCPLayoutElement::scrInnerRect);
+    axslid->replot();
+    m_RSliderV = new RangeSlider(Qt::Vertical, RangeSlider::Option::DoubleHandles);
+    m_RSliderV->SetRange(-4095, 0);
+    m_RSliderV->setMaximumHeight(400);
+    
+    m_upperSB = new QSpinBox(m_DiagRSlider);
+    m_upperSB->setRange(0, 4095);
+    m_upperSB->setValue(4095);
+    m_lowerSB = new QSpinBox(m_DiagRSlider);
+    m_lowerSB->setRange(0, 4095);
+
+    QGridLayout* vRSlayout = new QGridLayout(m_DiagRSlider);
+    QHBoxLayout* vSB1 = new QHBoxLayout();
+    QHBoxLayout* vSB2 = new QHBoxLayout();
+    {
+        vSB1->addWidget(new QLabel("Upper: "), 0);
+        vSB1->addWidget(m_upperSB, 1);
+        vSB2->addWidget(new QLabel("Lower: "), 0);
+        vSB2->addWidget(m_lowerSB, 1);
+    }
+    vRSlayout->addLayout(vSB1, 0, 0, 1, 2);
+    vRSlayout->addLayout(vSB2, 1, 0, 1, 2);
+    vRSlayout->addWidget(axslid, 2, 0);
+    vRSlayout->addWidget(m_RSliderV, 2, 1);
+
+    connect(m_RSliderV, &RangeSlider::lowerValueChanged, m_upperSB, [this](int l) {
+        if (abs(l) != m_upperSB->value() && abs(l) > m_lowerSB->value())
+            m_upperSB->setValue(abs(l)); });
+    connect(m_RSliderV, &RangeSlider::upperValueChanged, m_lowerSB, [this](int u) {
+        if (abs(u) != m_lowerSB->value() && abs(u) < m_upperSB->value())
+            m_lowerSB->setValue(abs(u)); });
+    connect(m_upperSB, qOverload<int>(&QSpinBox::valueChanged), m_RSliderV, [this](int val) {
+        if (val != abs(m_RSliderV->GetLowerValue()) && val > abs(m_RSliderV->GetUpperValue()))
+            m_RSliderV->setLowerValue(-val);
+        });
+    connect(m_lowerSB, qOverload<int>(&QSpinBox::valueChanged), m_RSliderV, [this](int val) {
+        if (val != abs(m_RSliderV->GetUpperValue()) && val < abs(m_RSliderV->GetLowerValue()))
+            m_RSliderV->setUpperValue(-val);
+        });
+    connect(m_RSliderV, &RangeSlider::lowerValueChanged, this, [this](int val) {
+        m_colorScale->setDataRange(QCPRange(m_colorScale->dataRange().lower, abs(val)));
+        /*m_QCP->replot();*/ });
+    connect(m_RSliderV, &RangeSlider::upperValueChanged, this, [this](int val) {
+        m_colorScale->setDataRange(QCPRange(abs(val), m_colorScale->dataRange().upper));
+        /*m_QCP->replot();*/ });
+
+    connect(m_RSliderV, &RangeSlider::sizeChanged, axslid, [axslid](int height) {
+        axslid->axisRect()->setMaximumSize(50, height+16);
+        axslid->axisRect()->setMinimumSize(10, height+16);
+        axslid->replot();
+        });
+
+    connect(m_QCP.data(), &QCustomPlot::axisDoubleClick, this, [this](QCPAxis* axis, QCPAxis::SelectablePart part) {
+        if (axis == m_colorScale->axis() && m_aManualCscale->isChecked())
+        {
+            m_DiagRSlider->move(QCursor::pos());
+            m_DiagRSlider->show();
+        }
+        });
 
 
-    /* add Viewer Widget to ViewerWindow*/
-    //m_pScene = QSharedPointer<QGraphicsScene>(new QGraphicsScene());
-    //m_PixmapItem = new QGraphicsPixmapItem();
-    //m_ScreenViewer = new GraphViewer(this);
-    //m_ScreenViewer->setAlignment(Qt::AlignCenter);
-    //m_ScreenViewer->setScene(m_pScene.data());
-    //m_pScene->addItem(m_PixmapItem);
-    //m_ScreenViewer->show();
-    //m_ScreenViewer->setStyleSheet("background-color: rgb(196,0, 0); color: rgb(255,255,255)");
 
-
+    /***********************************************************************/
     /*set image layout*/
     QVBoxLayout* m_VertLayout = new QVBoxLayout(this);
     QLabel* namelabel = new QLabel(sID);
@@ -232,7 +307,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     //this->setStyleSheet("background-color: rgb(85, 100, 100)");
     //this->setWindowFlags(Qt::Widget);
 
-
+    /***********************************************************************/
     /* add DiagController Controller */
     m_DiagController = new QDialog(this);
     m_DiagController->setModal(false);
@@ -297,7 +372,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     connect(m_Controller, SIGNAL(resetFPS()), this, SLOT(onResetFPS()));
     connect(m_Controller, SIGNAL(logging(const QString&)), this, SLOT(onFeedLogger(const QString&)));
 
-
+    /***********************************************************************/
     /*create context menu*/
     m_ContextMenu = new QMenu;
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -358,6 +433,13 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         m_aPlotFitter->isChecked() ? m_pImgCThread->toggleDoFitting(true) : m_pImgCThread->toggleDoFitting(false);
         m_QCP->replot(); });
 
+    m_aManualCscale = new QAction("Manual Color Scale");
+    m_aManualCscale->setCheckable(true);
+    m_aManualCscale->setChecked(false);
+    m_ContextMenu->addAction(m_aManualCscale);
+
+
+
     m_ContextMenu->addSeparator();
 
     m_aSaveCamSetting = new QAction("Save Setting");
@@ -384,6 +466,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(OnShowContextMenu(const QPoint&)));
     
+    /***********************************************************************/
     /* create FrameObserver to get frames from camera, add for QCPColorMap */
     SP_SET(m_pFrameObs, new FrameObserver(m_pCam));
     //connect(SP_ACCESS(m_pFrameObs), SIGNAL(frameReadyFromObserver(QImage, const QString&, const QString&, const QString&)),
@@ -403,18 +486,48 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     connect(SP_ACCESS(m_pFrameObs)->ImageProcessThreadPtr().data(),
         &ImageProcessingThread::logging, this, &ViewerWidget::onFeedLogger);
 
-
+    /***********************************************************************/
     /*create image calculating thread*/
     m_pImgCThread = new ImageCalculatingThread(m_pFrameObs, m_pCam, m_QCP, m_colorMap, m_bottomGraph, m_leftGraph);
     connect(m_pImgCThread, &ImageCalculatingThread::imageReadyForPlot,
         this, &ViewerWidget::onimageReadyFromCalc);
     connect(this, &ViewerWidget::acquisitionRunning, this, &ViewerWidget::onImageCalcStartStop);
     connect(m_QCP.data(), &QCustomPlot::mouseMove, m_pImgCThread, &ImageCalculatingThread::updateMousePos);
+    connect(m_QCPbottomAxisRect->axis(QCPAxis::atTop), qOverload<const QCPRange&>(&QCPAxis::rangeChanged),
+        m_QCPbottomAxisRect->axis(QCPAxis::atBottom), [this](QCPRange range) {
+            auto [ox, oy] = m_pImgCThread->offsetXY();
+            m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setRange(range - ox);
+        });
+    connect(m_QCPleftAxisRect->axis(QCPAxis::atRight), qOverload<const QCPRange&>(&QCPAxis::rangeChanged),
+        m_QCPleftAxisRect->axis(QCPAxis::atLeft), [this](QCPRange range) {
+            auto [ox, oy] = m_pImgCThread->offsetXY();
+            m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setRange(range - oy);
+        });
+    
     connect(m_pImgCThread, &ImageCalculatingThread::logging, this, &ViewerWidget::onFeedLogger);
+    connect(m_pImgCThread, &ImageCalculatingThread::currentFormat, m_RSliderV, [this](QString format) {
+        if (0 == m_sSliderFormat.compare(format)) return;
+        if (0 == format.compare("Mono12")) {
+            m_RSliderV->SetRange(-4095, 0);
+            m_upperSB->setRange(0, 4095);
+            m_lowerSB->setRange(0, 4095);
+            m_sSliderFormat = format;
+        }
+        else if (0 == format.compare("Mono8")) {
+            m_RSliderV->SetRange(-255, 0);
+            m_upperSB->setRange(0, 255);
+            m_lowerSB->setRange(0, 255);
+            m_sSliderFormat = format;
+        }
+        else {
+            m_InformationWindow->feedLogger("Logging", "I am curious how on earth do you get format other than Mono8/12", VimbaViewerLogCategory_ERROR);
+        }
+        });
 
 
     m_Timer = new QTimer(this);
     
+    /***********************************************************************/
     /* Statusbar */
     QStatusBar* statusbar1 = new QStatusBar;
     QStatusBar* statusbar2 = new QStatusBar;
@@ -483,7 +596,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         });
 
 
-
+    /***********************************************************************/
     m_TextItem = new QGraphicsTextItem;
     QFont serifFont("Arial", 12, QFont::Bold);
     m_TextItem->setFont(serifFont);
@@ -712,7 +825,12 @@ void ViewerWidget::onImageCalcStartStop(bool start)
 /* display frames on viewer, the ultimate signal comes from ImageProcessingThread::run() in FrameObserver.cpp */
 void ViewerWidget::onimageReadyFromCalc()
 {
-    m_colorMap->rescaleDataRange(true);
+    if (!m_aManualCscale->isChecked()) 
+    {
+        m_colorMap->rescaleDataRange(true);
+        m_upperSB->setValue(m_colorScale->dataRange().upper);
+        m_lowerSB->setValue(m_colorScale->dataRange().lower);
+    }
     m_QCPcenterAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(m_QCPcenterAxisRect->axis(QCPAxis::atBottom), 1.0);
     QMouseEvent event(QMouseEvent::None, m_pImgCThread->mousePos(), Qt::NoButton, 0, 0);
     m_bottomGraph->rescaleValueAxis(true,true); //only enlarge y and scale corresponde to visible x
@@ -721,9 +839,9 @@ void ViewerWidget::onimageReadyFromCalc()
     
     m_leftGraph->keyAxis()->setRange(m_colorMap->valueAxis()->range());
     
-    /*set the secondary relative axis*/
-    m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setRange(m_leftGraph->keyAxis()->range() - m_leftGraph->data()->at(0)->key);
-    m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setRange(m_bottomGraph->keyAxis()->range() - m_bottomGraph->data()->at(0)->key);
+    /*set the secondary relative axis, now replaced with connect rangechanged*/
+    //m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setRange(m_leftGraph->keyAxis()->range() - m_leftGraph->data()->at(0)->key);
+    //m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setRange(m_bottomGraph->keyAxis()->range() - m_bottomGraph->data()->at(0)->key);
 
 
     m_pImgCThread->mutex().lock();
@@ -797,8 +915,7 @@ void ViewerWidget::SetCurrentScreenROI()
             }
         }
         emit m_Controller->acquisitionStartStop("AcquisitionStart");
-        Sleep(10);
-        //m_QCP->rescaleAxes();
+        Sleep(50);
     }
     else
     {

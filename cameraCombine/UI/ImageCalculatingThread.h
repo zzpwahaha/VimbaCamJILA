@@ -76,6 +76,7 @@ public:
     const QPoint& mousePos() const { return m_mousePos; }
     std::pair<int, int> maxWidthHeight() const { return std::pair(m_widthMax, m_heightMax); }
     std::pair<int, int> WidthHeight() const { return std::pair(m_width, m_height); }
+    std::pair<int, int> offsetXY() const { return std::pair(m_offsetX, m_offsetY); }
     const QString& format() const { return m_format; }
     const double exposureTime() const { return m_exposureTime; }
     const double cameraGain() const { return m_cameraGain; }
@@ -85,6 +86,8 @@ public:
 signals:
     void imageReadyForPlot();
     void logging(const QString& sMessage);
+    void currentFormat(QString format);
+
 public slots:
     
     void updateMousePos(QMouseEvent* event);

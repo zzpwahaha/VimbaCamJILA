@@ -13,6 +13,7 @@
 #include "UI/SortFilterProxyModel.h"
 
 #include "UI/ImageCalculatingThread.h"
+#include "UI/RangeSlider.h"
 #include "ExternLib/qcustomplot/qcustomplot.h"
 
 class ViewerWidget :  public QWidget
@@ -37,6 +38,11 @@ private:
 
     QDialog*                            m_DiagController;
     QDialog*                            m_DiagInfomation;
+    QDialog*                            m_DiagRSlider;
+    RangeSlider*                        m_RSliderV;
+    QSpinBox*                           m_upperSB;
+    QSpinBox*                           m_lowerSB;
+    QString                            m_sSliderFormat;
 
     MainInformationWindow*              m_InformationWindow;
     ControllerTreeWindow*               m_Controller;
@@ -77,6 +83,7 @@ private:
     QAction*                            m_aResetFullROI;
     QAction*                            m_aPlotTracer;
     QAction*                            m_aPlotFitter;
+    QAction*                            m_aManualCscale;
     QAction*                            m_aSaveCamSetting;
     QAction*                            m_aLoadCamSetting;
     QAction*                            m_aSaveImg;

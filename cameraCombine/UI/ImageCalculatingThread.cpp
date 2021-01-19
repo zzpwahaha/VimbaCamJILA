@@ -22,6 +22,8 @@ ImageCalculatingThread::ImageCalculatingThread(
     , m_pQCPleftGraph(pleft)
     , m_width(0)
     , m_height(0)
+    , m_offsetX(0)
+    , m_offsetY(0)
     , m_format("")
     , m_exposureTime(0.0)
     , m_firstStart(true)
@@ -315,18 +317,9 @@ void ImageCalculatingThread::run()
         
         m_pProcessingThread->mutex().lock();
         //m_doubleQVector.clear();
-        //if (!m_pProcessingThread->dataReady())
         {
             m_pProcessingThread->calcWait().wait(&m_pProcessingThread->mutex(),2000);
-        //    m_doubleQVector.swap(m_pProcessingThread->doubleVec());
-        //    m_width = m_pProcessingThread->width();
-        //    m_height = m_pProcessingThread->height();
-        //    m_format = m_pProcessingThread->format();
 
-        //}
-        //else
-        //{
-            //m_uint16QVector.swap(m_pProcessingThread->uint16Vec());
             if (!m_Stopping)//protect it from overwrite when stop
             { 
                 m_doubleQVector.swap(m_pProcessingThread->doubleVec());
@@ -349,6 +342,7 @@ void ImageCalculatingThread::run()
             if (m_firstStart)
             {
                 setDefaultView();
+                emit currentFormat(m_format);
                 m_firstStart = false;
             }
             m_dataValid = false;

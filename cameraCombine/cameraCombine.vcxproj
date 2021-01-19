@@ -23,6 +23,7 @@
     <QtMoc Include="UI\CameraTreeWindow.h" />
     <QtMoc Include="UI\ControllerTreeWindow.h" />
     <QtMoc Include="UI\ExComboBox.h" />
+    <QtMoc Include="UI\RangeSlider.h" />
     <ClInclude Include="UI\Gaussian1DFit.h" />
     <ClInclude Include="UI\HexEditor\Commands.h" />
     <QtMoc Include="UI\HexEditor\HexMainWindow.h" />
@@ -245,6 +246,7 @@
     <ClCompile Include="FeatureObserver.cpp" />
     <ClCompile Include="FrameObserver.cpp" />
     <ClCompile Include="ImageProcessingThread.cpp" />
+    <ClCompile Include="UI\RangeSlider.cpp" />
     <ClCompile Include="UI\Gaussian1DFit.cpp" />
     <ClCompile Include="UI\ImageCalculatingThread.cpp" />
     <ClCompile Include="Helper.cpp" />
@@ -276,6 +278,7 @@
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+    <ProjectName>VimbaCamJILA</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -303,12 +306,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>$(ProjectDir)ExternLib\GSL_MSVC;D:\Allied Vision\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>$(ProjectDir)ExternLib\GSL_MSVC;D:\Allied Vision\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;D:\Allied Vision\Vimba_4.2\VimbaCPP\Lib\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>

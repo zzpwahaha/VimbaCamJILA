@@ -641,6 +641,9 @@
     <ClCompile Include="UI\Gaussian1DFit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UI\RangeSlider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ExternLib\qwt\qwt_abstract_legend.h">
@@ -794,6 +797,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="UI\MainInformationWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="UI\RangeSlider.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
