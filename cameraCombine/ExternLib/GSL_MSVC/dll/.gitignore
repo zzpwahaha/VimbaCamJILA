@@ -1,5 +1,7 @@
-# Ignore everything
-*
 
-# But not this file
+**/*.*
+!*.dll
+!*.lib
+
+
 !.gitignore

@@ -8,7 +8,7 @@ block/test.txt
 compile
 config.cache
 config.guess
-config.h
+/config.h
 config.h.in
 config.h.win32
 config.log
@@ -23,13 +23,13 @@ gsl-histogram
 gsl.pc
 gsl-randist
 gsl.spec
-gsl_version.h
+/gsl_version.h
 *.gz
 histogram/test.dat
 histogram/test.txt
 *.la
-_libs
-.libs
+#_libs
+#.libs
 libtool
 *.lo
 ltmain.sh
