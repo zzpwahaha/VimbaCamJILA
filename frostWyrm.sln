@@ -3,19 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vimbaMOTCamera", "vimbaMOTCamera\vimbaMOTCamera.vcxproj", "{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiThread-Mandelbrot", "MultiThread-Mandelbrot\MultiThread-Mandelbrot.vcxproj", "{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "camera", "camera\camera.vcxproj", "{25D29373-3615-40B6-9D0C-668382C5EADB}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaOfficial", "VimbaOfficial\VimbaOfficial.vcxproj", "{F72A6E4F-5153-4A53-8F88-5BD8663A5906}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaOfficialExtract", "VimbaOfficalExtract\VimbaOfficialExtract.vcxproj", "{18D3C715-6701-4607-A639-E19AA83DB4BA}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cameraCombine", "cameraCombine\cameraCombine.vcxproj", "{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cameraCombineTest", "cameraCombineTest\cameraCombineTest.vcxproj", "{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cameraCombine", "VimbaCam\cameraCombine.vcxproj", "{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,34 +13,14 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}.Debug|x64.ActiveCfg = Debug|x64
-		{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}.Debug|x64.Build.0 = Debug|x64
-		{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}.Release|x64.ActiveCfg = Release|x64
-		{8F02AC2E-5F7E-4408-BF92-A4D0523CCED3}.Release|x64.Build.0 = Release|x64
-		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Debug|x64.ActiveCfg = Debug|x64
-		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Debug|x64.Build.0 = Debug|x64
-		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Release|x64.ActiveCfg = Release|x64
-		{C9B273CC-85F8-44C5-B5E4-C097CBBAAFC7}.Release|x64.Build.0 = Release|x64
-		{25D29373-3615-40B6-9D0C-668382C5EADB}.Debug|x64.ActiveCfg = Debug|x64
-		{25D29373-3615-40B6-9D0C-668382C5EADB}.Debug|x64.Build.0 = Debug|x64
-		{25D29373-3615-40B6-9D0C-668382C5EADB}.Release|x64.ActiveCfg = Release|x64
-		{25D29373-3615-40B6-9D0C-668382C5EADB}.Release|x64.Build.0 = Release|x64
 		{F72A6E4F-5153-4A53-8F88-5BD8663A5906}.Debug|x64.ActiveCfg = Debug|x64
 		{F72A6E4F-5153-4A53-8F88-5BD8663A5906}.Debug|x64.Build.0 = Debug|x64
 		{F72A6E4F-5153-4A53-8F88-5BD8663A5906}.Release|x64.ActiveCfg = Release|x64
 		{F72A6E4F-5153-4A53-8F88-5BD8663A5906}.Release|x64.Build.0 = Release|x64
-		{18D3C715-6701-4607-A639-E19AA83DB4BA}.Debug|x64.ActiveCfg = Debug|x64
-		{18D3C715-6701-4607-A639-E19AA83DB4BA}.Debug|x64.Build.0 = Debug|x64
-		{18D3C715-6701-4607-A639-E19AA83DB4BA}.Release|x64.ActiveCfg = Release|x64
-		{18D3C715-6701-4607-A639-E19AA83DB4BA}.Release|x64.Build.0 = Release|x64
 		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Debug|x64.ActiveCfg = Debug|x64
 		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Debug|x64.Build.0 = Debug|x64
 		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Release|x64.ActiveCfg = Release|x64
 		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Release|x64.Build.0 = Release|x64
-		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Debug|x64.ActiveCfg = Debug|x64
-		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Debug|x64.Build.0 = Debug|x64
-		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Release|x64.ActiveCfg = Release|x64
-		{3CEC3B3E-2C1D-4AC3-83C8-F851EE96809B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
