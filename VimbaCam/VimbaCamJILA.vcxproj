@@ -30,6 +30,7 @@
     <QtMoc Include="UI\HexEditor\HexOptionDialog.h" />
     <QtMoc Include="UI\HexEditor\QHexEdit.h" />
     <QtMoc Include="UI\HexEditor\QHexEdit_p.h" />
+    <ClInclude Include="UI\HexEditor\ui_OptionDialog.h" />
     <ClInclude Include="UI\HexEditor\XByteArray.h" />
     <ClInclude Include="UI\Histogram\Histogram.h" />
     <QtMoc Include="UI\Histogram\HistogramWindow.h" />
@@ -53,6 +54,7 @@
     <ClCompile Include="FeatureObserver.cpp" />
     <ClCompile Include="FrameObserver.cpp" />
     <ClCompile Include="ImageProcessingThread.cpp" />
+    <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp" />
     <ClCompile Include="UI\RangeSlider.cpp" />
     <ClCompile Include="UI\Gaussian1DFit.cpp" />
     <ClCompile Include="UI\ImageCalculatingThread.cpp" />
