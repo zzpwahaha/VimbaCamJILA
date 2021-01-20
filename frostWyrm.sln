@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaOfficial", "VimbaOfficial\VimbaOfficial.vcxproj", "{F72A6E4F-5153-4A53-8F88-5BD8663A5906}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cameraCombine", "VimbaCam\cameraCombine.vcxproj", "{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaCamJILA", "VimbaCam\VimbaCamJILA.vcxproj", "{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
