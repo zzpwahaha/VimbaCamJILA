@@ -1,6 +1,6 @@
 .deps
-gsl_*.h
-*.h
+#gsl_*.h
+#*.h
 *.la
 .libs
 *.lo
