@@ -350,8 +350,15 @@ void ImageCalculatingThread::fit2dGaussian()
         m_gfit2D.set_initialP(A0, x00, y00, a0, b0, c0, D0);
 
         /*fiting*/
-        QVector<double> fitted2D;
-        m_gfit2D.solve_system();
+        try {
+            m_gfit2D.solve_system();
+        }
+        catch (const std::exception& e) {
+            emit logging("Exception from the thread: " + QString(e.what()));
+            return;
+        }
+
+        //QVector<double> fitted2D;
         //fitted2D = std::move(m_gfit2D.calcFittedGaussian());
         QVector<double> fitParaz = m_gfit2D.fittedPara();
         QVector<double> confi95z = m_gfit2D.confidence95Interval();

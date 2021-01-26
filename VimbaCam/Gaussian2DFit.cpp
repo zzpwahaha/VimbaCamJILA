@@ -1,6 +1,9 @@
 #include "Gaussian2DFit.h"
 #include <iostream>
 #include <qDebug>
+#include <thread>
+#include <future>
+#include <chrono>
 
 Gaussian2DFit::Gaussian2DFit(
     size_t n, size_t width, size_t height, double* datax, double* datay, double* dataz,
@@ -220,9 +223,26 @@ void Gaussian2DFit::solve_system()
     rss0 *= 1.0 / static_cast<double>(fit_data.n - numOfPara);
 
     /* iterate until convergence */
-    gsl_multifit_nlinear_driver(max_iter, ptol, gtol, ftol,
-        NULL, NULL, &info, work);
+
+
+    std::packaged_task<int()> task(std::bind(
+        &gsl_multifit_nlinear_driver,max_iter, ptol, gtol, ftol, nullptr, nullptr, &info, work));
+    auto future = task.get_future();
+    std::thread thrd(std::move(task));
+    if (future.wait_for(std::chrono::milliseconds(300)) == std::future_status::timeout)
+    {
+        //thrd.detach();
+        //thrd.~thread();
+        thrd.join();
+        throw std::runtime_error("Timeout");
+        //return;
+    }
+    else{ thrd.detach(); }
     
+
+    
+
+
     /* store final cost */
     gsl_blas_ddot(f, f, &rss);
     rss *= 1.0 / static_cast<double>(fit_data.n - numOfPara);
