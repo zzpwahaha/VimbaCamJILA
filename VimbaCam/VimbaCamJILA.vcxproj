@@ -13,6 +13,7 @@
   <ItemGroup>
     <QtMoc Include="ExternLib\qcustomplot\qcustomplot.h" />
     <QtMoc Include="FrameObserver.h" />
+    <ClInclude Include="Gaussian2DFit.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="ILogTarget.h" />
     <QtMoc Include="UI\ImageCalculatingThread.h" />
@@ -53,6 +54,7 @@
     <ClCompile Include="ExternLib\qcustomplot\qcustomplot.cpp" />
     <ClCompile Include="FeatureObserver.cpp" />
     <ClCompile Include="FrameObserver.cpp" />
+    <ClCompile Include="Gaussian2DFit.cpp" />
     <ClCompile Include="ImageProcessingThread.cpp" />
     <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp" />
     <ClCompile Include="UI\RangeSlider.cpp" />
@@ -93,10 +95,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">

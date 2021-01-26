@@ -83,6 +83,7 @@ private:
     QAction*                            m_aResetFullROI;
     QAction*                            m_aPlotTracer;
     QAction*                            m_aPlotFitter;
+    QAction*                            m_aPlotFitter2D;
     QAction*                            m_aManualCscale;
     QAction*                            m_aSaveCamSetting;
     QAction*                            m_aLoadCamSetting;

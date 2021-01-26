@@ -82,6 +82,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     /*note the index of the axrect is labeled with the position, i.e. lf=0,cter=1,bot=2, ignore cbar*/
     m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(QFont("Times", 10));
     m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(QFont("Times", 10));
+    m_QCPcenterAxisRect->axis(QCPAxis::atTop)->setLabelFont(QFont("Times", 10));
 
 
     m_QCPcenterAxisRect->setupFullAxesBox(true);
@@ -128,7 +129,6 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_colorMap->setInterpolate(false);
     m_colorMap->setColorScale(m_colorScale);
     m_colorMap->setGradient(QCPColorGradient::gpGrayscale);
-    
     //m_colorMap->valueAxis()->setTickLabelPadding(0);
 
     m_bottomGraph = QSharedPointer<QCPGraph>(
@@ -141,6 +141,11 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     /*add axis for fitted curve: index=2 is for bot, index=3 is for left*/
     m_QCP->addGraph(m_bottomGraph->keyAxis(), m_bottomGraph->valueAxis());
     m_QCP->addGraph(m_leftGraph->keyAxis(), m_leftGraph->valueAxis());
+    QCPCurve* hairCurve = new QCPCurve(m_colorMap->keyAxis(), m_colorMap->valueAxis());/*for two cross hairs, plottable(1)*/
+    QCPCurve* parametricCurve = new QCPCurve(m_colorMap->keyAxis(), m_colorMap->valueAxis()); /*for parametric ellipse, plottable(2)*/
+
+    qDebug() << m_QCP->axisRect(1)->plottables().at(2) << parametricCurve;
+
     /*set pen for all graph*/
     {
         QPen pen;
@@ -148,7 +153,11 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         pen.setWidth(3);
         pen.setColor(QColor(230, 0, 0));
         m_QCP->graph(2)->setPen(pen);
-        m_QCP->graph(3)->setPen(pen); 
+        m_QCP->graph(3)->setPen(pen);
+        pen.setWidth(5);
+        pen.setColor(QColor(0, 255, 0));
+        parametricCurve->setPen(pen);
+        hairCurve->setPen(pen);
     }
     {
         QPen pen;
@@ -433,6 +442,25 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         m_aPlotFitter->isChecked() ? m_pImgCThread->toggleDoFitting(true) : m_pImgCThread->toggleDoFitting(false);
         m_QCP->replot(); });
 
+    m_aPlotFitter2D = new QAction("Fitting2D");
+    m_aPlotFitter2D->setCheckable(true);
+    m_aPlotFitter2D->setChecked(false);
+    m_ContextMenu->addAction(m_aPlotFitter2D);
+    connect(m_aPlotFitter2D, &QAction::triggered, this, [this]() {
+        auto hairCurve = reinterpret_cast<QCPCurve*>(m_QCP->axisRect(1)->plottables().at(1));
+        auto parametric = reinterpret_cast<QCPCurve*>(m_QCP->axisRect(1)->plottables().at(2));
+        for (auto& fitgraph : { hairCurve,parametric })
+        {
+            m_aPlotFitter2D->isChecked() ? fitgraph->setVisible(true) : fitgraph->setVisible(false);
+        }
+        for (auto& ax : { m_QCPcenterAxisRect->axis(QCPAxis::atTop) })
+        {
+            m_aPlotFitter2D->isChecked() ? 0 : ax->setLabel(" ");
+        }
+        m_aPlotFitter2D->isChecked() ? m_pImgCThread->toggleDoFitting2D(true) : m_pImgCThread->toggleDoFitting2D(false);
+        m_QCP->replot(); });
+
+
     m_aManualCscale = new QAction("Manual Color Scale");
     m_aManualCscale->setCheckable(true);
     m_aManualCscale->setChecked(false);
@@ -605,35 +633,6 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     //setMaximumSize(600, 600);
 }
 
-//void ViewerWidget::onSetMousePosInScene(const QPointF& pPoint)
-//{
-//    if (!m_PixmapItem->pixmap().isNull())
-//    {        
-//        int pixValue=m_PixmapItem->pixmap().toImage().pixel(
-//            static_cast<int>(pPoint.x()),
-//            static_cast<int>(pPoint.y()));
-//        if (m_FormatLabel->text().contains("Mono8"))
-//        {
-//            //pixValue = pixValue & 0xFF;
-//        }
-//        else if (m_FormatLabel->text().contains("Mono12"))
-//        {
-//            //pixValue = pixValue & 0x0FFF;
-//        }
-//        else
-//        {
-//            m_CursorScenePosLabel->setText("MONO");
-//            return;
-//        }
-//        m_CursorScenePosLabel->setText("(" + QString::number(static_cast<int>(pPoint.x())) + " , " +
-//            QString::number(static_cast<int>(pPoint.y())) + " , " +
-//            QString::number(pixValue,16) + ")");
-//    }
-//    else
-//    {
-//        m_CursorScenePosLabel->setText("N/A");
-//    }
-//}
 
 void ViewerWidget::onSetMousePosInCMap(QMouseEvent* event)
 {
@@ -1160,7 +1159,7 @@ void ViewerWidget::on_ActionFreerun_triggered()
 {
     VmbError_t error;
     FeaturePtr pFeat;
-
+    
     checkDisplayInterval();
 
     /* update interpolation state after start */

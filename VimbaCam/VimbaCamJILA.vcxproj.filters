@@ -57,6 +57,9 @@
     <ClInclude Include="UI\HexEditor\ui_OptionDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Gaussian2DFit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cameraMainWindow.cpp">
@@ -153,6 +156,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gaussian2DFit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

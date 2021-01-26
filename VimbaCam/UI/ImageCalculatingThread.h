@@ -6,6 +6,7 @@
 
 #include "ExternLib/qcustomplot/qcustomplot.h"
 #include "Gaussian1DFit.h"
+#include "Gaussian2DFit.h"
 #include <utility>
 
 class ImageCalculatingThread :
@@ -42,11 +43,13 @@ private:
     bool                                      m_Stopping;
 
     bool                                      m_doFitting;
+    bool                                      m_doFitting2D;
 
     QPoint                                    m_mousePos;
 
     Gaussian1DFit                             m_gfitBottom;
     Gaussian1DFit                             m_gfitLeft;
+    Gaussian2DFit                             m_gfit2D;
 public:
     ImageCalculatingThread(const SP_DECL(FrameObserver)& ,
         const CameraPtr&,
@@ -66,6 +69,7 @@ public:
 private:
     void calcCrossSectionXY();
     void fit1dGaussian();
+    void fit2dGaussian();
 
 public:
     virtual void run() override;
@@ -92,5 +96,6 @@ public slots:
     
     void updateMousePos(QMouseEvent* event);
     void toggleDoFitting(bool dofit);
+    void toggleDoFitting2D(bool dofit);
 };
 
