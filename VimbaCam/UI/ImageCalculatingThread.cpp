@@ -35,7 +35,7 @@ ImageCalculatingThread::ImageCalculatingThread(
     , m_doFitting2D(false)
     , m_gfitBottom(5, NULL, NULL, 0, 0, 0, 0) /*5 is greater than fit param 4, otherwise will break*/
     , m_gfitLeft(5, NULL, NULL, 0, 0, 0, 0)
-    , m_gfit2D(16, 4, 4, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0) /* emulating 4*4 matrix */
+    , m_gfit2D(16, 4, 4, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 100) /* emulating 4*4 matrix */
 {
     m_pProcessingThread = QSharedPointer<ImageProcessingThread>(SP_ACCESS(m_pFrameObs)->ImageProcessThreadPtr());
     /*get the max width and height*/
@@ -307,8 +307,9 @@ void ImageCalculatingThread::fit1dGaussian()
             QVector<double> fitParax = m_gfitBottom.fittedPara();
             QVector<double> confi95x = m_gfitBottom.confidence95Interval();
             m_pQCP->axisRect(2)->axis(QCPAxis::atBottom)->setLabel(
-                QString("mu: %1 +/- %2, sigma: %3 +/- %4").
-                arg(fitParax.at(1) - m_offsetX, 0, 'f', 2).arg(confi95x.at(1), 0, 'f', 2).
+                QString::fromWCharArray(L"\u03bc") + QString(": %1 +/- %2, ").
+                arg(fitParax.at(1) - m_offsetX, 0, 'f', 2).arg(confi95x.at(1), 0, 'f', 2) +
+                QString::fromWCharArray(L"\u03c3") + QString(": %3 +/- %4").
                 arg(fitParax.at(2), 0, 'f', 2).arg(confi95x.at(2), 0, 'f', 2));
             });
         QFuture<void> resulty = QtConcurrent::run([this, &fittedy]() {
@@ -318,8 +319,9 @@ void ImageCalculatingThread::fit1dGaussian()
             QVector<double> fitParay = m_gfitLeft.fittedPara();
             QVector<double> confi95y = m_gfitLeft.confidence95Interval();
             m_pQCP->axisRect(0)->axis(QCPAxis::atLeft)->setLabel(
-                QString("mu: %1 +/- %2, sigma: %3 +/- %4").
-                arg(fitParay.at(1) - m_offsetY, 0, 'f', 2).arg(confi95y.at(1), 0, 'f', 2).
+                QString::fromWCharArray(L"\u03bc") + QString(": %1 +/- %2, ").
+                arg(fitParay.at(1) - m_offsetY, 0, 'f', 2).arg(confi95y.at(1), 0, 'f', 2) +
+                QString::fromWCharArray(L"\u03c3") + QString(": %3 +/- %4").
                 arg(fitParay.at(2), 0, 'f', 2).arg(confi95y.at(2), 0, 'f', 2));
             });
 

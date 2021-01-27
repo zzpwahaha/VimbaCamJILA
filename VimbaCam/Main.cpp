@@ -1,7 +1,7 @@
 ﻿
-#include "cameraMainWindow.h"
+#include "Source\cameraMainWindow.h"
 #include <QApplication>
-#include "Version.h"
+#include "Source\Version.h"
 
 
 int main(int argc, char *argv[])

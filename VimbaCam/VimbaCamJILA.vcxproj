@@ -12,76 +12,80 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ExternLib\qcustomplot\qcustomplot.h" />
-    <QtMoc Include="FrameObserver.h" />
-    <ClInclude Include="Gaussian2DFit.h" />
-    <ClInclude Include="Helper.h" />
-    <ClInclude Include="ILogTarget.h" />
-    <QtMoc Include="UI\ImageCalculatingThread.h" />
-    <QtMoc Include="ImageProcessingThread.h" />
-    <ClInclude Include="memcpy_threaded.h" />
-    <QtMoc Include="ViewerWidget.h" />
-    <QtMoc Include="UI\LoggerWindow.h" />
-    <QtMoc Include="UI\CameraTreeWindow.h" />
-    <QtMoc Include="UI\ControllerTreeWindow.h" />
-    <QtMoc Include="UI\ExComboBox.h" />
-    <QtMoc Include="UI\RangeSlider.h" />
-    <ClInclude Include="UI\Gaussian1DFit.h" />
-    <ClInclude Include="UI\HexEditor\Commands.h" />
-    <QtMoc Include="UI\HexEditor\HexMainWindow.h" />
-    <QtMoc Include="UI\HexEditor\HexOptionDialog.h" />
-    <QtMoc Include="UI\HexEditor\QHexEdit.h" />
-    <QtMoc Include="UI\HexEditor\QHexEdit_p.h" />
-    <ClInclude Include="UI\HexEditor\ui_OptionDialog.h" />
-    <ClInclude Include="UI\HexEditor\XByteArray.h" />
-    <ClInclude Include="UI\Histogram\Histogram.h" />
-    <QtMoc Include="UI\Histogram\HistogramWindow.h" />
-    <QtMoc Include="UI\Histogram\HistogramThread.h" />
-    <QtMoc Include="UI\MultiCompleter.h" />
-    <QtMoc Include="UI\IntSpinBox.h" />
-    <QtMoc Include="UI\MdiChild.h" />
-    <QtMoc Include="UI\LineEditCompleter.h" />
-    <QtMoc Include="UI\MainInformationWindow.h" />
-    <ClInclude Include="UI\SortFilterProxyModel.h" />
-    <ClInclude Include="Version.h" />
-    <ClInclude Include="VmbImageTransformHelper.hpp" />
-    <QtMoc Include="FeatureObserver.h" />
-    <QtMoc Include="CameraObserver.h" />
-    <QtMoc Include="cameraMainWindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cameraMainWindow.cpp" />
-    <ClCompile Include="CameraObserver.cpp" />
     <ClCompile Include="ExternLib\qcustomplot\qcustomplot.cpp" />
-    <ClCompile Include="FeatureObserver.cpp" />
-    <ClCompile Include="FrameObserver.cpp" />
-    <ClCompile Include="Gaussian2DFit.cpp" />
-    <ClCompile Include="ImageProcessingThread.cpp" />
-    <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp" />
-    <ClCompile Include="UI\RangeSlider.cpp" />
-    <ClCompile Include="UI\Gaussian1DFit.cpp" />
-    <ClCompile Include="UI\ImageCalculatingThread.cpp" />
-    <ClCompile Include="Helper.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Source\cameraMainWindow.cpp" />
+    <ClCompile Include="Source\CameraObserver.cpp" />
+    <ClCompile Include="Source\FeatureObserver.cpp" />
+    <ClCompile Include="Source\FrameObserver.cpp" />
+    <ClCompile Include="Source\Gaussian2DFit.cpp" />
+    <ClCompile Include="Source\Helper.cpp" />
+    <ClCompile Include="Source\ImageProcessingThread.cpp" />
+    <ClCompile Include="Source\ViewerWidget.cpp" />
     <ClCompile Include="UI\CameraTreeWindow.cpp" />
     <ClCompile Include="UI\ControllerTreeWindow.cpp" />
+    <ClCompile Include="UI\csvReader.cpp" />
     <ClCompile Include="UI\ExComboBox.cpp" />
+    <ClCompile Include="UI\Gaussian1DFit.cpp" />
     <ClCompile Include="UI\HexEditor\Commands.cpp" />
     <ClCompile Include="UI\HexEditor\HexMainWindow.cpp" />
     <ClCompile Include="UI\HexEditor\HexOptionDialog.cpp" />
     <ClCompile Include="UI\HexEditor\QHexEdit.cpp" />
     <ClCompile Include="UI\HexEditor\QHexEdit_p.cpp" />
+    <ClCompile Include="UI\HexEditor\ui_OptionDialog.cpp" />
     <ClCompile Include="UI\HexEditor\XByteArray.cpp" />
     <ClCompile Include="UI\Histogram\Histogram.cpp" />
     <ClCompile Include="UI\Histogram\HistogramThread.cpp" />
     <ClCompile Include="UI\Histogram\HistogramWindow.cpp" />
+    <ClCompile Include="UI\ImageCalculatingThread.cpp" />
     <ClCompile Include="UI\IntSpinBox.cpp" />
     <ClCompile Include="UI\LineEditCompleter.cpp" />
     <ClCompile Include="UI\LoggerWindow.cpp" />
     <ClCompile Include="UI\MainInformationWindow.cpp" />
     <ClCompile Include="UI\MdiChild.cpp" />
     <ClCompile Include="UI\MultiCompleter.cpp" />
+    <ClCompile Include="UI\RangeSlider.cpp" />
     <ClCompile Include="UI\SortFilterProxyModel.cpp" />
-    <ClCompile Include="ViewerWidget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Gaussian2DFit.h" />
+    <ClInclude Include="Source\Helper.h" />
+    <ClInclude Include="Source\ILogTarget.h" />
+    <ClInclude Include="Source\memcpy_threaded.h" />
+    <ClInclude Include="Source\Version.h" />
+    <ClInclude Include="Source\VmbImageTransformHelper.hpp" />
+    <QtMoc Include="Source\ViewerWidget.h" />
+    <QtMoc Include="Source\ImageProcessingThread.h" />
+    <QtMoc Include="Source\FrameObserver.h" />
+    <QtMoc Include="Source\FeatureObserver.h" />
+    <QtMoc Include="Source\CameraObserver.h" />
+    <QtMoc Include="Source\cameraMainWindow.h" />
+    <ClInclude Include="UI\csvReader.h" />
+    <ClInclude Include="UI\Gaussian1DFit.h" />
+    <ClInclude Include="UI\SortFilterProxyModel.h" />
+    <QtMoc Include="UI\RangeSlider.h" />
+    <QtMoc Include="UI\MultiCompleter.h" />
+    <QtMoc Include="UI\MdiChild.h" />
+    <QtMoc Include="UI\MainInformationWindow.h" />
+    <QtMoc Include="UI\LoggerWindow.h" />
+    <QtMoc Include="UI\LineEditCompleter.h" />
+    <QtMoc Include="UI\IntSpinBox.h" />
+    <QtMoc Include="UI\ImageCalculatingThread.h" />
+    <QtMoc Include="UI\ExComboBox.h" />
+    <QtMoc Include="UI\ControllerTreeWindow.h" />
+    <QtMoc Include="UI\CameraTreeWindow.h" />
+    <ClInclude Include="UI\HexEditor\Commands.h" />
+    <ClInclude Include="UI\HexEditor\ui_OptionDialog.h" />
+    <ClInclude Include="UI\HexEditor\XByteArray.h" />
+    <ClInclude Include="UI\Histogram\Histogram.h" />
+    <QtMoc Include="UI\Histogram\HistogramWindow.h" />
+    <QtMoc Include="UI\Histogram\HistogramThread.h" />
+    <QtMoc Include="UI\HexEditor\QHexEdit_p.h" />
+    <QtMoc Include="UI\HexEditor\QHexEdit.h" />
+    <QtMoc Include="UI\HexEditor\HexOptionDialog.h" />
+    <QtMoc Include="UI\HexEditor\HexMainWindow.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}</ProjectGuid>
@@ -119,11 +123,11 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir)Source\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)Source\;$(ProjectDir)UI\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

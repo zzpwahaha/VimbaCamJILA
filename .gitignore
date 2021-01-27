@@ -1,6 +1,6 @@
 # Build results
-/x64/*
-/*/x64/*
-
+x64/**/*.*
+/*/x64/
+!x64/**/*.csv
 # Visual Studio 2015/2017 cache/options directory
 .vs/
