@@ -7,7 +7,8 @@
 #include <filesystem>
 #include <utility>
 #include <QDebug>
-
+#include <qdialog.h>
+#include <qtimer.h>
 #include "UI/csvReader.h"
 
 using AVT::VmbAPI::Frame;
@@ -33,6 +34,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     //, m_nNumberOfFramesToSave(0)
     , m_FrameBufferCount(BUFFER_COUNT)
     , m_pCam(pCam)
+    , m_repSaveTimer(new QTimer(this))
 {
     VmbError_t errorType;
     QTime openTimer;
@@ -108,12 +110,15 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_QCP->plotLayout()->addElement(0, 2, m_colorScale);
     m_colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
 
-    m_QCPbottomAxisRect->setMinimumSize(600, 120);
-    m_QCPbottomAxisRect->setMaximumSize(600, 120);
-    m_QCPleftAxisRect->setMinimumSize(120, 600);
-    m_QCPleftAxisRect->setMaximumSize(120, 600);
+    //m_QCPbottomAxisRect->setMinimumSize(600, 120);
+    //m_QCPbottomAxisRect->setMaximumSize(600, 120);
+    //m_QCPleftAxisRect->setMinimumSize(120, 600);
+    //m_QCPleftAxisRect->setMaximumSize(120, 600);
+    
     QRect rec = QApplication::desktop()->screenGeometry();
+    m_QCPcenterAxisRect->setMinimumSize(int(rec.width() / 2 * 0.7), int(rec.height() * 0.6));
     m_QCP->setMaximumSize(rec.width() / 2, rec.height());
+    //m_QCP->setMinimumSize(rec.width() / 2 - 150, rec.height() - 200);
 
     // move newly created axes on "axes" layer and grids on "grid" layer:
     foreach(QCPAxisRect * rect, m_QCP->axisRects())
@@ -153,7 +158,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         layout->addLayout(layout1, 0);
         connect(reloadB, &QPushButton::clicked, this, [this]() {
             loadColorCSV();
-            std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto& tmp) {
+            std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto tmp) {
                 if (m_cmapCombo->findText(tmp.second) == -1)
                 {
                     m_cmapCombo->addItem(tmp.second);
@@ -162,7 +167,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     }
 
     loadColorCSV();
-    std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto& tmp) 
+    std::for_each(m_cmapMap.keyValueBegin(), m_cmapMap.keyValueEnd(), [this](auto tmp) 
         {m_cmapCombo->addItem(tmp.second); });
 
     if (m_cmapMap.values().contains("inferno"))
@@ -374,7 +379,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_DiagController->setWindowTitle("Controller for " + sID);
 
     /* add Controller Tree */
-    QWidget* widgetTree = new QWidget();
+    QWidget* widgetTree = new QWidget(this);
     m_Description = new QTextEdit();
     m_Controller = new ControllerTreeWindow(m_sCameraID, widgetTree, bAutoAdjustPacketSize, m_pCam);
     if (VmbErrorSuccess != m_Controller->getTreeStatus())
@@ -541,6 +546,30 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     connect(m_aSaveImg, &QAction::triggered, this, &ViewerWidget::on_ActionSaveAs_triggered);
 
 
+    QAction* aRepSaveSetting = m_ContextMenu->addAction("Rep. Save Setting");
+    connect(aRepSaveSetting, &QAction::triggered, this, [this]() {
+        createRepSaveControlWidget(); });
+
+    QAction* aRepSaveOnOff= m_ContextMenu->addAction("Turn Rep. Save On");
+    connect(m_repSaveTimer, &QTimer::timeout, this, [this]() {
+        m_repSaveCnter++;
+        repSave(); });
+    connect(aRepSaveOnOff, &QAction::triggered, this, [this, aRepSaveOnOff]() {
+        if (aRepSaveOnOff->text() == "Turn Rep. Save On") {
+            // turn on
+            m_repSaveCnter = 0;
+            aRepSaveOnOff->setText("Turn Rep. Save Off");
+            m_repSaveTimer->setInterval(int(m_repSaveTime * 60 * 1000));
+            repSave();
+            m_repSaveTimer->start();
+        }
+        else {
+            // turn off
+            m_repSaveTimer->stop();
+            aRepSaveOnOff->setText("Turn Rep. Save On");
+        }; });
+
+
     m_ContextMenu->addSeparator();
 
     //connecting the following action to a slot happens at cameraMainWindow, be careful of the order
@@ -688,7 +717,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_TextItem->setFont(serifFont);
     m_TextItem->setDefaultTextColor(Qt::red);
 
-    //setMaximumSize(600, 600);
+    //setMaximumSize(900, 900);
 
 }
 
@@ -1143,6 +1172,73 @@ bool ViewerWidget::isStreamingAvailable()
     AVT::VmbAPI::FeaturePtr pStreamIDFeature;
     m_pCam->GetFeatureByName("StreamID", pStreamIDFeature);
     return (NULL == pStreamIDFeature) ? false : true;
+}
+
+void ViewerWidget::createRepSaveControlWidget()
+{
+    QDialog* wid = new  QDialog(this);
+    //wid->setModal(false);
+    QVBoxLayout* layout = new QVBoxLayout(wid);
+    QHBoxLayout* layout1 = new QHBoxLayout(wid);
+    QHBoxLayout* layout2 = new QHBoxLayout(wid);
+    QLabel* repTime = new QLabel("Repetition time (min): ");
+    QLineEdit* repTimeTE = new QLineEdit(wid);
+    layout1->addWidget(repTime, 0);
+    layout1->addWidget(repTimeTE, 1);
+    layout->addLayout(layout1);
+    QLabel* saveP = new QLabel("Save path: ");
+    QLineEdit* savePLE = new QLineEdit();
+    layout2->addWidget(saveP, 0);
+    layout2->addWidget(savePLE, 1);
+    layout->addLayout(layout2);
+
+    repTimeTE->setText(QString::number(m_repSaveTime, 'g', 2));
+    savePLE->setText(m_repSavePath);
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, wid);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, [this, wid, repTimeTE, savePLE]() {
+        bool status = false;
+        m_repSaveTime = repTimeTE->text().toDouble(&status);
+        if (!status) {
+            m_repSaveTime = 0.0;
+            QMessageBox msgBox;
+            msgBox.setText("The Rep. save time is invalid");
+            msgBox.exec();
+            return;
+        }
+        m_repSavePath = savePLE->text();
+        if (!QDir(m_repSavePath).exists()) {
+            QDir().mkdir(m_repSavePath);
+        }
+        qDebug() << m_repSavePath; // eg D:\\Chimera\\Chimera-Cryo-Test\\VimbaCam\\test
+        wid->close();
+        });
+    connect(buttonBox, &QDialogButtonBox::rejected, wid, &QDialog::close);
+    layout->addWidget(buttonBox, 0);
+
+    wid->show();
+}
+
+void ViewerWidget::repSave()
+{
+    QVector<double> imgSave = std::move(m_pImgCThread->rawImageDefinite());
+    auto [imgWidth, imgHeight] = m_pImgCThread->WidthHeight();
+    QString fileName = m_repSavePath + "\\data" + QString::number(m_repSaveCnter) + ".csv";
+    QFile file(fileName);
+    if (file.open(QIODevice::ReadWrite)) {
+        QTextStream stream(&file);
+        stream << "TimeEpoch (ms)" << "," << QDateTime::currentMSecsSinceEpoch() << endl;
+        for (size_t i = 0; i < imgHeight; i++) {
+            for (size_t j = 0; j < imgWidth; j++) {
+                stream << imgSave[i * imgWidth + j];
+                j == imgWidth - 1 ? stream << endl : stream << ",";
+            }
+        }
+        m_InformationWindow->feedLogger("Logging", "saved successfully to " + fileName, VimbaViewerLogCategory_OK);
+    }
+    else {
+        m_InformationWindow->feedLogger("Logging", "Error saving image " + fileName, VimbaViewerLogCategory_ERROR);
+    }
 }
 
 VmbError_t ViewerWidget::onPrepareCapture()
@@ -1886,7 +1982,7 @@ void ViewerWidget::on_ActionSaveAs_triggered()
                             for (size_t j = 0; j < imgWidth; j++)
                             {
                                 stream << imgSave[i * imgWidth + j];
-                                j == imgWidth - 1 ? stream << "," : stream << endl;
+                                j == imgWidth - 1 ? stream << endl : stream << ",";
                             }
                         }
                     }

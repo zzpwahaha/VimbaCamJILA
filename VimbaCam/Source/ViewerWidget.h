@@ -140,7 +140,10 @@ private:
     //QVector<TabExtensionInterface*>     m_tabExtensionInterface; // Closed source injected
     //int                                 m_TabPluginCount;
 
-
+    double                              m_repSaveTime;
+    QString                             m_repSavePath;
+    QTimer*                             m_repSaveTimer;
+    size_t                              m_repSaveCnter;
 
 public:
     ViewerWidget(QWidget* parent = 0, Qt::WindowFlags flag = 0, 
@@ -165,6 +168,7 @@ private:
     VmbError_t  releaseBuffer();
     void        checkDisplayInterval();
     bool        isStreamingAvailable();
+    void        createRepSaveControlWidget();
     //void        changeEvent(QEvent* event);
     //bool        isDestPathWritable();
     //bool        checkUsedName(const QStringList& files);
@@ -173,7 +177,7 @@ private:
     //bool        CanReduceBpp();
     //QImage      ReduceBpp(QImage image);
     //bool        isSupportedPixelFormat();
-
+    void        repSave();
 
 public:
     //QAction* ActionFreerun;

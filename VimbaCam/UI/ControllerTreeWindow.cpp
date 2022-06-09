@@ -1457,12 +1457,12 @@ void ControllerTreeWindow::createIntSliderSpinBox ( const QModelIndex item )
             m_SpinBox_Int->setObjectName("value");      //mark as the element of this dialog that contains the value, used in "updateWidget()"
             m_Slider_Int = new QSlider(Qt::Horizontal);
             m_Slider_Int->installEventFilter(this);
-
+            m_Slider_Int->setTickPosition(QSlider::TicksBelow);
             error = m_FeaturePtr_IntSpinBox->GetIncrement(nInc);
             if(VmbErrorSuccess == error)
             {
                 m_SpinBox_Int->setSingleStep(nInc);
-                m_Slider_Int->setTickInterval(nInc);
+                m_Slider_Int->setTickInterval((nMax-nMin)/6/*nInc*/);
                 m_Slider_Int->setSingleStep(nInc);
             }
 

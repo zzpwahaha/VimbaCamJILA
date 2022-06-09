@@ -87,7 +87,7 @@ int Gaussian1DFit::func_df(const gsl_vector* p, void* datafit, gsl_matrix* J)
     const double& a = gsl_vector_get(p, 0);
     const double& b = gsl_vector_get(p, 1);
     const double& c = gsl_vector_get(p, 2);
-    const double& d = gsl_vector_get(p, 2);
+    const double& d = gsl_vector_get(p, 3); //not used here
 
     for (size_t i = 0; i < dataf->n; ++i)
     {

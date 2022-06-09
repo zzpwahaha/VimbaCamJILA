@@ -19,6 +19,7 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex & 
         int nCount = sourceModel()->rowCount(source_index) ;
         for(int i=0; i<nCount; ++i)
         {
+            // this is a recursive iteration untill it reaches the last layer
             if(filterAcceptsRow(i, source_index))
             {
                 return true ;
