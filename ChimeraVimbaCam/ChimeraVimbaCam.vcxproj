@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="ExternLib\qcustomplot\qcustomplot.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ExternLib\qcustomplot\qcustomplot.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Source\cameraMainWindow.cpp" />
+    <ClCompile Include="Source\CMOSSetting.cpp" />
+    <ClCompile Include="Source\csvReader.cpp" />
+    <ClCompile Include="Source\FrameAverager.cpp" />
+    <ClCompile Include="Source\FrameObserver.cpp" />
+    <ClCompile Include="Source\GaussianFit.cpp" />
+    <ClCompile Include="Source\Helper.cpp" />
+    <ClCompile Include="Source\ImageCalculatingThread.cpp" />
+    <ClCompile Include="Source\ImageProcessingThread.cpp" />
+    <ClCompile Include="Source\MakoCamera.cpp" />
+    <ClCompile Include="Source\MakoCameraCore.cpp" />
+    <ClCompile Include="Source\MakoSettingControl.cpp" />
+    <ClCompile Include="Source\MakoWrapper.cpp" />
+    <ClCompile Include="Source\PictureViewer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Source\cameraMainWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Accessory\Thrower.h" />
+    <ClInclude Include="Source\CMOSSetting.h" />
+    <ClInclude Include="Source\csvReader.h" />
+    <ClInclude Include="Source\GaussianFit.h" />
+    <ClInclude Include="Source\Helper.h" />
+    <ClInclude Include="Source\ImageProcessingThread.h" />
+    <ClInclude Include="stdafx.h" />
+    <QtMoc Include="Source\PictureViewer.h" />
+    <QtMoc Include="Source\MakoWrapper.h" />
+    <QtMoc Include="Source\MakoSettingControl.h" />
+    <QtMoc Include="Source\MakoCameraCore.h" />
+    <QtMoc Include="Source\MakoCamera.h" />
+    <QtMoc Include="Source\ImageCalculatingThread.h" />
+    <QtMoc Include="Source\FrameObserver.h" />
+    <QtMoc Include="Source\FrameAverager.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CB999954-2CD5-4636-8C7F-84B916A87D96}</ProjectGuid>
+    <Keyword>QtVS_v303</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+    <ProjectName>ChimeraVimbaCam</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)Source\Accessory;$(ProjectDir)Source\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)Source\Accessory;$(ProjectDir)Source\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <AdditionalDependencies>qwtd.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PreprocessorDefinitions>WIN32;QWT_DLL;GSL_DLL;CBL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <AdditionalDependencies>qwt.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PreprocessorDefinitions>WIN32;QWT_DLL;GSL_DLL;CBL_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtModules>concurrent;core;gui;multimedia;network;opengl;openglextensions;printsupport;qml;sql;svg;uitools;widgets;xml;xmlpatterns</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+    <QtInstall>5.15.2_msvc2019_64</QtInstall>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtModules>concurrent;core;gui;multimedia;network;opengl;openglextensions;printsupport;qml;sql;svg;uitools;widgets;xml;xmlpatterns</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+    <QtInstall>5.15.2_msvc2019_64</QtInstall>
+  </PropertyGroup>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

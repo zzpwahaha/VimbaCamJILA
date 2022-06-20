@@ -1,6 +1,7 @@
 //Description: LineEdit used by Filter
 
 #include "LineEditCompleter.h"
+#include <qabstractitemview.h>
 
 
 LineEditCompleter::LineEditCompleter(QWidget *parent) : QLineEdit(parent), c(0)

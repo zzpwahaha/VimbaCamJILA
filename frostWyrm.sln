@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaOfficial", "VimbaOffic
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VimbaCamJILA", "VimbaCam\VimbaCamJILA.vcxproj", "{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChimeraVimbaCam", "ChimeraVimbaCam\ChimeraVimbaCam.vcxproj", "{CB999954-2CD5-4636-8C7F-84B916A87D96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Debug|x64.Build.0 = Debug|x64
 		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Release|x64.ActiveCfg = Release|x64
 		{2419CB0A-43B4-4BAB-81DF-FEBB57BBBCB2}.Release|x64.Build.0 = Release|x64
+		{CB999954-2CD5-4636-8C7F-84B916A87D96}.Debug|x64.ActiveCfg = Debug|x64
+		{CB999954-2CD5-4636-8C7F-84B916A87D96}.Debug|x64.Build.0 = Debug|x64
+		{CB999954-2CD5-4636-8C7F-84B916A87D96}.Release|x64.ActiveCfg = Release|x64
+		{CB999954-2CD5-4636-8C7F-84B916A87D96}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

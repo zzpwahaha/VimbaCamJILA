@@ -45,7 +45,7 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_DiagInfomation = new QDialog(this);
     m_DiagInfomation->setModal(false);
     m_DiagInfomation->setWindowTitle("Information/Logger for " + sID);
-    m_DiagInfomation->setStyleSheet("background-color: rgb(255, 255, 255); font: 9pt;");//font: 10pt;
+    m_DiagInfomation->setStyleSheet("background-color: rgb(255, 255, 255); font: 12pt;");//font: 10pt;
     m_InformationWindow = new MainInformationWindow(0, 0, m_pCam);
     m_InformationWindow->openLoggingWindow();
     QVBoxLayout* infoLayout = new QVBoxLayout(m_DiagInfomation);
@@ -86,9 +86,9 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
     m_QCP->plotLayout()->addElement(0, 0, m_QCPleftAxisRect);
     m_QCP->plotLayout()->addElement(1, 1, m_QCPbottomAxisRect);
     /*note the index of the axrect is labeled with the position, i.e. lf=0,cter=1,bot=2, ignore cbar*/
-    m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(QFont("Times", 10));
-    m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(QFont("Times", 10));
-    m_QCPcenterAxisRect->axis(QCPAxis::atTop)->setLabelFont(QFont("Times", 10));
+    m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setLabelFont(QFont("Times", 12));
+    m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setLabelFont(QFont("Times", 12));
+    m_QCPcenterAxisRect->axis(QCPAxis::atTop)->setLabelFont(QFont("Times", 12));
 
 
     m_QCPcenterAxisRect->setupFullAxesBox(true);
@@ -612,11 +612,13 @@ ViewerWidget::ViewerWidget(QWidget* parent, Qt::WindowFlags flag,
         m_QCPbottomAxisRect->axis(QCPAxis::atBottom), [this](QCPRange range) {
             auto [ox, oy] = m_pImgCThread->offsetXY();
             m_QCPbottomAxisRect->axis(QCPAxis::atBottom)->setRange(range - ox);
+            m_QCP->replot();
         });
     connect(m_QCPleftAxisRect->axis(QCPAxis::atRight), qOverload<const QCPRange&>(&QCPAxis::rangeChanged),
         m_QCPleftAxisRect->axis(QCPAxis::atLeft), [this](QCPRange range) {
             auto [ox, oy] = m_pImgCThread->offsetXY();
             m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setRange(range - oy);
+            m_QCP->replot();
         });
     
     connect(m_pImgCThread, &ImageCalculatingThread::logging, this, &ViewerWidget::onFeedLogger);
@@ -958,12 +960,11 @@ void ViewerWidget::onimageReadyFromCalc()
         m_lowerSB->setValue(m_colorScale->dataRange().lower);
     }
     m_QCPcenterAxisRect->axis(QCPAxis::atLeft)->setScaleRatio(m_QCPcenterAxisRect->axis(QCPAxis::atBottom), 1.0);
-    QMouseEvent event(QMouseEvent::None, m_pImgCThread->mousePos(), Qt::NoButton, 0, 0);
-    m_bottomGraph->rescaleValueAxis(true,true); //only enlarge y and scale corresponde to visible x
+    m_bottomGraph->rescaleValueAxis(true, true); //only enlarge y and scale corresponde to visible x
     m_bottomGraph->keyAxis()->setRange(m_colorMap->keyAxis()->range());
     m_leftGraph->rescaleValueAxis(true, true);
-    
-    m_leftGraph->keyAxis()->setRange(m_colorMap->valueAxis()->range());
+    m_leftGraph->keyAxis()->setRange(m_colorMap->valueAxis()->range()); 
+    m_QCP->replot();
     
     /*set the secondary relative axis, now replaced with connect rangechanged*/
     //m_QCPleftAxisRect->axis(QCPAxis::atLeft)->setRange(m_leftGraph->keyAxis()->range() - m_leftGraph->data()->at(0)->key);
@@ -976,8 +977,8 @@ void ViewerWidget::onimageReadyFromCalc()
     auto [w, h] = m_pImgCThread->WidthHeight();
     m_ImageSizeButtonH->setText("Size H: " + QString::number(h));
     m_ImageSizeButtonW->setText(",W: " + QString::number(w) + " ");
+    QMouseEvent event(QMouseEvent::None, m_pImgCThread->mousePos(), Qt::NoButton, 0, 0);
     onSetMousePosInCMap(&event);
-    m_QCP->replot();
     
     updateExposureTime();
     updateCameraGain();

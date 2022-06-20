@@ -11,4 +11,10 @@
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin;D:\Allied Vision\Vimba_4.2\VimbaCPP\Bin\Win64;D:\Allied Vision\Vimba_4.2\VimbaImageTransform\Bin\Win64;%(Path)%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtLastBackgroundBuild>2022-06-20T04:36:08.0443156Z</QtLastBackgroundBuild>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtLastBackgroundBuild>2022-06-20T04:36:13.7519307Z</QtLastBackgroundBuild>
+  </PropertyGroup>
 </Project>
