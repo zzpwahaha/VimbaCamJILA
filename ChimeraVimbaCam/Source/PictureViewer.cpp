@@ -44,12 +44,13 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     m_QCPcenterAxisRect->setMarginGroup(QCP::msAll, marginGroup);
     m_colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
 
-    m_QCPbottomAxisRect->setMinimumSize(600, 120);
-    m_QCPbottomAxisRect->setMaximumSize(600, 120);
-    m_QCPleftAxisRect->setMinimumSize(120, 600);
-    m_QCPleftAxisRect->setMaximumSize(120, 600);
-    //QRect rec = QApplication::desktop()->screenGeometry();
-    m_QCP->setMaximumSize(960, 900);
+    
+    QRect rec = QApplication::desktop()->screenGeometry();
+    m_QCPbottomAxisRect->setMaximumSize(rec.width() / 2 - 250, (rec.width() / 2 - 250) / 5);
+    //m_QCPbottomAxisRect->setMaximumSize(600, 120);
+    m_QCPleftAxisRect->setMaximumSize((rec.width() / 2 - 250) / 5, rec.width() / 2 - 250);
+    //m_QCPleftAxisRect->setMaximumSize(120, 600);
+    m_QCP->setMaximumSize(rec.width()/2, rec.height());
 
     // move newly created axes on "axes" layer and grids on "grid" layer:
     foreach(QCPAxisRect * rect, m_QCP->axisRects())

@@ -1112,12 +1112,15 @@ void cameraMainWindow::openViewer(CameraInfo& info)
         m_Viewer.back()->setMaximumSize(rec.width() / 2, rec.height());
         m_Viewer.back()->show();
         //m_Viewer.back()->setStyleSheet("border: 1px solid red");
-        m_Viewer.back()->getmContextMenu()->addSeparator();
         
-        auto indx = m_activeViewerGrid->getActiveIndex();
+        
+        m_Viewer.back()->getmContextMenu()->addSeparator();
+        auto* aCamlist = m_Viewer.back()->getmContextMenu()->addAction("&Camera");
+        auto* aDisconnect = m_Viewer.back()->getmContextMenu()->addAction("&Disconnect");
         auto actions = m_Viewer.back()->getmContextMenu()->actions();
-        connect(actions.at(actions.size() - 1 - 2), &QAction::triggered,
-            this, [&, indx]() {
+        connect(aCamlist/*actions.at(actions.size() - 1 - 2)*/, &QAction::triggered,
+            this, [this]() {
+                auto indx = m_activeViewerGrid->getActiveIndex();
                 m_dCamList->setWindowTitle("Camera List : " +
                     QString::fromStdString(std::to_string(indx)));
                 m_activeViewerGrid->setActiveIndex(indx);
@@ -1126,8 +1129,9 @@ void cameraMainWindow::openViewer(CameraInfo& info)
                 m_dCamList->show();
             });
 
-        connect(actions.at(actions.size() - 1 - 1), &QAction::triggered,
-            this, [&, indx, info]() {
+        connect(aDisconnect, &QAction::triggered,
+            this, [this, info]() {
+                auto indx = m_activeViewerGrid->getActiveIndex();
                 m_activeViewerGrid->setActiveIndex(indx);
                 m_activeViewerGrid->Activate();
                 onCloseFromViewer(info.Cam()); });
@@ -1136,19 +1140,6 @@ void cameraMainWindow::openViewer(CameraInfo& info)
     {
         m_Logger->logging("Add viewer widget to the layout failed: the selector is not activated or the index range is invalid ", VimbaViewerLogCategory_ERROR);
     }
-    //for (size_t i = 0; i < m_Viewer.size(); i++)
-    //{
-    //    /*i < 3 ? m_ViewerGridLayout->addWidget(m_Viewer[i], 0, i) :
-    //        m_ViewerGridLayout->addWidget(m_Viewer[i], 1, i - 3);*/
-    //    //m_Viewer[i]->show();
-    //    //m_ViewerGridLayout->removeWidget();
-    //    m_ViewerGridLayout->addWidget(m_Viewer[i], 0, i);
-    //    m_ViewerGridLayout->setRowStretch(0, 1);
-    //   
-    //}
-    //this->setLayout(m_ViewerGridLayout);
-    //m_ViewerGridLayout->setAlignment(Qt::AlignCenter);
-    //this->centralWidget()->setLayout(m_ViewerGridLayout);
 
 
 

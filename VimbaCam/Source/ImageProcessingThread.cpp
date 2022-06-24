@@ -56,12 +56,12 @@ void ImageProcessingThread::run()
             /*my custom readout for mono8 and mono12*/
             QString sFormat = Helper::convertFormatToString(outputPixelFormat);
 
-            if (((tmpFrameData.Width() % 4 != 0) || (tmpFrameData.Height() % 2 != 0)))
-            {
-                sFormat.append(" (height" + QString::number(tmpFrameData.Width()) + " or width" + QString::number(tmpFrameData.Height()) + " not supported!)");
-                emit logging("From FrameObserver: " + sFormat + "width is module zero for 4, height is module zero for 2");
-                //continue;
-            }
+            //if (((tmpFrameData.Width() % 4 != 0) || (tmpFrameData.Height() % 2 != 0)))
+            //{
+            //    sFormat.append(" (height" + QString::number(tmpFrameData.Width()) + " or width" + QString::number(tmpFrameData.Height()) + " not supported!)");
+            //    emit logging("From FrameObserver: " + sFormat + "width is module zero for 4, height is module zero for 2");
+            //    //continue;
+            //}
 
 
             //QVector<ushort> uint16QVector;

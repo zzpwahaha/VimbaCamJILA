@@ -10,6 +10,8 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qaction.h>
+#include <qdialog.h>
+#include <qtimer.h>
 
 MakoCamera::MakoCamera(CameraInfo camInfo, cameraMainWindow* parent)
     : IChimeraSystem(parent)
@@ -19,6 +21,7 @@ MakoCamera::MakoCamera(CameraInfo camInfo, cameraMainWindow* parent)
         viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
     , camInfo(camInfo)
     , saveFileDialog(nullptr)
+    , m_repSaveTimer(new QTimer(this))
 {
     
 	//connect()
@@ -312,6 +315,74 @@ void MakoCamera::createAvgControlWidget()
     wid->show();
 }
 
+void MakoCamera::createRepSaveControlWidget()
+{
+    QDialog* wid = new QDialog(this);
+    wid->setAttribute(Qt::WA_DeleteOnClose, true);
+    //wid->setModal(false);
+    QVBoxLayout* layout = new QVBoxLayout(wid);
+    QHBoxLayout* layout1 = new QHBoxLayout(wid);
+    QHBoxLayout* layout2 = new QHBoxLayout(wid);
+    QLabel* repTime = new QLabel("Repetition time (min): ");
+    QLineEdit* repTimeTE = new QLineEdit(wid);
+    layout1->addWidget(repTime, 0);
+    layout1->addWidget(repTimeTE, 1);
+    layout->addLayout(layout1);
+    QLabel* saveP = new QLabel("Save path: ");
+    QLineEdit* savePLE = new QLineEdit();
+    layout2->addWidget(saveP, 0);
+    layout2->addWidget(savePLE, 1);
+    layout->addLayout(layout2);
+
+    repTimeTE->setText(QString::number(m_repSaveTime, 'g', 2));
+    savePLE->setText(m_repSavePath);
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, wid);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, [this, wid, repTimeTE, savePLE]() {
+        bool status = false;
+        m_repSaveTime = repTimeTE->text().toDouble(&status);
+        if (!status) {
+            m_repSaveTime = 0.0;
+            QMessageBox msgBox;
+            msgBox.setText("The Rep. save time is invalid");
+            msgBox.exec();
+            return;
+        }
+        m_repSavePath = savePLE->text();
+        if (!QDir(m_repSavePath).exists()) {
+            QDir().mkdir(m_repSavePath);
+        }
+        qDebug() << m_repSavePath; // eg D:\\Chimera\\Chimera-Cryo-Test\\VimbaCam\\test
+        wid->close();
+        });
+    connect(buttonBox, &QDialogButtonBox::rejected, wid, &QDialog::close);
+    layout->addWidget(buttonBox, 0);
+
+    wid->show();
+}
+
+void MakoCamera::repSave()
+{
+    QVector<double> imgSave = std::move(imgCThread.rawImageDefinite());
+    auto [imgWidth, imgHeight] = imgCThread.WidthHeight();
+    QString fileName = m_repSavePath + "\\data" + QString::number(m_repSaveCnter) + ".csv";
+    QFile file(fileName);
+    if (file.open(QIODevice::ReadWrite)) {
+        QTextStream stream(&file);
+        stream << "TimeEpoch (ms)" << "," << QDateTime::currentMSecsSinceEpoch() << endl;
+        for (size_t i = 0; i < imgHeight; i++) {
+            for (size_t j = 0; j < imgWidth; j++) {
+                stream << imgSave[i * imgWidth + j];
+                j == imgWidth - 1 ? stream << endl : stream << ",";
+            }
+        }
+        parentWin->reportStatus("Logging: saved successfully to " + fileName, -1);
+    }
+    else {
+        parentWin->reportErr("Logging: Error saving image " + fileName, -1);
+    }
+}
+
 
 void MakoCamera::startExp()
 {
@@ -459,6 +530,31 @@ void MakoCamera::initPlotContextMenu()
         catch (ChimeraError& e) {
             parentWin->reportErr("Capture image for saving failed \n" + e.qtrace());
         } });
+
+
+    QAction* aRepSaveSetting = viewer.contextMenu()->addAction("Rep. Save Setting");
+    connect(aRepSaveSetting, &QAction::triggered, this, [this]() {
+        createRepSaveControlWidget(); });
+
+    QAction* aRepSaveOnOff = viewer.contextMenu()->addAction("Turn Rep. Save On");
+    connect(m_repSaveTimer, &QTimer::timeout, this, [this]() {
+        m_repSaveCnter++;
+        repSave(); });
+    connect(aRepSaveOnOff, &QAction::triggered, this, [this, aRepSaveOnOff]() {
+        if (aRepSaveOnOff->text() == "Turn Rep. Save On") {
+            // turn on
+            m_repSaveCnter = 0;
+            aRepSaveOnOff->setText("Turn Rep. Save Off");
+            m_repSaveTimer->setInterval(int(m_repSaveTime * 60 * 1000));
+            repSave();
+            m_repSaveTimer->start();
+        }
+        else {
+            // turn off
+            m_repSaveTimer->stop();
+            aRepSaveOnOff->setText("Turn Rep. Save On");
+        }; });
+
 }
 
 void MakoCamera::releaseBuffer()

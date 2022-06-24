@@ -14,6 +14,12 @@ int main(int argc, char *argv[])
     cameraMainWindow Application;
     Application.setWindowTitle(QString("Chimera Vimba Viewer "));
     
+
+    qRegisterMetaType< QVector<double> >("QVector<double>");
+    qRegisterMetaType<size_t>();
+    qRegisterMetaType<MakoSettings*>();
+    qRegisterMetaType<CameraInfo>();
+
     //qApp->screens()[0]->geometry().height();
 
     Application.showMaximized();

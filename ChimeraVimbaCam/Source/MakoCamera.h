@@ -62,7 +62,8 @@ private:
     void initPlotContextMenu();
     void handleStatusButtonClicked(QString featName);
     void createAvgControlWidget();
-
+    void createRepSaveControlWidget();
+    void repSave();
 
 private:
     // this order matters since the ctor will initialize core first and then viewer and finally imgCThread
@@ -103,6 +104,11 @@ private:
 	QAction*                            m_aStartStopCap;
     QAction*                            m_aManualCscale;
     //QString                             currentFormat;
+
+    double                              m_repSaveTime;
+    QString                             m_repSavePath;
+    QTimer*                             m_repSaveTimer;
+    size_t                              m_repSaveCnter;
 
 };
 
