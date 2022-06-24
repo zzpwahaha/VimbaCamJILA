@@ -4,9 +4,9 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QVector>
-#include "UI/LoggerWindow.h"
-#include "UI/CameraTreeWindow.h"
-#include "ViewerWidget.h"
+#include "LoggerWindow.h"
+#include "CameraTreeWindow.h"
+#include "MakoCamera.h"
 #include "VimbaCPP/Include/VimbaSystem.h"
 
 
@@ -14,8 +14,8 @@ using namespace AVT::VmbAPI;
 using AVT::VmbAPI::CameraPtrVector;
 
 
-class CameraInfo;
-typedef QVector<CameraInfo>     CameraInfoVector;
+//class CameraInfo;
+
 
 enum ViewerGridGeometry
 {
@@ -49,15 +49,41 @@ class cameraMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
+private:
+    class FindByName
+    {
+        const QString m_Name;
+    public:
+        FindByName(const QString& s)
+            : m_Name(s)
+        {}
+        bool operator()(const CameraInfo& i) const
+        {
+            return i.DisplayName() == m_Name;
+        }
+    };
+    class CameraPtrCompare
+    {
+        const CameraPtr m_Camera;
+    public:
+        CameraPtrCompare(const CameraPtr& cam)
+            : m_Camera(cam)
+        {}
+        bool operator() (const CameraPtr& other) const
+        {
+            return m_Camera.get() == other.get();
+        }
+    };
+
 public:
 	cameraMainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = 0);
 	~cameraMainWindow();
-
+    typedef QVector<CameraInfo>     CameraInfoVector;
 private:
 	QMutex                          m_Lock;
 	LoggerWindow*                   m_Logger;
 	CameraTreeWindow*				m_CameraTree;
-    QVector <ViewerWidget*>         m_Viewer;
+    QVector <MakoCamera*>           m_Viewer;
     CameraInfoVector                m_CameraInfos;
     VimbaSystem&                    m_VimbaSystem;
     QVector<QTreeWidgetItem*>       m_GigE;
@@ -126,109 +152,12 @@ private slots:
 //    void about                  (void);
 //    void rightMouseOpenCamera   (bool bOpenAccesState);
     
+public slots:
+    void reportErr(QString errStr, unsigned errorLevel = 0);
+    void reportStatus(QString statusStr, unsigned notificationLevel = 0);
 
 };
 
 
 
-class CameraInfo
-{
-private:
-    CameraPtr       m_Cam;
-    QString         m_DisplayName;
-    bool            m_IsOpen;
-    QStringList     m_PermittedAccess;
-    QStringList     m_PermittedAccessState;
-public:
-    CameraInfo()
-        : m_IsOpen(false)
-    {}
-    explicit CameraInfo(CameraPtr cam, const QString& name)
-        : m_Cam(cam)
-        , m_DisplayName(name)
-        , m_IsOpen(false)
-    {}
-    const CameraPtr& Cam()            const { return m_Cam; }
-    CameraPtr& Cam()                        { return m_Cam; }
-    const QString& DisplayName()      const { return m_DisplayName; }
-    bool  IsOpen()                    const { return m_IsOpen; }
-    void  SetOpen(bool s)                   { m_IsOpen = s; }
-    const QStringList& PermittedAccess()   const             { return m_PermittedAccess; }
-    void               PermittedAccess(const QStringList& l) { m_PermittedAccess = l; }
-    const QStringList& PermittedAccessState()   const        { return m_PermittedAccessState; }
-    void               PermittedAccessState(const QStringList& l) { m_PermittedAccessState = l; }
-    void SetPermittedAccessState(unsigned int pos, QString status)
-    {
-        m_PermittedAccessState[pos] = status;
-    }
-    void ResetPermittedAccessState()
-    {
-        for (int pos = 0; pos < m_PermittedAccessState.size(); ++pos)
-        {
-            m_PermittedAccessState[pos] = "false";
-        }
-    }
 
-
-    bool operator==(const CameraPtr& other)   const { return SP_ACCESS(other) == SP_ACCESS(m_Cam); }
-    bool operator<(const CameraPtr& other)    const { return SP_ACCESS(other) < SP_ACCESS(m_Cam); }
-    
-    VmbInterfaceType InterfaceType() const
-    {
-        VmbInterfaceType interfaceType;
-        VmbErrorType result = SP_ACCESS(m_Cam)->GetInterfaceType(interfaceType);
-        if (result != VmbErrorSuccess)
-        {
-            throw std::runtime_error("could not read interface type from camera");
-        }
-        return interfaceType;
-    }
-    QString InterfaceTypeString() const
-    {
-        VmbInterfaceType interfaceType;
-        VmbErrorType result = SP_ACCESS(m_Cam)->GetInterfaceType(interfaceType);
-        if (result != VmbErrorSuccess)
-        {
-            throw std::runtime_error("could not read interface type from camera");
-        }
-        switch (interfaceType)
-        {
-        case VmbInterfaceEthernet:
-            return "GigE";
-        case VmbInterfaceFirewire:
-            return "1394";
-        case VmbInterfaceUsb:
-            return "USB";
-        case VmbInterfaceCL:
-            return "CL";
-        case VmbInterfaceCSI2:
-            return "CSI2";
-        }
-    }
-};
-
-class FindByName
-{
-    const QString m_Name;
-public:
-    FindByName(const QString& s)
-        : m_Name(s)
-    {}
-    bool operator()(const CameraInfo& i) const
-    {
-        return i.DisplayName() == m_Name;
-    }
-};
-
-class CameraPtrCompare
-{
-    const CameraPtr m_Camera;
-public:
-    CameraPtrCompare(const CameraPtr& cam)
-        : m_Camera(cam)
-    {}
-    bool operator() (const CameraPtr& other) const
-    {
-        return m_Camera.get() == other.get();
-    }
-};

@@ -1,29 +1,29 @@
 #include "stdafx.h"
 #include "CMOSSetting.h"
 
-const std::array<CameraInfo::name, MAKO_NUMBER> CameraInfo::allCams = { name::Mako1, name::Mako2 };
+//const std::array<CameraInfo::name, MAKO_NUMBER> CameraInfo::allCams = { name::Mako1, name::Mako2 };
 
-std::string CameraInfo::toStr(name m_)
-{
-	switch (m_) {
-	case CameraInfo::name::Mako1:
-		return "Mako1";
-	case CameraInfo::name::Mako2:
-		return "Mako2";
-	}
-	return "";
-}
-
-CameraInfo::name CameraInfo::fromStr(std::string txt)
-{
-	for (auto opt : allCams) {
-		if (toStr(opt) == txt) {
-			return opt;
-		}
-	}
-	thrower("Failed to convert string to CMOS option!");
-	return CameraInfo::name::Mako1;
-}
+//std::string CameraInfo::toStr(name m_)
+//{
+//	switch (m_) {
+//	case CameraInfo::name::Mako1:
+//		return "Mako1";
+//	case CameraInfo::name::Mako2:
+//		return "Mako2";
+//	}
+//	return "";
+//}
+//
+//CameraInfo::name CameraInfo::fromStr(std::string txt)
+//{
+//	for (auto opt : allCams) {
+//		if (toStr(opt) == txt) {
+//			return opt;
+//		}
+//	}
+//	thrower("Failed to convert string to CMOS option!");
+//	return CameraInfo::name::Mako1;
+//}
 
 
 

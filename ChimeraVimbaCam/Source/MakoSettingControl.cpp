@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #define NOMINMAX
 #include "MakoSettingControl.h"
-#include "ConfigurationSystems/ConfigSystem.h"
-#include <CustomQtControls/LineEditCompleter.h>
-#include <CustomQtControls/TickSlider.h>
-#include <CMOSCamera/Helper.h>
+//#include "ConfigurationSystems/ConfigSystem.h"
+#include <LineEditCompleter.h>
+#include <TickSlider.h>
+#include <Helper.h>
 #include <qlayout.h>
 #include <qspinbox.h>
 #include <qcombobox.h>
@@ -620,30 +620,30 @@ void MakoSettingControl::updateUnRegisterFeature()
     }
 }
 
-void MakoSettingControl::handleSavingConfig(ConfigStream& configFile, std::string delim)
-{
-    if (m_pCam == nullptr) {
-        /*return*/; //means in SAFEMODE, do not update the setting but do write to the config
-    }
-    else {
-        updateCurrentSettings();
-    }
-    configFile << delim + "\n";
-    configFile << "/*Mako System Active:*/ " << currentSettings.expActive
-        << "\n/*Left:*/ " << currentSettings.dims.left
-        << "\n/*Top:*/ " << currentSettings.dims.top
-        << "\n/*Right:*/ " << currentSettings.dims.right
-        << "\n/*Bottom:*/ " << currentSettings.dims.bottom
-        << "\n/*H-Bin:*/ " << currentSettings.dims.horizontalBinning
-        << "\n/*V-Bin:*/ " << currentSettings.dims.verticalBinning
-        << "\n/*Exposure Time:*/ " << currentSettings.exposureTime
-        << "\n/*Frame Rate:*/ " << currentSettings.frameRate
-        << "\n/*Raw Gain:*/ " << currentSettings.rawGain
-        << "\n/*Pics Per Rep:*/ " << currentSettings.picsPerRep
-        << "\n/*Trigger Mode:*/ " << MakoTrigger::toStr(currentSettings.triggerMode)
-        << "\n";
-    configFile << "END_"+ delim + "\n";
-}
+//void MakoSettingControl::handleSavingConfig(ConfigStream& configFile, std::string delim)
+//{
+//    if (m_pCam == nullptr) {
+//        /*return*/; //means in SAFEMODE, do not update the setting but do write to the config
+//    }
+//    else {
+//        updateCurrentSettings();
+//    }
+//    configFile << delim + "\n";
+//    configFile << "/*Mako System Active:*/ " << currentSettings.expActive
+//        << "\n/*Left:*/ " << currentSettings.dims.left
+//        << "\n/*Top:*/ " << currentSettings.dims.top
+//        << "\n/*Right:*/ " << currentSettings.dims.right
+//        << "\n/*Bottom:*/ " << currentSettings.dims.bottom
+//        << "\n/*H-Bin:*/ " << currentSettings.dims.horizontalBinning
+//        << "\n/*V-Bin:*/ " << currentSettings.dims.verticalBinning
+//        << "\n/*Exposure Time:*/ " << currentSettings.exposureTime
+//        << "\n/*Frame Rate:*/ " << currentSettings.frameRate
+//        << "\n/*Raw Gain:*/ " << currentSettings.rawGain
+//        << "\n/*Pics Per Rep:*/ " << currentSettings.picsPerRep
+//        << "\n/*Trigger Mode:*/ " << MakoTrigger::toStr(currentSettings.triggerMode)
+//        << "\n";
+//    configFile << "END_"+ delim + "\n";
+//}
 
 QString MakoSettingControl::getFeatureNameFromModel(const QModelIndex& item) const
 {

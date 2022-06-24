@@ -5,7 +5,7 @@
 #include <algorithm>
 
 
-#include "CameraObserver.h"
+#include "MakoWrapper.h"
 
 
 cameraMainWindow::cameraMainWindow(QWidget* parent, Qt::WindowFlags flags)
@@ -132,9 +132,9 @@ public:
     FindWindowByCameraPtr(CameraPtr cam)
         : m_Cam(cam)
     {}
-    bool operator () (ViewerWidget* v) const
+    bool operator () (MakoCamera* v) const
     {
-        return v->isControlledCamera(m_Cam);
+        return SP_ACCESS(m_Cam) == SP_ACCESS(v->getMakoCore().getCameraPtr());;
     }
 };
 
@@ -159,7 +159,7 @@ void cameraMainWindow::closeEvent(QCloseEvent* event)
     QMutexLocker local_lock(&m_Lock);
     if (!m_Viewer.empty())
     {
-        QVector<ViewerWidget*>::iterator it = m_Viewer.begin();
+        QVector<MakoCamera*>::iterator it = m_Viewer.begin();
         while (it != m_Viewer.end())
         {
             delete* it;
@@ -865,6 +865,14 @@ void cameraMainWindow::onUpdateDeviceList(void)
     }
 }
 
+void cameraMainWindow::reportErr(QString errStr, unsigned errorLevel) {
+    m_Logger->logging(errStr, VimbaViewerLogCategory::VimbaViewerLogCategory_ERROR);
+}
+
+void cameraMainWindow::reportStatus(QString statusStr, unsigned notificationLevel) {
+    m_Logger->logging(statusStr, VimbaViewerLogCategory::VimbaViewerLogCategory_INFO);
+}
+
 
 void cameraMainWindow::onCameraClicked(const QString& sModel, const bool& bIsChecked)
 {
@@ -977,10 +985,10 @@ void cameraMainWindow::on_ActionDiscover_triggered(void)
     {
         for (int i = 0; i < m_Viewer.size(); i++)
         {
-            if (m_Viewer[i]->getCamOpenStatus())
-            {
-                tmpCameras.push_back(m_Viewer[i]->getCameraPtr());
-            }
+            //if (m_Viewer[i]->getCamOpenStatus())
+            //{
+            tmpCameras.push_back(m_Viewer[i]->getMakoCore().getCameraPtr());
+            //}
         }
     }
     for (int i = 0; i < tmpCameras.size(); ++i)
@@ -1027,7 +1035,7 @@ void cameraMainWindow::closeViewer(CameraPtr cam, int closefromDisconnect)
         findPos->SetOpen(false);
     }
 
-    QVector<ViewerWidget*>::iterator findWindowPos = std::find_if(m_Viewer.begin(), m_Viewer.end(), FindWindowByCameraPtr(cam));
+    QVector<MakoCamera*>::iterator findWindowPos = std::find_if(m_Viewer.begin(), m_Viewer.end(), FindWindowByCameraPtr(cam));
     if (m_Viewer.end() != findWindowPos)
     {
 
@@ -1060,82 +1068,35 @@ void cameraMainWindow::closeViewer(CameraPtr cam, int closefromDisconnect)
 /*locked by on camera clicked*/
 void cameraMainWindow::openViewer(CameraInfo& info)
 {
-    try
-    {
-        if (!info.IsOpen())
-        {
-            /*did not use right mouse clicked function*/
-            /* if it's not triggered from right mouse click menu, open with best case */
-            //if (!m_bIsOpenByRightMouseClick)
-            //    m_sOpenAccessType = getBestAccess(info);
-
+    try {
+        if (!info.IsOpen()) {
             //keep in mind what viewer is open
-
-            m_Viewer.append(new ViewerWidget(this, 0, info.DisplayName(), m_bIsAutoAdjustPacketSize, info.Cam()));
-
-            if (!connect(m_Viewer.back(), SIGNAL(closeViewer(CameraPtr)), this, SLOT(onCloseFromViewer(CameraPtr))))
-                m_Logger->logging("MainWindow: Failed connecting SIGNAL (<CameraTreeWindow>closeViewer) to SLOT(<MainWindow>onCloseFromViewer)", VimbaViewerLogCategory_ERROR);
-
-            QString sBestAccess = getBestAccess(info);
-
-            if (m_Viewer.back()->getCamOpenStatus())
-            {
-                m_Logger->logging(tr("Opening The Viewer:") + "\t" + info.DisplayName(), VimbaViewerLogCategory_INFO);
-                info.SetOpen(true);
-                /*Use best case in case open camera directly with no  right mouse click */
-               /* if (!m_bIsOpenByRightMouseClick)
-                {
-                    info.SetPermittedAccessState(0, "true");
-                }*/
-
-                info.SetPermittedAccessState(0, "true");
-                QString sAdjustMsg;
-                if (m_Viewer.back()->getAdjustPacketSizeMessage(sAdjustMsg))
-                {
-                    sAdjustMsg.contains("Failed", Qt::CaseInsensitive) ? m_Logger->logging(sAdjustMsg + info.DisplayName(), VimbaViewerLogCategory_INFO) : m_Logger->logging(sAdjustMsg + info.DisplayName(), VimbaViewerLogCategory_OK);
-                }
+            try {
+                m_Viewer.append(new MakoCamera(info, this));
+                m_Viewer.back()->initialize();
             }
-            else
-            {
+            catch (ChimeraError& e) {
                 info.SetOpen(false);
-                if (VmbErrorInvalidAccess == m_Viewer.back()->getOpenError())
-                {
-                    m_Logger->logging(tr("Opening The Viewer:") + "\t" +
-                        info.DisplayName() +
-                        " failed! <Cannot open the camera because it is already under control by another application>", VimbaViewerLogCategory_WARNING);
-                    return;
-                }
-                else
-                {
-                    m_Logger->logging(tr("Opening The Viewer:") + "\t" +
-                        info.DisplayName() +
-                        " failed! - Error: " +
-                        QString::number(m_Viewer.back()->getOpenError()) +
-                        Helper::mapReturnCodeToString(m_Viewer.back()->getOpenError()), VimbaViewerLogCategory_WARNING);
-
-                    QMessageBox::warning(this, "Error", tr("Opening The Viewer:") + "\t" +
-                        info.DisplayName() +
-                        " failed! - Error: " +
-                        QString::number(m_Viewer.back()->getOpenError()) +
-                        Helper::mapReturnCodeToString(m_Viewer.back()->getOpenError()));
-                    return;
-                }
-
                 onCloseFromViewer(info.Cam());
                 info.ResetPermittedAccessState();
-
+                m_Logger->logging(e.qtrace(), VimbaViewerLogCategory_ERROR);
+                errBox(e.trace());
+                return;
             }
+            m_Logger->logging(tr("Opening The Viewer:") + "\t" + info.DisplayName(), VimbaViewerLogCategory_INFO);
+            info.SetOpen(true);
+            info.SetPermittedAccessState(0, "true");
+            if (!connect(m_Viewer.back(), SIGNAL(closeViewer(CameraPtr)), this, SLOT(onCloseFromViewer(CameraPtr))))
+                m_Logger->logging("MainWindow: Failed connecting SIGNAL (<CameraTreeWindow>closeViewer) to SLOT(<MainWindow>onCloseFromViewer)", VimbaViewerLogCategory_ERROR);           
         }
-        else
-        {
+        else {
             m_Logger->logging(tr("Opening The Viewer:") + "\t" +
                 info.DisplayName() +
                 " failed! <Cannot open the same camera twice>", VimbaViewerLogCategory_WARNING);
             return;
         }
     }
-    catch (const std::exception& e)
-    {
+    catch (const std::exception& e) {
         m_Logger->logging("MainWindow <openViewer> Exception: " + QString::fromStdString(e.what()), VimbaViewerLogCategory_ERROR);
     }
 

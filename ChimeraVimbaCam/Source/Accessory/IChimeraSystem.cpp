@@ -1,13 +1,12 @@
 #include "stdafx.h"
-#include <GeneralObjects/IChimeraSystem.h>
-#include <PrimaryWindows/IChimeraQtWindow.h>
-#include <PrimaryWindows/QtMainWindow.h>
+#include <IChimeraSystem.h>
+#include <cameraMainWindow.h>
 
-IChimeraSystem::IChimeraSystem (IChimeraQtWindow* parent_in) 
+IChimeraSystem::IChimeraSystem (cameraMainWindow* parent_in)
 {
 	parentWin = parent_in;
-	connect (this, &IChimeraSystem::error, parentWin, &IChimeraQtWindow::reportErr);
-	connect (this, &IChimeraSystem::warning, parentWin, &IChimeraQtWindow::reportErr);
-	connect (this, &IChimeraSystem::notification, parentWin, &IChimeraQtWindow::reportStatus);
+	connect (this, &IChimeraSystem::error, parentWin, &cameraMainWindow::reportErr);
+	connect (this, &IChimeraSystem::warning, parentWin, &cameraMainWindow::reportErr);
+	connect (this, &IChimeraSystem::notification, parentWin, &cameraMainWindow::reportStatus);
 }
 

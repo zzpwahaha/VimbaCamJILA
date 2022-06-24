@@ -60,7 +60,7 @@ void ImageProcessingThread::run()
             {
                 sFormat.append(" (height" + QString::number(tmpFrameData.Width()) + " or width" + QString::number(tmpFrameData.Height()) + " not supported!)");
                 emit logging("From FrameObserver: " + sFormat + "width is module zero for 4, height is module zero for 2");
-                continue;
+                //continue;
             }
 
 

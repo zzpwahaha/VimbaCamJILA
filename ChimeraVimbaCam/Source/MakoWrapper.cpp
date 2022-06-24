@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "MakoWrapper.h"
-#include <CMOSCamera/Helper.h>
+#include <Helper.h>
 #include <qendian.h>
 
 InterfacePtr MakoWrapper::getInterfaceByID(VimbaSystem& vsys, std::string sInterfaceID)

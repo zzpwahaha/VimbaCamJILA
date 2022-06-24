@@ -3,7 +3,7 @@
 #include <tuple>
 #include <filesystem>
 #include <utility>
-#include <GeneralImaging/csvReader.h>
+#include <csvReader.h>
 
 
 PictureViewer::PictureViewer(std::string plotname, QWidget* parent)

@@ -5,8 +5,8 @@
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qmenu.h>
-#include "../3rd_Party/qcustomplot/qcustomplot.h"
-#include <CustomQtControls/RangeSlider.h>
+#include "../ExternLib/qcustomplot/qcustomplot.h"
+#include <RangeSlider.h>
 class PictureViewer : public QWidget
 {
     Q_OBJECT

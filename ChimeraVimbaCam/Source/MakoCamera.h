@@ -1,16 +1,15 @@
 #pragma once
-#include "LowLevel/constants.h"
-#include "GeneralObjects/IChimeraSystem.h"
-#include "ConfigurationSystems/Version.h"
-#include "ConfigurationSystems/ConfigStream.h"
-#include "PrimaryWindows/IChimeraQtWindow.h"
+#include "Accessory/IChimeraSystem.h"
+//#include "ConfigurationSystems/ConfigStream.h"
 #include <QLabel.h>
 #include <qcheckbox.h>
+#include <qspinbox.h>
 #include <array>
 #include "MakoCameraCore.h"
 #include "ImageCalculatingThread.h"
-#include <GeneralImaging/PictureViewer.h>
+#include <PictureViewer.h>
 
+class cameraMainWindow;
 class MakoCamera : public IChimeraSystem 
 {
     Q_OBJECT
@@ -19,7 +18,7 @@ public:
 	MakoCamera& operator=(const MakoCamera&) = delete;
 	MakoCamera(const MakoCamera&) = delete;
 	
-	MakoCamera(CameraInfo camInfo, IChimeraQtWindow* parent);
+	MakoCamera(CameraInfo camInfo, cameraMainWindow* parent);
     ~MakoCamera();
 
     void initialize();
@@ -38,13 +37,18 @@ public:
 
     void updateStatusBar();
 
-    void prepareForExperiment();
+    //void prepareForExperiment();
 
     void setMOTCalcActive(bool active);
 
     MakoCameraCore& getMakoCore() { return core; };
     const CameraInfo& getCameraInfo() { return camInfo; }
     bool isExpStillRunning() { return isExpRunning; } // used in MakoWindow to verify all cam is finished writing data to hdf5
+
+
+
+    QString getCameraID() { return qstr(core.CameraName()); }
+    QMenu* getmContextMenu() { return viewer.contextMenu(); };
 
 public slots:
     void handleExpImage(QVector<double> img, int width, int height);

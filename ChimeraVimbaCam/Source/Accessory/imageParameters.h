@@ -1,7 +1,7 @@
 // created by Mark O. Brown
 #pragma once
-#include <GeneralUtilityFunctions/my_str.h>
-#include <GeneralUtilityFunctions/Thrower.h>
+#include <my_str.h>
+#include <Thrower.h>
 
 struct imageParameters{
 	imageParameters ( ) { };

@@ -1,7 +1,9 @@
 #include "stdafx.h"
+#include <cameraMainWindow.h>
+#include "Accessory/my_str.h"
 #include "MakoCamera.h"
-#include <PrimaryWindows/QtAndorWindow.h>
-#include <PrimaryWindows/QtMakoWindow.h>
+#include <qstatusbar.h>
+#include <qapplication.h>
 #include <qdialog.h>
 #include <qfiledialog.h>
 #include <qlabel.h>
@@ -9,11 +11,11 @@
 #include <qpushbutton.h>
 #include <qaction.h>
 
-MakoCamera::MakoCamera(CameraInfo camInfo, IChimeraQtWindow* parent)
+MakoCamera::MakoCamera(CameraInfo camInfo, cameraMainWindow* parent)
     : IChimeraSystem(parent)
     , core(camInfo)
     , viewer(core.CameraName(), this)
-    , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, camInfo.safemode,
+    , imgCThread(SP_DECL(FrameObserver)(core.getFrameObs()), core, false,
         viewer.plot(), viewer.cmap(), viewer.bottomPlot(), viewer.leftPlot())
     , camInfo(camInfo)
     , saveFileDialog(nullptr)
@@ -120,9 +122,9 @@ void MakoCamera::initialize()
     QRect rec = QApplication::desktop()->screenGeometry();
     this->setMaximumSize(rec.width() / 2, rec.height());
 
-    if (camInfo.safemode) {
-        return; // do not do the follow handling in safemode
-    }
+    //if (camInfo.safemode) {
+    //    return; // do not do the follow handling in safemode
+    //}
     connect(m_TrigOnOffButton, &QPushButton::clicked, this, [this]() {
         handleStatusButtonClicked("TriggerMode"); });
     connect(m_TrigSourceButton, &QPushButton::clicked, this, [this]() {
@@ -292,9 +294,9 @@ void MakoCamera::createAvgControlWidget()
         QString s = avgnLE->text();
         int val;
         try {
-            val = boost::lexical_cast<int>(str(s));
+            val = s.toInt();
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (ChimeraError&) {
             errBox("The average number is not valid, please input a positive integer");
         }
         if (val > 0) {
@@ -610,7 +612,7 @@ void MakoCamera::manualSaveImage()
         }
 
         fileExtension = "*.pdf ;; *.csv";
-        saveFileDialog = new QFileDialog(this, "Save Image", qstr(DATA_SAVE_LOCATION), fileExtension);
+        saveFileDialog = new QFileDialog(this, "Save Image", qstr(""/*DATA_SAVE_LOCATION*/), fileExtension);
         saveFileDialog->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
         saveFileDialog->selectNameFilter("*.csv");
         saveFileDialog->setViewMode(QFileDialog::Detail);
@@ -675,9 +677,9 @@ void MakoCamera::manualSaveImage()
 
 void MakoCamera::updateStatusBar()
 {
-    if (camInfo.safemode) {
-        return;
-    }
+    //if (camInfo.safemode) {
+    //    return;
+    //}
     core.updateCurrentSettings();
     MakoSettings ms = core.getRunningSettings();
     m_expActive->setChecked(ms.expActive);
@@ -705,16 +707,16 @@ void MakoCamera::updateStatusBar()
 
 }
 
-void MakoCamera::prepareForExperiment()
-{
-    currentRepNumber = 0;
-    isExpRunning = true;
-    if (core.getRunningSettings().picsPerRep <= 0) {
-        thrower("The CMOS camera " + CameraInfo::toStr(camInfo.camName) + " is set to be Experiment Active but the Picture-Per-Repetion is " + str(core.getRunningSettings().picsPerRep)
-            + " which is not greater than or equal to 1");
-    }
-    acquisitionStartStopFromCtrler("AcquisitionStart");
-}
+//void MakoCamera::prepareForExperiment()
+//{
+//    currentRepNumber = 0;
+//    isExpRunning = true;
+//    if (core.getRunningSettings().picsPerRep <= 0) {
+//        thrower("The CMOS camera " + CameraInfo::toStr(camInfo.camName) + " is set to be Experiment Active but the Picture-Per-Repetion is " + str(core.getRunningSettings().picsPerRep)
+//            + " which is not greater than or equal to 1");
+//    }
+//    acquisitionStartStopFromCtrler("AcquisitionStart");
+//}
 
 void MakoCamera::setMOTCalcActive(bool active)
 {
@@ -723,38 +725,38 @@ void MakoCamera::setMOTCalcActive(bool active)
 
 void MakoCamera::handleExpImage(QVector<double> img, int width, int height)
 {
-    if (!isExpRunning) {
-        return;
-    }
-    try {
-        auto* andorWin = parentWin->andorWin;
-        currentRepNumber++;
-        m_OperatingStatusLabel->setText("Exp Running" + qstr(currentRepNumber));
-        if (core.getRunningSettings().triggerMode == CMOSTrigger::mode::ContinuousSoftware) {
-            // don't write data if continuous, that's a recipe for disaster.
-            emit error("Mako camera mode is continuous, such high data rate is hard to write to "
-                "disk continously. Double check if this is what you need.\n");
-            return;
-        }
-        if (MOTCalcActive) {
-            emit imgReadyForAnalysis(img, width, height, currentRepNumber - 1);
-        }
-        andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height, camInfo.camName);
+    //if (!isExpRunning) {
+    //    return;
+    //}
+    //try {
+    //    auto* andorWin = parentWin->andorWin;
+    //    currentRepNumber++;
+    //    m_OperatingStatusLabel->setText("Exp Running" + qstr(currentRepNumber));
+    //    if (core.getRunningSettings().triggerMode == CMOSTrigger::mode::ContinuousSoftware) {
+    //        // don't write data if continuous, that's a recipe for disaster.
+    //        emit error("Mako camera mode is continuous, such high data rate is hard to write to "
+    //            "disk continously. Double check if this is what you need.\n");
+    //        return;
+    //    }
+    //    if (MOTCalcActive) {
+    //        emit imgReadyForAnalysis(img, width, height, currentRepNumber - 1);
+    //    }
+    //    andorWin->getLogger().writeMakoPic(img.toStdVector(), width, height, camInfo.camName);
 
-        if (currentRepNumber == core.getRunningSettings().totalPictures()) {
-            // handle mako finish
-            isExpRunning = false;
-            imgCThread.experimentFinished();
-            m_OperatingStatusLabel->setText("Exp Finished");
-            // tell the andor window that the basler camera finished so that the data file can be handled appropriately.
-            //mainWin->getComm ()->sendBaslerFin ();
-            parentWin->makoWin->CMOSChkFinished();
-        }
-    }
-    catch (ChimeraError& err) {
-        emit error(err.qtrace());
-        m_OperatingStatusLabel->setText("Exp ERROR!");
-    }
+    //    if (currentRepNumber == core.getRunningSettings().totalPictures()) {
+    //        // handle mako finish
+    //        isExpRunning = false;
+    //        imgCThread.experimentFinished();
+    //        m_OperatingStatusLabel->setText("Exp Finished");
+    //        // tell the andor window that the basler camera finished so that the data file can be handled appropriately.
+    //        //mainWin->getComm ()->sendBaslerFin ();
+    //        parentWin->makoWin->CMOSChkFinished();
+    //    }
+    //}
+    //catch (ChimeraError& err) {
+    //    emit error(err.qtrace());
+    //    m_OperatingStatusLabel->setText("Exp ERROR!");
+    //}
 }
 
 

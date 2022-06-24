@@ -1,21 +1,103 @@
 #pragma once
 #include <string>
-#include "GeneralImaging/imageParameters.h"
+#include "Accessory/imageParameters.h"
+#include "VimbaCPP/Include/VimbaSystem.h"
+#include <qstringlist.h>
+#include <QMetaType>
 
-struct CameraInfo
+//struct CameraInfo
+//{
+//	//enum class name {
+//	//	Mako1,Mako2
+//	//};
+//	//static const std::array<name, MAKO_NUMBER> allCams;
+//	//CameraInfo::name camName;
+//	std::string ip;
+//	std::string delim;
+//	const bool safemode = false;
+//
+//	//static std::string toStr(name m_);
+//	//static CameraInfo::name fromStr(std::string txt);
+//
+//};
+
+
+using namespace AVT::VmbAPI;
+using AVT::VmbAPI::CameraPtrVector;
+class CameraInfo
 {
-	enum class name {
-		Mako1,Mako2
-	};
-	static const std::array<name, MAKO_NUMBER> allCams;
-	CameraInfo::name camName;
-	std::string ip;
-	std::string delim;
-	bool safemode = true;
+private:
+    CameraPtr       m_Cam;
+    QString         m_DisplayName;
+    bool            m_IsOpen;
+    QStringList     m_PermittedAccess;
+    QStringList     m_PermittedAccessState;
+public:
+    CameraInfo()
+        : m_IsOpen(false)
+    {}
+    explicit CameraInfo(CameraPtr cam, const QString& name)
+        : m_Cam(cam)
+        , m_DisplayName(name)
+        , m_IsOpen(false)
+    {}
+    const CameraPtr& Cam()            const { return m_Cam; }
+    CameraPtr& Cam() { return m_Cam; }
+    const QString& DisplayName()      const { return m_DisplayName; }
+    bool  IsOpen()                    const { return m_IsOpen; }
+    void  SetOpen(bool s) { m_IsOpen = s; }
+    const QStringList& PermittedAccess()   const { return m_PermittedAccess; }
+    void               PermittedAccess(const QStringList& l) { m_PermittedAccess = l; }
+    const QStringList& PermittedAccessState()   const { return m_PermittedAccessState; }
+    void               PermittedAccessState(const QStringList& l) { m_PermittedAccessState = l; }
+    void SetPermittedAccessState(unsigned int pos, QString status)
+    {
+        m_PermittedAccessState[pos] = status;
+    }
+    void ResetPermittedAccessState()
+    {
+        for (int pos = 0; pos < m_PermittedAccessState.size(); ++pos)
+        {
+            m_PermittedAccessState[pos] = "false";
+        }
+    }
 
-	static std::string toStr(name m_);
-	static CameraInfo::name fromStr(std::string txt);
 
+    bool operator==(const CameraPtr& other)   const { return SP_ACCESS(other) == SP_ACCESS(m_Cam); }
+    bool operator<(const CameraPtr& other)    const { return SP_ACCESS(other) < SP_ACCESS(m_Cam); }
+
+    VmbInterfaceType InterfaceType() const
+    {
+        VmbInterfaceType interfaceType;
+        VmbErrorType result = SP_ACCESS(m_Cam)->GetInterfaceType(interfaceType);
+        if (result != VmbErrorSuccess)
+        {
+            throw std::runtime_error("could not read interface type from camera");
+        }
+        return interfaceType;
+    }
+    QString InterfaceTypeString() const
+    {
+        VmbInterfaceType interfaceType;
+        VmbErrorType result = SP_ACCESS(m_Cam)->GetInterfaceType(interfaceType);
+        if (result != VmbErrorSuccess)
+        {
+            throw std::runtime_error("could not read interface type from camera");
+        }
+        switch (interfaceType)
+        {
+        case VmbInterfaceEthernet:
+            return "GigE";
+        case VmbInterfaceFirewire:
+            return "1394";
+        case VmbInterfaceUsb:
+            return "USB";
+        case VmbInterfaceCL:
+            return "CL";
+        case VmbInterfaceCSI2:
+            return "CSI2";
+        }
+    }
 };
 
 

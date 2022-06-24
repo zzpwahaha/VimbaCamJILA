@@ -4,7 +4,7 @@
 #include <VimbaCPP/Include/VimbaSystem.h>
 #include "FrameObserver.h"
 #include "MakoCameraCore.h"
-#include "../3rd_Party/qcustomplot/qcustomplot.h"
+#include "../ExternLib/qcustomplot/qcustomplot.h"
 #include "GaussianFit.h"
 #include "FrameAverager.h"
 #include <deque>

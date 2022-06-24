@@ -1,7 +1,7 @@
 #pragma once
 #include "CMOSSetting.h"
 #include "MakoWrapper.h"
-#include "ConfigurationSystems/ConfigStream.h"
+//#include "ConfigurationSystems/ConfigStream.h"
 #include <qwidget.h>
 #include <QMap>
 #include <QTreeView>
@@ -59,7 +59,7 @@ class MakoSettingControl : public QTreeView
         void updateRegisterFeature();
         void updateUnRegisterFeature();
         void saveFeaturesToTextFile(const QString& sDestPathAndFileName) {};
-        void handleSavingConfig(ConfigStream& configFile, std::string delim);
+        //void handleSavingConfig(ConfigStream& configFile, std::string delim);
 
 
         /*getter for m_model*/

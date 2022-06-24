@@ -16,7 +16,11 @@
   <ItemGroup>
     <ClCompile Include="ExternLib\qcustomplot\qcustomplot.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Source\Accessory\IChimeraSystem.cpp" />
+    <ClCompile Include="Source\Accessory\miscCommonFunctions.cpp" />
+    <ClCompile Include="Source\Accessory\my_str.cpp" />
     <ClCompile Include="Source\cameraMainWindow.cpp" />
+    <ClCompile Include="Source\CameraTreeWindow.cpp" />
     <ClCompile Include="Source\CMOSSetting.cpp" />
     <ClCompile Include="Source\csvReader.cpp" />
     <ClCompile Include="Source\FrameAverager.cpp" />
@@ -25,16 +29,29 @@
     <ClCompile Include="Source\Helper.cpp" />
     <ClCompile Include="Source\ImageCalculatingThread.cpp" />
     <ClCompile Include="Source\ImageProcessingThread.cpp" />
+    <ClCompile Include="Source\LineEditCompleter.cpp" />
+    <ClCompile Include="Source\LoggerWindow.cpp" />
     <ClCompile Include="Source\MakoCamera.cpp" />
     <ClCompile Include="Source\MakoCameraCore.cpp" />
     <ClCompile Include="Source\MakoSettingControl.cpp" />
     <ClCompile Include="Source\MakoWrapper.cpp" />
     <ClCompile Include="Source\PictureViewer.cpp" />
+    <ClCompile Include="Source\RangeSlider.cpp" />
+    <ClCompile Include="Source\TickSlider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Source\cameraMainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Accessory\miscCommonFunctions.h" />
+    <ClInclude Include="Source\Accessory\my_str.h" />
+    <QtMoc Include="Source\LoggerWindow.h" />
+    <QtMoc Include="Source\CameraTreeWindow.h" />
+    <QtMoc Include="Source\TickSlider.h" />
+    <QtMoc Include="Source\RangeSlider.h" />
+    <QtMoc Include="Source\LineEditCompleter.h" />
+    <QtMoc Include="Source\Accessory\IChimeraSystem.h" />
+    <ClInclude Include="Source\Accessory\imageParameters.h" />
     <ClInclude Include="Source\Accessory\Thrower.h" />
     <ClInclude Include="Source\CMOSSetting.h" />
     <ClInclude Include="Source\csvReader.h" />

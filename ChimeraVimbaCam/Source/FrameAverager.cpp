@@ -87,7 +87,7 @@ void FrameAverager::normalAvg(QVector<double>& vec)
         m_avgs.clear();
         m_avgfirstStart = false;
     }
-    for (auto idx : range(m_avgResult.size())) {
+    for (unsigned idx = 0; idx < m_avgResult.size(); idx++) {
         m_avgResult[idx] = m_avgResult[idx] * m_avgs.size() + vec[idx]
             - (m_avgs.size() == m_avgNum ? m_avgs.front()[idx] : 0);
         m_avgResult[idx] /= (m_avgs.size() == m_avgNum ? m_avgs.size() : (m_avgs.size() + 1));
@@ -112,7 +112,7 @@ void FrameAverager::exponentialAvg(QVector<double>& vec)
         return;
     }
     const double base = std::pow(e, 1 / static_cast<double>(m_avgNum));
-    for (auto idx : range(m_avgResult.size())) {
+    for (unsigned idx = 0; idx < m_avgResult.size(); idx++) {
         m_avgResult[idx] = m_avgResult[idx] + vec[idx] * ((1 - std::pow(base, -double(m_avgNumCntrs))) / (base - 1));
         m_avgResult[idx] /= (base - std::pow(base, -double(m_avgNumCntrs))) / (base - 1);
     }

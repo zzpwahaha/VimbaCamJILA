@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 #include <qobject.h>
 #include "VimbaCPP/Include/VimbaSystem.h"
 #include <VimbaCPP/Include/ICameraListObserver.h>

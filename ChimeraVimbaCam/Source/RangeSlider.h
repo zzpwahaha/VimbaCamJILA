@@ -2,7 +2,7 @@
 #include <QWidget>
 #include <QPainter>
 #include <QMouseEvent>
-#include <../3rd_Party/qcustomplot/qcustomplot.h>
+#include <../ExternLib/qcustomplot/qcustomplot.h>
 #include <qspinbox.h>
 enum {
     scHandleSideLength = 11,

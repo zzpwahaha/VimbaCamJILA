@@ -1,11 +1,11 @@
 #pragma once
-#include "GeneralObjects/IDeviceCore.h"
+//#include "GeneralObjects/IDeviceCore.h"
 #include "FrameObserver.h"
 #include "MakoWrapper.h"
 #include "MakoSettingControl.h"
 #include "CMOSSetting.h"
 
-class MakoCameraCore : public IDeviceCore
+class MakoCameraCore : public QObject
 {
 	Q_OBJECT
 public:
@@ -16,15 +16,15 @@ public:
 	MakoCameraCore(CameraInfo camInfo);
 	~MakoCameraCore();
 	
-	std::string getDelim() override { return camInfo.delim; }
-	void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override;
-	void loadExpSettings(ConfigStream& stream) override;
-	void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;
-	void programVariation(unsigned variation, std::vector<parameterType>& params,
-		ExpThreadWorker* threadworker) override {};
-	void normalFinish() override;
-	void errorFinish() override;
-	MakoSettings getSettingsFromConfig(ConfigStream& configFile);
+	//std::string getDelim() override { return camInfo.delim; }
+	//void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override;
+	//void loadExpSettings(ConfigStream& stream) override;
+	//void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;
+	//void programVariation(unsigned variation, std::vector<parameterType>& params,
+	//	ExpThreadWorker* threadworker) override {};
+	//void normalFinish() override;
+	//void errorFinish() override;
+	//MakoSettings getSettingsFromConfig(ConfigStream& configFile);
 
 	void initializeVimba();
 	void validateCamera(const CameraPtrVector& Cameras);

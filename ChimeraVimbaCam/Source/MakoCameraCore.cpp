@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "MakoCameraCore.h"
-#include "ConfigurationSystems/ConfigSystem.h"
-#include <ExperimentThread/ExpThreadWorker.h>
-#include "MiscellaneousExperimentOptions/Repetitions.h"
-#include <DataLogging/DataLogger.h>
+//#include "ConfigurationSystems/ConfigSystem.h"
+//#include <ExperimentThread/ExpThreadWorker.h>
+//#include "MiscellaneousExperimentOptions/Repetitions.h"
+//#include <DataLogging/DataLogger.h>
 #include <qdebug.h>
 
 MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
@@ -11,9 +11,6 @@ MakoCameraCore::MakoCameraCore(CameraInfo camInfo)
     , makoCtrl()
     , camInfo(camInfo)
 {
-    if (camInfo.safemode) {
-        return;
-    }
     try {
         initializeVimba();
         SP_SET(frameObs, new FrameObserver(cameraPtr));
@@ -37,121 +34,121 @@ MakoCameraCore::~MakoCameraCore()
     m_VimbaSystem.Shutdown();
 }
 
-void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
-{
-    try {
-        if (!experimentActive) {
-            H5::Group makoGroup(log.file.createGroup("/Mako:Off"));
-            return;
-        }
-        H5::Group makoGroup;
-        try {
-            makoGroup = log.file.openGroup("/Mako");
-        }
-        catch (H5::Exception&) {
-            makoGroup = log.file.createGroup("/Mako");
-        }
-        H5::Group makoSubGroup(makoGroup.createGroup(CameraInfo::toStr(camInfo.camName)));
-        hsize_t rank1[] = { 1 };
-        // pictures. These are permanent members of the class for speed during the writing process.	
-        hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.width(),
-                               expRunSettings.dims.height() };
-        hsize_t picDims[] = { 1, expRunSettings.dims.width(), expRunSettings.dims.height() };
-        log.MakoPicureSetDataSpace[camInfo.camName] = H5::DataSpace(3, setDims);
-        log.MakoPicDataSpace[camInfo.camName] = H5::DataSpace(3, picDims);
-        log.MakoPictureDataset[camInfo.camName] = makoSubGroup.createDataSet("Pictures", H5::PredType::NATIVE_LONG,
-            log.MakoPicureSetDataSpace[camInfo.camName]);
-        log.currentMakoPicNumber[camInfo.camName] = 0;
-        //log.writeDataSet(BaslerAcquisition::toStr(expRunSettings.acquisitionMode), "Camera-Mode", baslerGroup);
-        //log.writeDataSet(BaslerAutoExposure::toStr(expRunSettings.exposureMode), "Exposure-Mode", baslerGroup);
-        log.writeDataSet(expRunSettings.exposureTime, "Exposure-Time", makoSubGroup);
-        log.writeDataSet(MakoTrigger::toStr(expRunSettings.triggerMode), "Trigger-Mode", makoSubGroup);
-        // image settings
-        H5::Group imageDims = makoSubGroup.createGroup("Image-Dimensions");
-        log.writeDataSet(expRunSettings.dims.top, "Top", imageDims);
-        log.writeDataSet(expRunSettings.dims.bottom, "Bottom", imageDims);
-        log.writeDataSet(expRunSettings.dims.left, "Left", imageDims);
-        log.writeDataSet(expRunSettings.dims.right, "Right", imageDims);
-        log.writeDataSet(expRunSettings.dims.horizontalBinning, "Horizontal-Binning", imageDims);
-        log.writeDataSet(expRunSettings.dims.verticalBinning, "Vertical-Binning", imageDims);
-        log.writeDataSet(expRunSettings.frameRate, "Frame-Rate", makoSubGroup);
-        log.writeDataSet(expRunSettings.rawGain, "Raw-Gain", makoSubGroup);
-    }
-    catch (H5::Exception err) {
-        log.logError(err);
-        throwNested("ERROR: Failed to log basler parameters in HDF5 file: " + err.getDetailMsg());
-    }
-}
-
-// to enable emitting imageReadyForExp in ImageCalculatingThread
-void MakoCameraCore::loadExpSettings(ConfigStream& stream) {
-    if (camInfo.safemode) {
-        return;
-    }
-    ConfigSystem::stdGetFromConfig(stream, *this, expRunSettings, Version("1.0"));
-    expRunSettings.repsPerVar = ConfigSystem::stdConfigGetter(stream, "REPETITIONS",
-        Repetitions::getSettingsFromConfig);
-    experimentActive = expRunSettings.expActive;
-    if (experimentActive) {
-        emit makoStarted();
-    }
-}
-
-void MakoCameraCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
-{
-    if (camInfo.safemode) {
-        return;
-    }
-    expRunSettings.variations = (params.size() == 0 ? 1 : params.front().keyValues.size());
-    makoCtrl.setSettings(expRunSettings);
-    runSettings = expRunSettings;    
-    if (experimentActive) {
-        emit threadworker->prepareMako(&expRunSettings, camInfo);//Qt::BlockingQueuedConnection
-    }
-    
-}
-
-// to disable emitting imageReadyForExp in ImageCalculatingThread
-void MakoCameraCore::normalFinish()
-{
-    emit makoFinished();
-}
-
-void MakoCameraCore::errorFinish()
-{
-    emit makoFinished();
-}
-
-MakoSettings MakoCameraCore::getSettingsFromConfig(ConfigStream& configFile)
-{
-    MakoSettings newSettings;
-    configFile >> newSettings.expActive;
-    std::string test;
-    try {
-        configFile >> test;
-        newSettings.dims.left = boost::lexical_cast<int>(test);
-        configFile >> test;
-        newSettings.dims.top = boost::lexical_cast<int>(test);
-        configFile >> test;
-        newSettings.dims.right = boost::lexical_cast<int>(test);
-        configFile >> test;
-        newSettings.dims.bottom = boost::lexical_cast<int>(test);
-    }
-    catch (boost::bad_lexical_cast&) {
-        throwNested("Mako control failed to convert dimensions recorded in the config file "
-            "to integers");
-    }
-    configFile >> newSettings.dims.horizontalBinning;
-    configFile >> newSettings.dims.verticalBinning;
-    configFile >> newSettings.exposureTime;
-    configFile >> newSettings.frameRate;
-    configFile >> newSettings.rawGain;
-    configFile >> newSettings.picsPerRep;
-    std::string txt;
-    configFile >> txt;
-    newSettings.triggerMode = MakoTrigger::fromStr(txt);
-    return newSettings;
-}
+//void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)
+//{
+//    try {
+//        if (!experimentActive) {
+//            H5::Group makoGroup(log.file.createGroup("/Mako:Off"));
+//            return;
+//        }
+//        H5::Group makoGroup;
+//        try {
+//            makoGroup = log.file.openGroup("/Mako");
+//        }
+//        catch (H5::Exception&) {
+//            makoGroup = log.file.createGroup("/Mako");
+//        }
+//        H5::Group makoSubGroup(makoGroup.createGroup(CameraInfo::toStr(camInfo.camName)));
+//        hsize_t rank1[] = { 1 };
+//        // pictures. These are permanent members of the class for speed during the writing process.	
+//        hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.width(),
+//                               expRunSettings.dims.height() };
+//        hsize_t picDims[] = { 1, expRunSettings.dims.width(), expRunSettings.dims.height() };
+//        log.MakoPicureSetDataSpace[camInfo.camName] = H5::DataSpace(3, setDims);
+//        log.MakoPicDataSpace[camInfo.camName] = H5::DataSpace(3, picDims);
+//        log.MakoPictureDataset[camInfo.camName] = makoSubGroup.createDataSet("Pictures", H5::PredType::NATIVE_LONG,
+//            log.MakoPicureSetDataSpace[camInfo.camName]);
+//        log.currentMakoPicNumber[camInfo.camName] = 0;
+//        //log.writeDataSet(BaslerAcquisition::toStr(expRunSettings.acquisitionMode), "Camera-Mode", baslerGroup);
+//        //log.writeDataSet(BaslerAutoExposure::toStr(expRunSettings.exposureMode), "Exposure-Mode", baslerGroup);
+//        log.writeDataSet(expRunSettings.exposureTime, "Exposure-Time", makoSubGroup);
+//        log.writeDataSet(MakoTrigger::toStr(expRunSettings.triggerMode), "Trigger-Mode", makoSubGroup);
+//        // image settings
+//        H5::Group imageDims = makoSubGroup.createGroup("Image-Dimensions");
+//        log.writeDataSet(expRunSettings.dims.top, "Top", imageDims);
+//        log.writeDataSet(expRunSettings.dims.bottom, "Bottom", imageDims);
+//        log.writeDataSet(expRunSettings.dims.left, "Left", imageDims);
+//        log.writeDataSet(expRunSettings.dims.right, "Right", imageDims);
+//        log.writeDataSet(expRunSettings.dims.horizontalBinning, "Horizontal-Binning", imageDims);
+//        log.writeDataSet(expRunSettings.dims.verticalBinning, "Vertical-Binning", imageDims);
+//        log.writeDataSet(expRunSettings.frameRate, "Frame-Rate", makoSubGroup);
+//        log.writeDataSet(expRunSettings.rawGain, "Raw-Gain", makoSubGroup);
+//    }
+//    catch (H5::Exception err) {
+//        log.logError(err);
+//        throwNested("ERROR: Failed to log basler parameters in HDF5 file: " + err.getDetailMsg());
+//    }
+//}
+//
+//// to enable emitting imageReadyForExp in ImageCalculatingThread
+//void MakoCameraCore::loadExpSettings(ConfigStream& stream) {
+//    if (camInfo.safemode) {
+//        return;
+//    }
+//    ConfigSystem::stdGetFromConfig(stream, *this, expRunSettings, Version("1.0"));
+//    expRunSettings.repsPerVar = ConfigSystem::stdConfigGetter(stream, "REPETITIONS",
+//        Repetitions::getSettingsFromConfig);
+//    experimentActive = expRunSettings.expActive;
+//    if (experimentActive) {
+//        emit makoStarted();
+//    }
+//}
+//
+//void MakoCameraCore::calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker)
+//{
+//    if (camInfo.safemode) {
+//        return;
+//    }
+//    expRunSettings.variations = (params.size() == 0 ? 1 : params.front().keyValues.size());
+//    makoCtrl.setSettings(expRunSettings);
+//    runSettings = expRunSettings;    
+//    if (experimentActive) {
+//        emit threadworker->prepareMako(&expRunSettings, camInfo);//Qt::BlockingQueuedConnection
+//    }
+//    
+//}
+//
+//// to disable emitting imageReadyForExp in ImageCalculatingThread
+//void MakoCameraCore::normalFinish()
+//{
+//    emit makoFinished();
+//}
+//
+//void MakoCameraCore::errorFinish()
+//{
+//    emit makoFinished();
+//}
+//
+//MakoSettings MakoCameraCore::getSettingsFromConfig(ConfigStream& configFile)
+//{
+//    MakoSettings newSettings;
+//    configFile >> newSettings.expActive;
+//    std::string test;
+//    try {
+//        configFile >> test;
+//        newSettings.dims.left = boost::lexical_cast<int>(test);
+//        configFile >> test;
+//        newSettings.dims.top = boost::lexical_cast<int>(test);
+//        configFile >> test;
+//        newSettings.dims.right = boost::lexical_cast<int>(test);
+//        configFile >> test;
+//        newSettings.dims.bottom = boost::lexical_cast<int>(test);
+//    }
+//    catch (boost::bad_lexical_cast&) {
+//        throwNested("Mako control failed to convert dimensions recorded in the config file "
+//            "to integers");
+//    }
+//    configFile >> newSettings.dims.horizontalBinning;
+//    configFile >> newSettings.dims.verticalBinning;
+//    configFile >> newSettings.exposureTime;
+//    configFile >> newSettings.frameRate;
+//    configFile >> newSettings.rawGain;
+//    configFile >> newSettings.picsPerRep;
+//    std::string txt;
+//    configFile >> txt;
+//    newSettings.triggerMode = MakoTrigger::fromStr(txt);
+//    return newSettings;
+//}
 
 void MakoCameraCore::initializeVimba()
 {
@@ -232,58 +229,43 @@ void MakoCameraCore::validateCamera(const CameraPtrVector& Cameras)
         }
     }
 
-    std::string allIPs;
-    /*gather info for all listed camera and compare to the expected one from constant.h*/
-    for (unsigned int i = 0; i < Cameras.size(); i++)
-    {
-        /*check ip address*/
-        std::string ipaddress;
-        error = MakoWrapper::getIPAddress(Cameras[i], ipaddress);
-        if (VmbErrorSuccess != error)
-        {
-            thrower("GetIPAddress error for camera " + str(i) + "Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-            continue;
+    try {
+        cameraPtr = camInfo.Cam();
+        QtCameraObserverPtr pDeviceObs(new CameraObserver());
+        error = m_VimbaSystem.RegisterCameraListObserver(pDeviceObs);
+        if (VmbErrorSuccess != error) {
+            thrower("Error in RegisterCameraListObserver \r\n Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
         }
-        allIPs += ipaddress.append(" ");
-        if (ipaddress.find(camInfo.ip) != std::string::npos) {
-            cameraPtr = Cameras[i];
-            QtCameraObserverPtr pDeviceObs(new CameraObserver());
-            error = m_VimbaSystem.RegisterCameraListObserver(pDeviceObs);
 
-            /*get camera name*/
-            std::string displayName;
-            error = MakoWrapper::getCameraDisplayName(Cameras[i], displayName);
-            if (VmbErrorSuccess != error)
-            {
-                thrower("GetDisplayName error for camera " + str(i) + "Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-                continue;
+        /*get camera name*/
+        std::string displayName;
+        error = MakoWrapper::getCameraDisplayName(cameraPtr, displayName);
+        if (VmbErrorSuccess != error) {
+            thrower("GetDisplayName error for camera \r\n Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
+        }
+        cameraName = displayName;
+        /*check access type*/
+        VmbAccessModeType accessType = VmbAccessModeType::VmbAccessModeNone;
+        error = camInfo.Cam()->GetPermittedAccess(accessType);
+        if (VmbErrorSuccess == error) {
+            if (!(accessType & VmbAccessModeType::VmbAccessModeFull)) {
+                thrower("Camera do not support full access mode, check if there is running program that grab the camera.");
             }
-            cameraName = displayName;
+        }
+        else {
+            thrower("Error in GetPermittedAccess. Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
+        }
 
-            /*check access type*/
-            VmbAccessModeType accessType = VmbAccessModeType::VmbAccessModeNone;
-            error = Cameras[i]->GetPermittedAccess(accessType);
-            if (VmbErrorSuccess == error) {
-                if (!(accessType & VmbAccessModeType::VmbAccessModeFull)) {
-                    thrower("Camera do not support full access mode, check if there is running program that grab the camera.");
-                }
-            }
-            else {
-                thrower("Error in GetPermittedAccess. Error: " + str(error) + " " + str(Helper::mapReturnCodeToString(error)));
-            }
-
-            /*open camera*/
-            VmbError_t error = cameraPtr->Open(VmbAccessModeFull);
-            if (VmbErrorSuccess != error) {
-                thrower("Fatal Error, Failed to open Mako camera " + str(cameraName) + "with error:" + str(error)
-                    + " " + str(Helper::mapReturnCodeToString(error)));
-                return;
-            }
-            return;
+        /*open camera*/
+        VmbError_t error = cameraPtr->Open(VmbAccessModeFull);
+        if (VmbErrorSuccess != error) {
+            thrower("Fatal Error, Failed to open Mako camera " + str(cameraName) + "with error:" + str(error)
+                + " " + str(Helper::mapReturnCodeToString(error)));
         }
     }
-    thrower("Mako validate Error: Did not find the camera IP in the current cameras. Want " + camInfo.ip +
-        ", but the the listed IPs are " + allIPs);
+    catch (ChimeraError& e) {
+        throwNested("Error in validating Mako Camera: \r\n" + e.trace());
+    }
 }
 
 void MakoCameraCore::releaseBuffer()

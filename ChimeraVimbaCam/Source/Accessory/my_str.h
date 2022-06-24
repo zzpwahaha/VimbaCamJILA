@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <QString>
-#include "range.h"
+//#include "range.h"
 
 template <typename T> QString qstr (T input, const int precision = 13, bool eatZeros = false, bool toLower = false,
 	bool zeroPad = false, bool useScientificNotation = false) {
@@ -37,9 +37,12 @@ template <typename T> std::string str( T input, const int precision = 13, bool e
 					}
 				}
 				// then needs zeros
-				for ( auto zero : range ( -(int(outStr.size ( )) - fpos - precision) ) ){
+				for (unsigned i = 0; i < -(int(outStr.size()) - fpos - precision); i++) {
 					outStr += "0";
 				}
+				//for ( auto zero : range ( -(int(outStr.size ( )) - fpos - precision) ) ){
+				//	outStr += "0";
+				//}
 			}
 		}
 	}

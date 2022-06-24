@@ -3,14 +3,14 @@
 #include <qwidget.h>
 #include <qobject.h>
 
-class IChimeraQtWindow;
+class cameraMainWindow;
 
 class IChimeraSystem : public QWidget 
 {
 	Q_OBJECT
 	public:
-		IChimeraSystem(IChimeraQtWindow* parent_in);
-		IChimeraQtWindow* parentWin;
+		IChimeraSystem(cameraMainWindow* parent_in);
+		cameraMainWindow* parentWin;
 
 	public Q_SLOTS:
 

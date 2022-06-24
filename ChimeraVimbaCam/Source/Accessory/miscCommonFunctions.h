@@ -7,8 +7,7 @@
 #include <iomanip>
 #include <algorithm>
 #include "QMessageBox.h"
-#include <GeneralObjects/ChimeraStyleSheets.h>
-#include <GeneralUtilityFunctions/my_str.h>
+#include <my_str.h>
 
 // this function takes any argument, converts it to a string, and displays it on the screen. It can be useful for debuging.
 template <typename T> void errBox( T msg ){

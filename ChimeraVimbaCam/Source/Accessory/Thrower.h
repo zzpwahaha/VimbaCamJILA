@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <regex>
 #include <qstring.h>
-#include <GeneralUtilityFunctions/my_str.h>
+#include <my_str.h>
 
 class ChimeraError : public std::runtime_error{
 	public:
