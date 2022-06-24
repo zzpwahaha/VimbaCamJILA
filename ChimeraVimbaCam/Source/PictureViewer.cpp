@@ -64,9 +64,9 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
 
     /***********************************************************************/
     /*color map and cmap gradient*/
-    m_colorMap = QSharedPointer<QCPColorMap>(new QCPColorMap(
+    m_colorMap = new QCPColorMap(
         m_QCPcenterAxisRect->axis(QCPAxis::atBottom),
-        m_QCPcenterAxisRect->axis(QCPAxis::atLeft)));
+        m_QCPcenterAxisRect->axis(QCPAxis::atLeft));
     m_colorMap->setInterpolate(false);
     m_colorMap->setColorScale(m_colorScale);
     //m_colorMap->setGradient(QCPColorGradient::gpGrayscale);
@@ -116,12 +116,10 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
 
     /****************************************************************************/
     /*bottom/left graph and center parametric curve*/
-    m_bottomGraph = QSharedPointer<QCPGraph>(
-        new QCPGraph(m_QCPbottomAxisRect->axis(QCPAxis::atTop),
-            m_QCPbottomAxisRect->axis(QCPAxis::atLeft)));
-    m_leftGraph = QSharedPointer<QCPGraph>(
-        new QCPGraph(m_QCPleftAxisRect->axis(QCPAxis::atRight),
-            m_QCPleftAxisRect->axis(QCPAxis::atBottom)));
+    m_bottomGraph = new QCPGraph(m_QCPbottomAxisRect->axis(QCPAxis::atTop),
+        m_QCPbottomAxisRect->axis(QCPAxis::atLeft));
+    m_leftGraph = new QCPGraph(m_QCPleftAxisRect->axis(QCPAxis::atRight),
+        m_QCPleftAxisRect->axis(QCPAxis::atBottom));
     m_leftGraph->valueAxis()->setTickLabelRotation(90);
     /*add axis for fitted curve: index=2 is for bot, index=3 is for left*/
     m_QCP->addGraph(m_bottomGraph->keyAxis(), m_bottomGraph->valueAxis());
@@ -177,10 +175,10 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
     /*tracer for the bottom and left plot*/
     m_QCPtracerbottom = new QCPItemTracer(m_QCP.data());
     m_QCPtracerbottom->setClipAxisRect(m_bottomGraph->keyAxis()->axisRect());
-    m_QCPtracerbottom->setGraph(m_bottomGraph.data());
+    m_QCPtracerbottom->setGraph(m_bottomGraph);
     m_QCPtracerleft = new QCPItemTracer(m_QCP.data());
     m_QCPtracerleft->setClipAxisRect(m_leftGraph->keyAxis()->axisRect());
-    m_QCPtracerleft->setGraph(m_leftGraph.data());
+    m_QCPtracerleft->setGraph(m_leftGraph);
     for (auto& tracer : { m_QCPtracerbottom ,m_QCPtracerleft })
     {
         tracer->setInterpolating(false);
@@ -258,7 +256,7 @@ PictureViewer::PictureViewer(std::string plotname, QWidget* parent)
 
 PictureViewer::~PictureViewer()
 {
-    m_QCP->~QCustomPlot();
+    //m_QCP->~QCustomPlot();
 }
 
 // m_QCP replot should be taken care of manually depending on whether camera is running

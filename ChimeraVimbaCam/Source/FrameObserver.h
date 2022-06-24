@@ -47,7 +47,7 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
 
     private:
         typedef QSharedPointer<unsigned char>   FrameDataPtr;
-
+        QMutex                              m_StoppingLock;
         FPSCounter                              m_FPSCamera;
         FPSCounter                              m_FPSReceived;
         CameraPtr                               m_pCam;                     // camera to wait for frames on
@@ -57,6 +57,6 @@ class FrameObserver : public QObject, public AVT::VmbAPI::IFrameObserver
 
         ImageProcessingThread               m_imgPThread;   // Image processing thread
         bool                                m_IsStopping;
-        QMutex                              m_StoppingLock;
+
             
 };

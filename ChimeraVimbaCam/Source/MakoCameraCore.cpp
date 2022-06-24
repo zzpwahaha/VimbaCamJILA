@@ -31,7 +31,8 @@ MakoCameraCore::~MakoCameraCore()
     qDebug() << "dctor of mako core";
     releaseBuffer();
     cameraPtr->Close();
-    m_VimbaSystem.Shutdown();
+    //m_VimbaSystem.Shutdown(); //only commented out for standalone cam, since still need m_VimbaSystem to find cameras
+    qDebug() << "finish dctor of mako core";
 }
 
 //void MakoCameraCore::logSettings(DataLogger& log, ExpThreadWorker* threadworker)

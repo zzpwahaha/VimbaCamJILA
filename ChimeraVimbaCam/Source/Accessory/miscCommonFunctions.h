@@ -12,6 +12,7 @@
 // this function takes any argument, converts it to a string, and displays it on the screen. It can be useful for debuging.
 template <typename T> void errBox( T msg ){
 	QMessageBox* messageBox = new QMessageBox();
+	messageBox->setAttribute(Qt::WA_DeleteOnClose);
 	messageBox->setStyleSheet ("QDialog {background-color: red;}"
 		"QPushButton {background-color: blue;}");
 	//messageBox.setStyleSheet (chimeraStyleSheets::stdStyleSheet ());
@@ -22,6 +23,7 @@ template <typename T> void errBox( T msg ){
 // this function takes any argument, converts it to a string, and displays it on the screen. It can be useful for debuging.
 template <typename T> void infoBox( T msg ){
 	QMessageBox* messageBox = new QMessageBox ();
+	messageBox->setAttribute(Qt::WA_DeleteOnClose);
 	// seems not working for some reason.
 	messageBox->setStyleSheet (chimeraStyleSheets::stdStyleSheet ());
 	messageBox->information(0, "Information", cstr(msg));

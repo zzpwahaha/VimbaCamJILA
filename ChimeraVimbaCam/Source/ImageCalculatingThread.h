@@ -5,6 +5,7 @@
 #include "FrameObserver.h"
 #include "MakoCameraCore.h"
 #include "../ExternLib/qcustomplot/qcustomplot.h"
+#include "PictureViewer.h"
 #include "GaussianFit.h"
 #include "FrameAverager.h"
 #include <deque>
@@ -12,13 +13,14 @@
 
 class ImageProcessingThread;
 
+
 class ImageCalculatingThread :
     public QThread
 {
     Q_OBJECT
 public:
     ImageCalculatingThread(const SP_DECL(FrameObserver)&, MakoCameraCore& core,
-        bool SAFEMODE, QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft);
+        bool SAFEMODE, PictureViewer& viewer);
     ~ImageCalculatingThread();
     void StartProcessing();
     void StopProcessing();
@@ -78,15 +80,16 @@ public slots:
 private:
     SP_DECL(FrameObserver)                    m_pFrameObs;
     MakoCameraCore&                           core;
+    PictureViewer&                            viewer;
     CameraPtr                                 m_pCam;
-    QSharedPointer<ImageProcessingThread>     m_pProcessingThread;
+    ImageProcessingThread*                     m_pProcessingThread;
     bool                                      expActive;
     bool                                      expRunning;
 
-    QCustomPlot*                              m_pQCP;
-    QCPColorMap*                              m_pQCPColormap;
-    QCPGraph*                                 m_pQCPbottomGraph;
-    QCPGraph*                                 m_pQCPleftGraph;
+    //QCustomPlot*                              m_pQCP;
+    //QCPColorMap*                              m_pQCPColormap;
+    //QCPGraph*                                 m_pQCPbottomGraph;
+    //QCPGraph*                                 m_pQCPleftGraph;
     QVector<ushort>                           m_uint16QVector;
     QVector<double>                           m_doubleQVector;
     QVector<double>                           m_doubleCrxX;

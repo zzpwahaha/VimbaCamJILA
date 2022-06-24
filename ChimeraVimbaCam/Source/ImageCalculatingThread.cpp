@@ -11,17 +11,18 @@ using AVT::VmbAPI::FeaturePtr;
 
 ImageCalculatingThread::ImageCalculatingThread(
     const SP_DECL(FrameObserver)& pFrameObs, MakoCameraCore& core, bool SAFEMODE,
-    QCustomPlot* plot, QCPColorMap* cmap, QCPGraph* pbot, QCPGraph* pleft)
+    PictureViewer& viewer)
     : QThread()
     , m_pFrameObs(pFrameObs)
     , core(core)
     , m_pCam(core.getCameraPtr())
     , expActive(false)
     , expRunning(false)
-    , m_pQCP(plot)
-    , m_pQCPColormap(cmap)
-    , m_pQCPbottomGraph(pbot)
-    , m_pQCPleftGraph(pleft)
+    , viewer(viewer)
+    //, m_pQCP(plot)
+    //, m_pQCPColormap(cmap)
+    //, m_pQCPbottomGraph(pbot)
+    //, m_pQCPleftGraph(pleft)
     , m_width(0)
     , m_height(0)
     , m_offsetX(0)
@@ -41,7 +42,7 @@ ImageCalculatingThread::ImageCalculatingThread(
     , m_gfitLeft(5, NULL, NULL, 0, 0, 0, 0)
     , m_gfit2D(16, 4, 4, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 100) /* emulating 4*4 matrix */
 {
-    m_pProcessingThread = QSharedPointer<ImageProcessingThread>(SP_ACCESS(m_pFrameObs)->ImageProcessThreadPtr());
+    m_pProcessingThread = SP_ACCESS(m_pFrameObs)->ImageProcessThreadPtr();
     
     if (SAFEMODE) {
         return;
@@ -81,7 +82,7 @@ void ImageCalculatingThread::updateExposureTime()
 
 void ImageCalculatingThread::updateDataMaxMin()
 {
-    QCPRange range = m_pQCPColormap->data()->dataBounds();
+    QCPRange range = viewer.cmap()->data()->dataBounds();
     m_datamax = range.upper;
     m_datamin = range.lower;
 }
@@ -109,15 +110,15 @@ template <class T>
 void ImageCalculatingThread::assignValue(const QVector<T>& vec1d, std::string sFormat,
     unsigned Height, unsigned Width, unsigned offsetX, unsigned offsetY)
 {
-    m_pQCPColormap->data()->setSize(Width, Height);
-    m_pQCPColormap->data()->setRange(QCPRange(offsetX, Width + offsetX - 1), 
+    viewer.cmap()->data()->setSize(Width, Height);
+    viewer.cmap()->data()->setRange(QCPRange(offsetX, Width + offsetX - 1),
         QCPRange(offsetY, Height + offsetY - 1));
     /*QVector<double> tmp(vec1d.begin(),vec1d.end());*/
     for (size_t i = 0; i < Height; i++)
     {
         for (size_t j = 0; j < Width; j++)
         {
-            m_pQCPColormap->data()->setCell(j, i, vec1d.at(i * Width + j));
+            viewer.cmap()->data()->setCell(j, i, vec1d.at(i * Width + j));
         }
     }
     
@@ -189,7 +190,7 @@ void ImageCalculatingThread::calcCrossSectionXY()
     double i = 0.0;
     m_leftKey = QVector<double>(m_height, m_offsetY);
     std::for_each(m_leftKey.begin(), m_leftKey.end(), [i](auto& key) mutable {key = key + i; i++; });
-    m_pQCPleftGraph->setData(m_leftKey, m_doubleCrxY, true);
+    viewer.leftPlot()->setData(m_leftKey, m_doubleCrxY, true);
 
     for (size_t i = 0; i < m_width; i++)
     {
@@ -204,7 +205,7 @@ void ImageCalculatingThread::calcCrossSectionXY()
     double ii = 0.0;
     m_bottomKey = QVector<double>(m_width, m_offsetX);
     std::for_each(m_bottomKey.begin(), m_bottomKey.end(), [ii](auto& key) mutable {key = key + ii; ii++; });
-    m_pQCPbottomGraph->setData(m_bottomKey, m_doubleCrxX, true);
+    viewer.bottomPlot()->setData(m_bottomKey, m_doubleCrxX, true);
     
 
 }
@@ -213,21 +214,21 @@ void ImageCalculatingThread::setDefaultView()
 {
     if (m_Stopping && !m_doFitting2D)
     {
-        reinterpret_cast<QCPCurve*>(m_pQCP->axisRect(1)->plottables().at(2))->data()->clear();
-        reinterpret_cast<QCPCurve*>(m_pQCP->axisRect(1)->plottables().at(1))->data()->clear();
+        reinterpret_cast<QCPCurve*>(viewer.plot()->axisRect(1)->plottables().at(2))->data()->clear();
+        reinterpret_cast<QCPCurve*>(viewer.plot()->axisRect(1)->plottables().at(1))->data()->clear();
     }
 
-    m_pQCP->axisRect(1)->axis(QCPAxis::atLeft)->setScaleRatio(
-        m_pQCP->axisRect(1)->axis(QCPAxis::atBottom), double(m_height)/ double(m_width));
-    m_pQCPColormap->rescaleAxes();
-    m_pQCPColormap->colorScale()->rescaleDataRange(false);
+    viewer.plot()->axisRect(1)->axis(QCPAxis::atLeft)->setScaleRatio(
+        viewer.plot()->axisRect(1)->axis(QCPAxis::atBottom), double(m_height)/ double(m_width));
+    viewer.cmap()->rescaleAxes();
+    viewer.cmap()->colorScale()->rescaleDataRange(false);
     
-    m_width > m_height ? m_pQCPColormap->valueAxis()->scaleRange(double(m_width) / double(m_height)) :
-        m_pQCPColormap->keyAxis()->scaleRange(double(m_height) / double(m_width));
+    m_width > m_height ? viewer.cmap()->valueAxis()->scaleRange(double(m_width) / double(m_height)) :
+        viewer.cmap()->keyAxis()->scaleRange(double(m_height) / double(m_width));
 
 
 
-    for (auto& graph : { m_pQCPbottomGraph ,m_pQCPleftGraph })
+    for (auto& graph : { viewer.bottomPlot() ,viewer.leftPlot() })
     {
         graph->rescaleAxes();
         graph->valueAxis()->setRangeLower(graph->valueAxis()->range().lower - graph->valueAxis()->range().size() * 0.1);
@@ -305,10 +306,10 @@ void ImageCalculatingThread::fit1dGaussian()
         QFuture<void> resultx = QtConcurrent::run([this, &fittedx]() {
             m_gfitBottom.solve_system();
             fittedx = std::move(m_gfitBottom.calcFittedGaussian());
-            m_pQCP->graph(2)->setData(m_bottomKey, fittedx, true);
+            viewer.plot()->graph(2)->setData(m_bottomKey, fittedx, true);
             QVector<double> fitParax = m_gfitBottom.fittedPara();
             QVector<double> confi95x = m_gfitBottom.confidence95Interval();
-            m_pQCP->axisRect(2)->axis(QCPAxis::atBottom)->setLabel(
+            viewer.plot()->axisRect(2)->axis(QCPAxis::atBottom)->setLabel(
                 QString::fromWCharArray(L"\u03bc") + QString(": %1 +/- %2, ").
                 arg(fitParax.at(1) - m_offsetX, 0, 'f', 2).arg(confi95x.at(1), 0, 'f', 2) +
                 QString::fromWCharArray(L"\u03c3") + QString(": %3 +/- %4").
@@ -317,10 +318,10 @@ void ImageCalculatingThread::fit1dGaussian()
         QFuture<void> resulty = QtConcurrent::run([this, &fittedy]() {
             m_gfitLeft.solve_system();
             fittedy = std::move(m_gfitLeft.calcFittedGaussian());
-            m_pQCP->graph(3)->setData(m_leftKey, fittedy, true);
+            viewer.plot()->graph(3)->setData(m_leftKey, fittedy, true);
             QVector<double> fitParay = m_gfitLeft.fittedPara();
             QVector<double> confi95y = m_gfitLeft.confidence95Interval();
-            m_pQCP->axisRect(0)->axis(QCPAxis::atLeft)->setLabel(
+            viewer.plot()->axisRect(0)->axis(QCPAxis::atLeft)->setLabel(
                 QString::fromWCharArray(L"\u03bc") + QString(": %1 +/- %2, ").
                 arg(fitParay.at(1) - m_offsetY, 0, 'f', 2).arg(confi95y.at(1), 0, 'f', 2) +
                 QString::fromWCharArray(L"\u03c3") + QString(": %3 +/- %4").
@@ -384,7 +385,7 @@ void ImageCalculatingThread::fit2dGaussian()
             //    arg(sigMinor, 0, 'f', 2).arg(errMinor, 0, 'f', 2));
             return;
         }
-        m_pQCP->axisRect(1)->axis(QCPAxis::atTop)->setLabel(
+        viewer.plot()->axisRect(1)->axis(QCPAxis::atTop)->setLabel(
             QString::fromWCharArray(L"\u03bc") + QString("XY: (%1 +/- %2, %3 +/- %4)").
             arg(fitParaz.at(1) - m_offsetX, 5, 'f', 2).arg(confi95z.at(1), 5, 'f', 2).
             arg(fitParaz.at(2) - m_offsetY, 5, 'f', 2).arg(confi95z.at(2), 5, 'f', 2) + ", " +
@@ -403,7 +404,7 @@ void ImageCalculatingThread::fit2dGaussian()
             const double r = sqrt(2.) / sqrt(a * cos(phi) * cos(phi) + b * sin(2 * phi) + c * sin(phi) * sin(phi));
             parametric[i] = QCPCurveData(i, r * cos(phi) + fitParaz[1], r * sin(phi) + fitParaz[2]);
         }
-        reinterpret_cast<QCPCurve*>(m_pQCP->axisRect(1)->plottables().at(2))->data()->set(parametric, true);
+        reinterpret_cast<QCPCurve*>(viewer.plot()->axisRect(1)->plottables().at(2))->data()->set(parametric, true);
 
         /*cross hair*/
         std::array<double, 2> kMajor = { a - c - Delta, 2. * b };
@@ -425,7 +426,7 @@ void ImageCalculatingThread::fit2dGaussian()
             hair[4] = (QCPCurveData(4, m_width * kMinor[0] + centerx, m_height * kMinor[1] + centery));
             hair[5] = (QCPCurveData(5, qQNaN(), qQNaN()));
         }
-        reinterpret_cast<QCPCurve*>(m_pQCP->axisRect(1)->plottables().at(1))->data()->set(hair, true);
+        reinterpret_cast<QCPCurve*>(viewer.plot()->axisRect(1)->plottables().at(1))->data()->set(hair, true);
 
 
 
@@ -434,7 +435,7 @@ void ImageCalculatingThread::fit2dGaussian()
         finished but already in processing, when it is done, it still set the label*/
         if(!m_Stopping && !m_doFitting2D)
         {
-            m_pQCP->axisRect(1)->axis(QCPAxis::atTop)->setLabel("");
+            viewer.plot()->axisRect(1)->axis(QCPAxis::atTop)->setLabel("");
         }
 
 

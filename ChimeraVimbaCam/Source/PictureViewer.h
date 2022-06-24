@@ -25,12 +25,12 @@ public:
 
     QMenu* contextMenu() { return m_ContextMenu; }
     QCustomPlot* plot() { return m_QCP.get(); }
-    QCPColorMap* cmap() { return m_colorMap.get(); }
+    QCPColorMap* cmap() { return m_colorMap; }
     QCPAxisRect* centerAxes() { return m_QCPcenterAxisRect; }
     QCPAxisRect* leftAxes() { return m_QCPleftAxisRect; }
     QCPAxisRect* bottomAxes() { return m_QCPbottomAxisRect; }
-    QCPGraph* bottomPlot() { return m_bottomGraph.get(); }
-    QCPGraph* leftPlot() { return m_leftGraph.get(); }
+    QCPGraph* bottomPlot() { return m_bottomGraph; }
+    QCPGraph* leftPlot() { return m_leftGraph; }
     QCPItemTracer* bottomTracer() { return m_QCPtracerbottom; }
     QCPItemTracer* leftTracer() { return m_QCPtracerleft; }
     QCPItemText* bottomTracerText() { return m_QCPtraceTextbottom; }
@@ -40,33 +40,16 @@ public:
 
     QDialog* manualColorScaleDlg() { return m_dCScale; }
 private:
-    //QDialog*                            m_DiagController;
-    //QDialog*                            m_DiagInfomation;
     QDialog*                            m_DiagRSlider;
     RangeSliderIntg*                    intgSlider;
-    //RangeSlider*                        m_RSliderV;
-    //QSpinBox*                           m_upperSB;
-    //QSpinBox*                           m_lowerSB;
-    //QString                             m_sSliderFormat;
-
-
-    //QLabel*                             m_OperatingStatusLabel;
-    //QPushButton*                        m_FormatButton;
-    //QPushButton*                        m_ImageSizeButtonH;
-    //QPushButton*                        m_ImageSizeButtonW;
-    //QPushButton*                        m_FramerateButton;
-    //QLabel*                             m_FramesLabel;
-    //QLabel*                             m_CursorScenePosLabel;
-    //QPushButton*                        m_ExposureTimeButton;
-    //QPushButton*                        m_CameraGainButton;
 
     QSharedPointer<QCustomPlot>         m_QCP;
     QCPAxisRect*                        m_QCPcenterAxisRect;
     QCPAxisRect*                        m_QCPbottomAxisRect;
     QCPAxisRect*                        m_QCPleftAxisRect;
-    QSharedPointer<QCPColorMap>         m_colorMap;
-    QSharedPointer<QCPGraph>            m_bottomGraph;
-    QSharedPointer<QCPGraph>            m_leftGraph;
+    QCPColorMap*         m_colorMap;
+    QCPGraph*            m_bottomGraph;
+    QCPGraph*            m_leftGraph;
     QCPColorScale*                      m_colorScale;
     QVector<QCPColorGradient>           m_colorgradient;
     QMap<int, QString>                  m_cmapMap;
@@ -79,28 +62,7 @@ private:
     QCPItemText*                        m_QCPtraceTextleft;
 
     QMenu*                              m_ContextMenu;
-    //QAction*                            m_aStartStopCap;
-    //QAction*                            m_aDiagCtrler;
-    //QAction*                            m_aDiagInfo;
-    //QAction*                            m_aSetCurrScrROI;
-    //QAction*                            m_aResetFullROI;
-    //QAction*                            m_aPlotTracer;
-    //QAction*                            m_aPlotFitter;
-    //QAction*                            m_aPlotFitter2D;
-    //QAction*                            m_aCscale;
-    //QAction*                            m_aManualCscale;
-    //QAction*                            m_aSaveCamSetting;
-    //QAction*                            m_aLoadCamSetting;
-    //QAction*                            m_aSaveImg;
-    //QAction*                            m_aCamlist;
-    //QAction*                            m_aDisconnect;
 
-    ///* Save Image Option */
-    //QString                             m_SaveFileDir;
-    //QString                             m_SelectedExtension;
-    //QFileDialog*                        m_saveFileDialog; // save an image
-
-    //unsigned int                        m_FrameBufferCount;
 
 };
 
