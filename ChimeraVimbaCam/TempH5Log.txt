@@ -1,0 +1,19 @@
+HDF5-DIAG: Error detected in HDF5 (1.10.1) thread 0:
+  #000: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5G.c line 472 in H5Gopen2(): unable to open group
+    major: Symbol table
+    minor: Can't open object
+  #001: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Gint.c line 287 in H5G__open_name(): group not found
+    major: Symbol table
+    minor: Object not found
+  #002: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Gloc.c line 428 in H5G_loc_find(): can't find object
+    major: Symbol table
+    minor: Object not found
+  #003: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Gtraverse.c line 867 in H5G_traverse(): internal path traversal failed
+    major: Symbol table
+    minor: Object not found
+  #004: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Gtraverse.c line 639 in H5G_traverse_real(): traversal operator failed
+    major: Symbol table
+    minor: Callback failed
+  #005: C:\CMake-hdf5-1.10.1\hdf5-1.10.1\src\H5Gloc.c line 383 in H5G_loc_find_cb(): object 'Miscellaneous' doesn't exist
+    major: Symbol table
+    minor: Object not found

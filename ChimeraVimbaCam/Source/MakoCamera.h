@@ -8,6 +8,7 @@
 #include "MakoCameraCore.h"
 #include "ImageCalculatingThread.h"
 #include <PictureViewer.h>
+#include <Accessory/DataLogger.h>
 
 class cameraMainWindow;
 class MakoCamera : public IChimeraSystem 
@@ -71,6 +72,7 @@ private:
 	PictureViewer viewer;
     ImageCalculatingThread imgCThread;
     CameraInfo camInfo;
+
 
     QDialog* makoCtrlDialog;
     QFileDialog* saveFileDialog;

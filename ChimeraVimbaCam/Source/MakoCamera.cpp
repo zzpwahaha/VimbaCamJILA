@@ -363,8 +363,19 @@ void MakoCamera::createRepSaveControlWidget()
 
 void MakoCamera::repSave()
 {
-    QVector<double> imgSave = std::move(imgCThread.rawImageDefinite());
-    auto [imgWidth, imgHeight] = imgCThread.WidthHeight();
+    QVector<double> imgSave;
+    int imgWidth, imgHeight;
+    try {
+        imgSave = std::move(imgCThread.rawImageDefinite());
+        //imgSave = QVector<double>(m_pImgCThread->rawImage().begin(), m_pImgCThread->rawImage().end());
+        auto tmp = imgCThread.WidthHeight();
+        imgWidth = tmp.first;
+        imgHeight = tmp.second;
+    }
+    catch (ChimeraError& e) {
+        emit error("Error in obtaining image for saving\r\n" + e.qtrace());
+    }
+
     QString fileName = m_repSavePath + "\\data" + QString::number(m_repSaveCnter) + ".csv";
     QFile file(fileName);
     if (file.open(QIODevice::ReadWrite)) {
@@ -380,6 +391,18 @@ void MakoCamera::repSave()
     }
     else {
         parentWin->reportErr("Logging: Error saving image " + fileName, -1);
+    }
+
+    fileName = m_repSavePath + "\\data" + QString::number(m_repSaveCnter) + ".h5";
+    try {
+        DataLogger dlog_tmp("", parentWin);
+        dlog_tmp.initializeDataFiles(str(fileName));
+        core.logSettings(dlog_tmp);
+        dlog_tmp.writeMakoPic(imgSave.toStdVector(), imgWidth, imgHeight);
+        dlog_tmp.normalCloseFile();
+    }
+    catch (ChimeraError& e) {
+        emit error("Logging: Error saving image \r\n" + e.qtrace());
     }
 }
 
@@ -687,9 +710,18 @@ void MakoCamera::manualSaveImage()
 {
     // make a copy of the images before save-as dialog appears (image can change during time dialog open)
     QVector<double> imgSave;
-    imgSave = std::move(imgCThread.rawImageDefinite());
-    //imgSave = QVector<double>(m_pImgCThread->rawImage().begin(), m_pImgCThread->rawImage().end());
-    auto [imgWidth, imgHeight] = imgCThread.WidthHeight();
+    int imgWidth, imgHeight;
+    try {
+        imgSave = std::move(imgCThread.rawImageDefinite());
+        //imgSave = QVector<double>(m_pImgCThread->rawImage().begin(), m_pImgCThread->rawImage().end());
+        auto tmp = imgCThread.WidthHeight();
+        imgWidth = tmp.first;
+        imgHeight = tmp.second;
+    }
+    catch(ChimeraError &e) {
+        emit error("Error in obtaining image for saving\r\n" + e.qtrace());
+    }
+
 
 
     QString     fileExtension;
@@ -707,8 +739,8 @@ void MakoCamera::manualSaveImage()
             saveFileDialog = nullptr;
         }
 
-        fileExtension = "*.pdf ;; *.csv";
-        saveFileDialog = new QFileDialog(this, "Save Image", qstr(""/*DATA_SAVE_LOCATION*/), fileExtension);
+        fileExtension = "*.pdf ;; *.h5 ;; *.csv";
+        saveFileDialog = new QFileDialog(this, "Save Image", QDir::currentPath(), fileExtension);
         saveFileDialog->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
         saveFileDialog->selectNameFilter("*.csv");
         saveFileDialog->setViewMode(QFileDialog::Detail);
@@ -749,6 +781,15 @@ void MakoCamera::manualSaveImage()
                             }
                         }
                     }
+                    saved = true;
+                }
+                else if (0 == selectedExtension.compare("*.h5"))
+                {
+                    DataLogger dlog_tmp("", parentWin);
+                    dlog_tmp.initializeDataFiles(str(fileName));
+                    core.logSettings(dlog_tmp);
+                    dlog_tmp.writeMakoPic(imgSave.toStdVector(), imgWidth, imgHeight);
+                    dlog_tmp.normalCloseFile();
                     saved = true;
                 }
 

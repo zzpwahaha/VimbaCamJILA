@@ -36,16 +36,16 @@
     <ClCompile Include="Source\CMOSSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\csvReader.cpp">
+    <ClCompile Include="Source\Accessory\csvReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\FrameAverager.cpp">
+    <ClCompile Include="Source\Accessory\FrameAverager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\FrameObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GaussianFit.cpp">
+    <ClCompile Include="Source\Accessory\GaussianFit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Helper.cpp">
@@ -96,6 +96,9 @@
     <ClCompile Include="Source\LoggerWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Accessory\DataLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ExternLib\qcustomplot\qcustomplot.h">
@@ -104,7 +107,7 @@
     <QtMoc Include="Source\cameraMainWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Source\FrameAverager.h">
+    <QtMoc Include="Source\Accessory\FrameAverager.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Source\FrameObserver.h">
@@ -151,10 +154,10 @@
     <ClInclude Include="Source\CMOSSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\csvReader.h">
+    <ClInclude Include="Source\Accessory\csvReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GaussianFit.h">
+    <ClInclude Include="Source\Accessory\GaussianFit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Helper.h">
@@ -176,6 +179,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Accessory\miscCommonFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Accessory\DataLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

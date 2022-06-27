@@ -4,6 +4,7 @@
 #include "MakoWrapper.h"
 #include "MakoSettingControl.h"
 #include "CMOSSetting.h"
+#include "Accessory/DataLogger.h"
 
 class MakoCameraCore : public QObject
 {
@@ -17,7 +18,7 @@ public:
 	~MakoCameraCore();
 	
 	//std::string getDelim() override { return camInfo.delim; }
-	//void logSettings(DataLogger& logger, ExpThreadWorker* threadworker) override;
+	void logSettings(DataLogger& logger);
 	//void loadExpSettings(ConfigStream& stream) override;
 	//void calculateVariations(std::vector<parameterType>& params, ExpThreadWorker* threadworker) override;
 	//void programVariation(unsigned variation, std::vector<parameterType>& params,

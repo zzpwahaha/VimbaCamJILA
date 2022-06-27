@@ -123,7 +123,6 @@ class MakoSettingControl : public QTreeView
 
         bool eventFilter(QObject* object, QEvent* event);
 
-
     public slots:
         void closeControls(void);
         void onClicked(const QModelIndex& index);

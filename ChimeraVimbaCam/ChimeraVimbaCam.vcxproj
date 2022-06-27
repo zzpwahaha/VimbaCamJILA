@@ -16,16 +16,17 @@
   <ItemGroup>
     <ClCompile Include="ExternLib\qcustomplot\qcustomplot.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Source\Accessory\DataLogger.cpp" />
     <ClCompile Include="Source\Accessory\IChimeraSystem.cpp" />
     <ClCompile Include="Source\Accessory\miscCommonFunctions.cpp" />
     <ClCompile Include="Source\Accessory\my_str.cpp" />
     <ClCompile Include="Source\cameraMainWindow.cpp" />
     <ClCompile Include="Source\CameraTreeWindow.cpp" />
     <ClCompile Include="Source\CMOSSetting.cpp" />
-    <ClCompile Include="Source\csvReader.cpp" />
-    <ClCompile Include="Source\FrameAverager.cpp" />
+    <ClCompile Include="Source\Accessory\csvReader.cpp" />
+    <ClCompile Include="Source\Accessory\FrameAverager.cpp" />
     <ClCompile Include="Source\FrameObserver.cpp" />
-    <ClCompile Include="Source\GaussianFit.cpp" />
+    <ClCompile Include="Source\Accessory\GaussianFit.cpp" />
     <ClCompile Include="Source\Helper.cpp" />
     <ClCompile Include="Source\ImageCalculatingThread.cpp" />
     <ClCompile Include="Source\ImageProcessingThread.cpp" />
@@ -43,6 +44,7 @@
     <QtMoc Include="Source\cameraMainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Accessory\DataLogger.h" />
     <ClInclude Include="Source\Accessory\miscCommonFunctions.h" />
     <ClInclude Include="Source\Accessory\my_str.h" />
     <QtMoc Include="Source\LoggerWindow.h" />
@@ -54,8 +56,8 @@
     <ClInclude Include="Source\Accessory\imageParameters.h" />
     <ClInclude Include="Source\Accessory\Thrower.h" />
     <ClInclude Include="Source\CMOSSetting.h" />
-    <ClInclude Include="Source\csvReader.h" />
-    <ClInclude Include="Source\GaussianFit.h" />
+    <ClInclude Include="Source\Accessory\csvReader.h" />
+    <ClInclude Include="Source\Accessory\GaussianFit.h" />
     <ClInclude Include="Source\Helper.h" />
     <ClInclude Include="Source\ImageProcessingThread.h" />
     <ClInclude Include="stdafx.h" />
@@ -66,7 +68,7 @@
     <QtMoc Include="Source\MakoCamera.h" />
     <QtMoc Include="Source\ImageCalculatingThread.h" />
     <QtMoc Include="Source\FrameObserver.h" />
-    <QtMoc Include="Source\FrameAverager.h" />
+    <QtMoc Include="Source\Accessory\FrameAverager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CB999954-2CD5-4636-8C7F-84B916A87D96}</ProjectGuid>
@@ -104,16 +106,16 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)Source\Accessory;$(ProjectDir)Source\;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)ExternLib\HDF5\HDF5-1.10.1-win64-Debug\include;$(ProjectDir)Source\Accessory;$(ProjectDir)Source\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\HDF5\HDF5-1.10.1-win64-Debug\lib;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)Source\Accessory;$(ProjectDir)Source\;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\GSL_MSVC;$(ProjectDir)ExternLib\Vimba_4.2;$(ProjectDir)ExternLib\HDF5\HDF5-1.10.1-win64-Release\include;$(ProjectDir)Source\Accessory;$(ProjectDir)Source\;$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)ExternLib\qwt;$(ProjectDir)ExternLib\HDF5\HDF5-1.10.1-win64-Release\lib;$(ProjectDir)ExternLib\GSL_MSVC\dll\x64\Release;$(ProjectDir)ExternLib\Vimba_4.2\VimbaCPP\Lib\Win64;$(ProjectDir)ExternLib\Vimba_4.2\VimbaImageTransform\Lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>qwtd.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qwtd.lib;libhdf5_D.lib;libhdf5_cpp_D.lib;libhdf5_hl_D.lib;libhdf5_hl_cpp_D.lib;libhdf5_tools_D.lib;libszip_D.lib;libzlib_D.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -125,7 +127,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>qwt.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qwt.lib;libhdf5.lib;libhdf5_cpp.lib;libhdf5_hl.lib;libhdf5_hl_cpp.lib;libhdf5_tools.lib;libszip.lib;libzlib.lib;gsl.lib;cblas.lib;VimbaCPP.lib;VimbaImageTransform.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
