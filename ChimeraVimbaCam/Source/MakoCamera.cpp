@@ -406,6 +406,284 @@ void MakoCamera::repSave()
     }
 }
 
+void MakoCamera::saveCameraSetting()
+{
+    VmbErrorType err = VmbErrorSuccess;
+
+    //  create window title
+    QString windowTitle = tr("Save Camera Settings");
+
+    //  create message box
+    QMessageBox msgbox;
+    msgbox.setWindowTitle(windowTitle);
+
+    //  check if camera was opened in 'full access' mode
+    //if (0 != m_sAccessMode.compare(tr("(FULL ACCESS)")))
+    //{
+    //    msgbox.setIcon(QMessageBox::Critical);
+    //    msgbox.setText(tr("Camera must be opened in FULL ACCESS mode to use this feature"));
+    //    msgbox.exec();
+    //    return;
+    //}
+
+    //  setup file dialog
+    QFileDialog* saveFileDialog = new QFileDialog(nullptr, windowTitle, QDir::home().absolutePath(), "*.xml");
+    //saveFileDialog->setAttribute(Qt::WA_DeleteOnClose);
+    saveFileDialog->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
+    saveFileDialog->selectNameFilter("*.xml");
+    saveFileDialog->setAcceptMode(QFileDialog::AcceptSave);
+
+    //  show dialog
+    int rval = saveFileDialog->exec();
+    if (0 == rval) {
+        return;
+    }
+
+    //  get selected file
+    QString saveFileDir = saveFileDialog->directory().absolutePath();
+    QStringList selectedFiles = saveFileDialog->selectedFiles();
+    if (true == selectedFiles.isEmpty())
+    {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("No file selected"));
+        msgbox.exec();
+        return;
+    }
+
+    //  get selected file
+    QString selectedFile = selectedFiles.at(0);
+    if (false == selectedFile.endsWith(".xml"))
+    {
+        selectedFile.append(".xml");
+    }
+
+    //  setup behaviour for loading and saving camera features
+    core.getCameraPtr()->LoadSaveSettingsSetup(VmbFeaturePersistNoLUT, 5, 4);
+
+    //  call VimbaCPP save function
+    QString msgtext;
+    err = core.getCameraPtr()->SaveCameraSettings(selectedFile.toStdString());
+    
+    delete saveFileDialog;
+    if (VmbErrorSuccess != err)
+    {
+        msgtext = tr("There have been errors during saving feature values.\n");
+        msgtext.append(tr("[Error code: %1]\n").arg(err));
+        msgtext.append(tr("[file: %1]").arg(selectedFile));
+        thrower("ERROR: SaveCameraSettings returned: " + str(err) + ". For details activate VimbaC logging and check out VmbCameraSettingsSave.log");
+        msgbox.setIcon(QMessageBox::Warning);
+        msgbox.setText(msgtext);
+        msgbox.exec();
+        return;
+    }
+    else
+    {
+        msgtext = tr("Successfully saved device settings to\n'");
+        msgtext.append(selectedFile);
+        msgtext.append("'");
+        msgbox.setIcon(QMessageBox::Information);
+        msgbox.setText(msgtext);
+        msgbox.exec();
+    }
+}
+
+void MakoCamera::loadCameraSetting()
+{
+    bool proceedLoading = true;
+
+    //  create window title
+    QString windowTitle = tr("Load Camera Settings");
+
+    //  setup message boxes
+    QMessageBox msgbox;
+    msgbox.setWindowTitle(windowTitle);
+    QMessageBox msgbox2;
+    msgbox2.setStandardButtons(QMessageBox::Yes);
+    msgbox2.addButton(QMessageBox::No);
+    msgbox2.setDefaultButton(QMessageBox::No);
+
+    //  check if camera was opened in 'full access' mode
+    //if (0 != m_sAccessMode.compare(tr("(FULL ACCESS)")))
+    //{
+    //    msgbox.setIcon(QMessageBox::Critical);
+    //    msgbox.setText(tr("Camera must be opened in FULL ACCESS mode to use this feature"));
+    //    msgbox.exec();
+    //    return;
+    //}
+
+    //  create file dialog
+    QFileDialog* saveFileDialog = new QFileDialog(nullptr, windowTitle, QDir::home().absolutePath(), "*.xml");
+    saveFileDialog->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowMaximizeButtonHint);
+    saveFileDialog->selectNameFilter("*.xml");
+    saveFileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+    saveFileDialog->setFileMode(QFileDialog::ExistingFile);
+
+    //  show dialog
+    int rval = saveFileDialog->exec();
+    if (0 == rval) {
+        return;
+    }
+
+    //  get selected file
+    QString saveFileDir = saveFileDialog->directory().absolutePath();
+    QStringList selectedFiles = saveFileDialog->selectedFiles();
+    if (true == selectedFiles.isEmpty()) {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("No file selected"));
+        msgbox.exec();
+        return;
+    }
+    delete saveFileDialog;
+
+    //  get selected file
+    QString selectedFile = selectedFiles.at(0);
+
+    //  check if xml file is valid
+    if (false == selectedFile.endsWith(".xml")) {
+        msgbox.setIcon(QMessageBox::Critical);
+        msgbox.setText(tr("Invalid xml file selected.\nFile must be of type '*.xml'"));
+        msgbox.exec();
+        return;
+    }
+
+    //  create and prepare xml parser
+    //  to check if model name differences between xxml file
+    //  and connected camera exist
+    QXmlStreamReader xml;
+    QFile xmlFile(selectedFile);
+    QString deviceModel = QString("");
+
+    //  open xml file stream
+    bool check = xmlFile.open(QIODevice::ReadOnly);
+    if (false == check) {
+        msgbox2.setIcon(QMessageBox::Warning);
+        msgbox2.setText(tr("Could not validate camera model.\nDo you want to proceed loading settings to selected camera ?"));
+        rval = msgbox2.exec();
+        if (QMessageBox::No == rval) {
+            proceedLoading = false;
+        }
+    }
+    else {
+        //  connect opened file with xml stream object
+        xml.setDevice(&xmlFile);
+    }
+
+    //  proceed loading camera settings only if flag still true
+    if (true == proceedLoading)
+    {
+        //  read xml structure
+        while (false == xml.atEnd())
+        {
+            //  get current xml token
+            xml.readNext();
+            QString currentToken = xml.name().toString();
+
+            //  check if token is named 'CameraSettings'
+            if (0 == currentToken.compare("CameraSettings"))
+            {
+                //  get token attributes and iterate through them
+                QXmlStreamAttributes attributes = xml.attributes();
+                for (int i = 0; i < attributes.count(); ++i)
+                {
+                    //  get current attribute
+                    QXmlStreamAttribute currentAttribute = attributes.at(i);
+
+                    //  check if current attribute is name 'CameraModel'
+                    QString attributeName = currentAttribute.name().toString();
+                    if (0 == attributeName.compare("CameraModel"))
+                    {
+                        deviceModel = currentAttribute.value().toString();
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        //  close xml file stream
+        xmlFile.close();
+
+        //  check if deviceModel was retrieved from xml file
+        if (true == deviceModel.isEmpty())
+        {
+            msgbox2.setIcon(QMessageBox::Warning);
+            msgbox2.setText(tr("Could not validate camera model.\nDo you want to proceed loading settings to selected camera ?"));
+            rval = msgbox2.exec();
+            if (QMessageBox::No == rval)
+            {
+                proceedLoading = false;
+            }
+        }
+    }
+
+    //  proceed loading camera settings only if flag still true
+    std::string modelName;
+    if (true == proceedLoading)
+    {
+        //  get model name from connected camera
+        const VmbErrorType err = core.getCameraPtr()->GetModel(modelName);
+        if (VmbErrorSuccess != err)
+        {
+            msgbox2.setIcon(QMessageBox::Warning);
+            msgbox2.setText(tr("Could not validate camera model.\nDo you want to proceed loading settings to selected camera ?"));
+            rval = msgbox2.exec();
+            if (QMessageBox::No == rval)
+            {
+                proceedLoading = false;
+            }
+        }
+    }
+
+    //  proceed loading camera settings only if flag still true
+    if (true == proceedLoading)
+    {
+        //  compare mode names from xml file and from
+        //  connected device with each other
+        if (0 != deviceModel.compare(QString(modelName.c_str())))
+        {
+            QString msgtext = tr("Selected camera model is different from xml file.\n");
+            msgtext.append(tr("[camera: %1]\n").arg(modelName.c_str()));
+            msgtext.append(tr("[xml: %1]\n\n").arg(deviceModel));
+            msgtext.append(tr("Do you want to proceed loading operation ?"));
+            msgbox2.setIcon(QMessageBox::Warning);
+            msgbox2.setText(msgtext);
+            rval = msgbox2.exec();
+            if (QMessageBox::No == rval)
+            {
+                proceedLoading = false;
+            }
+        }
+    }
+
+    //  proceed loading camera settings only if flag still true
+    if (true == proceedLoading)
+    {
+        //  setup behaviour for loading and saving camera features
+        core.getCameraPtr()->LoadSaveSettingsSetup(VmbFeaturePersistNoLUT, 5, 4);
+
+        //  call load method from VimbaCPP
+        const VmbErrorType err = core.getCameraPtr()->LoadCameraSettings(selectedFile.toStdString());
+        if (VmbErrorSuccess != err)
+        {
+            QString msgtext = tr("There have been errors during loading of feature values.\n");
+            msgtext.append(tr("[Error code: %1]\n").arg(err));
+            msgtext.append(tr("[file: %1]").arg(selectedFile));
+            thrower("ERROR: LoadCameraSettings returned: " + str(err) + ". For details activate VimbaC logging and check out VmbCameraSettingsLoad.log");
+            msgbox.setIcon(QMessageBox::Warning);
+            msgbox.setText(msgtext);
+            msgbox.exec();
+            return;
+        }
+        else
+        {
+            msgbox.setIcon(QMessageBox::Information);
+            QString msgtext = tr("Successfully loaded device settings\nfrom '%1'").arg(selectedFile);
+            msgbox.setText(msgtext);
+            msgbox.exec();
+        }
+    }
+}
+
 
 void MakoCamera::startExp()
 {
@@ -578,6 +856,14 @@ void MakoCamera::initPlotContextMenu()
             aRepSaveOnOff->setText("Turn Rep. Save On");
         }; });
 
+    QAction* aSaveCamSetting = viewer.contextMenu()->addAction("Save Cam Setting");
+    connect(aSaveCamSetting, &QAction::triggered, this, [this]() { 
+        saveCameraSetting(); });
+
+    QAction* aLoadCamSetting = viewer.contextMenu()->addAction("Load Cam Setting");
+    connect(aLoadCamSetting, &QAction::triggered, this, [this]() {
+        loadCameraSetting(); });
+
 }
 
 void MakoCamera::releaseBuffer()
@@ -664,6 +950,9 @@ void MakoCamera::setCurrentScreenROI()
     QCPRange yr = viewer.centerAxes()->axis(QCPAxis::atLeft)->range();
     if (xr.lower > 0 && xr.upper < maxw && yr.lower>0 && yr.upper < maxh)
     {
+        auto xwywoxoy = core.getROIIncrement();
+        int xwIncr = xwywoxoy[0]; int ywIncr = xwywoxoy[1]; int oxIncr = xwywoxoy[2]; int oyIncr = xwywoxoy[3];
+        qDebug() << "Incre" << xwIncr << ywIncr << oxIncr << oyIncr;
         int xlower = 2 * std::floor(xr.lower / 2);
         int xupper = 2 * std::ceil(xr.upper / 2);
         int ylower = 2 * std::floor(yr.lower / 2);
@@ -672,6 +961,11 @@ void MakoCamera::setCurrentScreenROI()
         yupper += (yupper - ylower) % 4 == 0 ? 0 : 2;
         int xw = (xupper - xlower) > 2 ? xupper - xlower : 4;
         int yw = (yupper - ylower) > 2 ? yupper - ylower : 4;
+
+        xlower += (xlower % oxIncr) == 0 ? 0 : oxIncr - (xlower % oxIncr);
+        ylower += (ylower % oyIncr) == 0 ? 0 : oyIncr - (ylower % oyIncr);
+        xw += (xw % xwIncr) == 0 ? 0 : xwIncr - (xw % xwIncr);
+        yw += (yw % ywIncr) == 0 ? 0 : ywIncr - (yw % ywIncr);
         
         resetFullROI(true);
         try {

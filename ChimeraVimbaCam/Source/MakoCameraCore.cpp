@@ -456,8 +456,52 @@ void MakoCameraCore::stopCapture()
     }
 }
 
+std::array<unsigned, 4> MakoCameraCore::getROIIncrement()
+{
+    FeaturePtr pFeat;
+    VmbInt64_t xw, yw, ox, oy;
+    if (VmbErrorSuccess == cameraPtr->GetFeatureByName("Width", pFeat))
+    {
+        VmbErrorType error = pFeat->GetIncrement(xw);
+        if (VmbErrorSuccess != error)
+        {
+            thrower("Failed to get width increment " + str(xw) + ", and error: " + str(error) +
+                " " + str(Helper::mapReturnCodeToString(error)));
+        }
+    }
+    if (VmbErrorSuccess == cameraPtr->GetFeatureByName("Height", pFeat))
+    {
+        VmbErrorType error = pFeat->GetIncrement(yw);
+        if (VmbErrorSuccess != error)
+        {
+            thrower("Failed to get Height increment " + str(yw) + ", and error: " + str(error) +
+                " " + str(Helper::mapReturnCodeToString(error)));
+        }
+    }
+    if (VmbErrorSuccess == cameraPtr->GetFeatureByName("OffsetX", pFeat))
+    {
+        VmbErrorType error = pFeat->GetIncrement(ox);
+        if (VmbErrorSuccess != error)
+        {
+            thrower("Failed to get OffsetX increment " + str(ox) + ", and error: " + str(error) +
+                " " + str(Helper::mapReturnCodeToString(error)));
+        }
+    }
+    if (VmbErrorSuccess == cameraPtr->GetFeatureByName("OffsetY", pFeat))
+    {
+        VmbErrorType error = pFeat->GetIncrement(oy);
+        if (VmbErrorSuccess != error)
+        {
+            thrower("Failed to get OffsetY increment " + str(oy) + ", and error: " + str(error) +
+                " " + str(Helper::mapReturnCodeToString(error)));
+        }
+    }
+    return std::array<unsigned, 4>({ unsigned(xw), unsigned(yw), unsigned(ox), unsigned(oy) });// xwidth, ywidth, offsetx, offsety
+}
+
 void MakoCameraCore::setROI(int width, int height, int offsetx, int offsety)
 {
+    qDebug() << width << height << offsetx << offsety;
     FeaturePtr pFeat;
     if (VmbErrorSuccess == cameraPtr->GetFeatureByName("Width", pFeat))
     {

@@ -7,7 +7,7 @@
 
 FrameAverager::FrameAverager()
 	: m_averaging(false)
-	, m_avgfirstStart(true)
+	, m_avgfirstStart(false)
     , m_avgNum(50)
     , m_avgType(avgType::exp)
 {

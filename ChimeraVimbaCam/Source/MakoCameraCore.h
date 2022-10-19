@@ -58,6 +58,7 @@ public:
 	SP_DECL(FrameObserver) getFrameObs() { return frameObs; }
 	CameraPtr& getCameraPtr() { return cameraPtr; }
 	MakoSettings getRunningSettings() { return runSettings; }
+	std::array<unsigned, 4> getROIIncrement(); // xwidth, ywidth, offsetx, offsety
 
 signals:
 	void makoFinished();

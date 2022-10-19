@@ -129,7 +129,7 @@ void ImageCalculatingThread::StartProcessing()
     m_Stopping = false;
     m_firstStart = true;
     m_dataValid = false;
-    m_avger.toggleDoAveraging(true);
+    //m_avger.toggleDoAveraging(true);
     updateXYOffset();
     updateExposureTime();
     start();
@@ -149,7 +149,7 @@ void ImageCalculatingThread::StopProcessing()
     m_firstStart = true;
     m_dataValid = false;
     m_bkgValid = false;
-    m_avger.toggleDoAveraging(false);
+    //m_avger.toggleDoAveraging(false);
     updateXYOffset();
     updateExposureTime();
 

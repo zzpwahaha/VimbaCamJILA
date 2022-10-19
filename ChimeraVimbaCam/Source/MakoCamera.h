@@ -65,6 +65,8 @@ private:
     void createAvgControlWidget();
     void createRepSaveControlWidget();
     void repSave();
+    void saveCameraSetting();
+    void loadCameraSetting();
 
 private:
     // this order matters since the ctor will initialize core first and then viewer and finally imgCThread
