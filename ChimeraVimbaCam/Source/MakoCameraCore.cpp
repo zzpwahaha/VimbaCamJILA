@@ -58,9 +58,9 @@ void MakoCameraCore::logSettings(DataLogger& log)
         expRunSettings = runSettings;
 
         // pictures. These are permanent members of the class for speed during the writing process.	
-        hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.width(),
-                               expRunSettings.dims.height() };
-        hsize_t picDims[] = { 1, expRunSettings.dims.width(), expRunSettings.dims.height() };
+        hsize_t setDims[] = { unsigned __int64(expRunSettings.totalPictures()), expRunSettings.dims.height(),
+                               expRunSettings.dims.width() };
+        hsize_t picDims[] = { 1, expRunSettings.dims.height() , expRunSettings.dims.width()};
         log.MakoPicureSetDataSpace = H5::DataSpace(3, setDims);
         log.MakoPicDataSpace = H5::DataSpace(3, picDims);
         log.MakoPictureDataset = makoSubGroup.createDataSet("Pictures", H5::PredType::NATIVE_LONG,

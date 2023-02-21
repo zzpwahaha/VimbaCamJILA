@@ -474,7 +474,7 @@ void DataLogger::writeMakoPic(std::vector<double> image, int width, int height)
 	}
 	// starting coordinates of writebtn area in the h5 file of the array of picture data points.
 	hsize_t offset[] = { currentMakoPicNumber++, 0, 0 };
-	hsize_t slabdim[3] = { 1, width, height };// dims.width (), dims.height ()};
+	hsize_t slabdim[3] = { 1, height, width };// dims.height (), dims.width ()}; // dim0(row/height) first and then dim1(col/width)
 	try {
 		MakoPicureSetDataSpace.selectHyperslab(H5S_SELECT_SET, slabdim, offset);
 		MakoPictureDataset.write(image.data(), H5::PredType::NATIVE_DOUBLE, MakoPicDataSpace,
